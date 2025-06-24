@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -61,6 +62,12 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				fire: {
+					purple: '#7C3AED',
+					magenta: '#C026D3',
+					gold: '#F59E0B',
+					deep: '#4C1D95'
 				}
 			},
 			borderRadius: {
@@ -84,11 +91,41 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				'gentle-float': {
+					'0%, 100%': { 
+						transform: 'translateY(0px) rotate(0deg)' 
+					},
+					'50%': { 
+						transform: 'translateY(-10px) rotate(1deg)' 
+					}
+				},
+				'dance-sway': {
+					'0%, 100%': { 
+						transform: 'translateX(0px) scale(1)' 
+					},
+					'25%': { 
+						transform: 'translateX(-5px) scale(1.02)' 
+					},
+					'75%': { 
+						transform: 'translateX(5px) scale(1.02)' 
+					}
+				},
+				'fire-glow': {
+					'0%, 100%': { 
+						boxShadow: '0 0 20px rgba(124, 58, 237, 0.4)' 
+					},
+					'50%': { 
+						boxShadow: '0 0 40px rgba(192, 38, 211, 0.6)' 
+					}
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'gentle-float': 'gentle-float 3s ease-in-out infinite',
+				'dance-sway': 'dance-sway 4s ease-in-out infinite',
+				'fire-glow': 'fire-glow 2s ease-in-out infinite'
 			}
 		}
 	},
