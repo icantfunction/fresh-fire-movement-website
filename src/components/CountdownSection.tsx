@@ -46,7 +46,7 @@ const CountdownSection = () => {
               { label: 'Minutes', value: timeLeft.minutes },
               { label: 'Seconds', value: timeLeft.seconds }
             ].map((item, index) => (
-              <div key={index} className="animate-dance-sway">
+              <div key={index}>
                 <div className="bg-white/20 rounded-xl p-4 md:p-6">
                   <div className="text-3xl md:text-4xl font-bold text-white mb-2">
                     {item.value.toString().padStart(2, '0')}

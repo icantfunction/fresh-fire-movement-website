@@ -3,7 +3,7 @@ const AboutSection = () => {
   return (
     <section className="py-20 px-4">
       <div className="max-w-4xl mx-auto text-center">
-        <div className="animate-gentle-float">
+        <div>
           <h2 className="text-4xl md:text-5xl font-bold mb-8 text-fire-gradient">
             Called to Move in His Spirit
           </h2>

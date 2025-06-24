@@ -11,7 +11,7 @@ const TestimonialSection = () => {
         
         <div className="grid md:grid-cols-2 gap-8">
           {/* Video Testimonial Placeholder */}
-          <Card className="p-8 bg-white/80 backdrop-blur-sm shadow-xl border border-purple-200 animate-gentle-float">
+          <Card className="p-8 bg-white/80 backdrop-blur-sm shadow-xl border border-purple-200">
             <div className="aspect-video bg-gradient-to-br from-fire-purple/20 to-fire-magenta/20 rounded-lg flex items-center justify-center mb-6">
               <div className="text-center text-gray-600">
                 <div className="w-16 h-16 mx-auto mb-4 bg-fire-purple/20 rounded-full flex items-center justify-center">
@@ -29,7 +29,7 @@ const TestimonialSection = () => {
           </Card>
           
           {/* Quote Slider Placeholder */}
-          <Card className="p-8 bg-white/80 backdrop-blur-sm shadow-xl border border-purple-200 animate-dance-sway">
+          <Card className="p-8 bg-white/80 backdrop-blur-sm shadow-xl border border-purple-200">
             <div className="text-center">
               <div className="text-6xl text-fire-gold mb-4">"</div>
               <blockquote className="text-xl italic text-gray-700 mb-6">

@@ -18,7 +18,7 @@ const GallerySection = () => {
         
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
           {placeholderImages.map((image, index) => (
-            <Card key={index} className="overflow-hidden group cursor-pointer animate-gentle-float shadow-lg hover:shadow-2xl transition-all duration-300">
+            <Card key={index} className="overflow-hidden group cursor-pointer shadow-lg hover:shadow-2xl transition-all duration-300">
               <div 
                 className="aspect-square bg-cover bg-center group-hover:scale-110 transition-transform duration-500"
                 style={{ backgroundImage: `url(${image})` }}

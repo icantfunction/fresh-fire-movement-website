@@ -1,27 +1,12 @@
+
 import { Button } from "@/components/ui/button";
 import { Instagram, ExternalLink } from "lucide-react";
 
 const HeroSection = () => {
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-      {/* Background Image */}
-      <div 
-        className="absolute inset-0 z-0"
-        style={{
-          backgroundImage: "url('https://images.unsplash.com/photo-1523712999610-f77fbcfc3843?w=1920&h=1080&fit=crop')",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          filter: "brightness(0.3)"
-        }}
-      />
-      
-      {/* Fire Gradient Overlay */}
-      <div className="absolute inset-0 fire-gradient opacity-70 z-10" />
-      
-      {/* Floating Fire Elements - keep these animated */}
-      <div className="absolute top-20 left-10 w-32 h-32 rounded-full bg-gradient-to-r from-orange-500 to-red-500 opacity-30 animate-gentle-float z-20" />
-      <div className="absolute bottom-32 right-16 w-24 h-24 rounded-full bg-gradient-to-r from-yellow-400 to-orange-600 opacity-40 animate-dance-sway z-20" />
-      <div className="absolute top-1/3 right-1/4 w-16 h-16 rounded-full bg-gradient-to-r from-red-400 to-pink-500 opacity-25 animate-gentle-float z-20" style={{ animationDelay: '1s' }} />
+      {/* Simple Fire Gradient Background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-orange-600 via-red-600 to-yellow-500 z-0" />
       
       {/* Main Content */}
       <div className="relative z-30 text-center px-4 max-w-4xl mx-auto">
