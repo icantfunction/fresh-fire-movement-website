@@ -114,202 +114,285 @@ const AboutUs = () => {
           {/* Dance Ministry Guidelines */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-fire-gradient">Dance Ministry Guidelines</CardTitle>
+              <CardTitle className="text-fire-gradient text-2xl">Dance Ministry Guidelines</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-6">
-              <p>
-                Fresh Fire is a ministry within the Worship Arts department at CLC. Therefore,
-                each worshipper must abide by the governing principles in the Worship Arts
-                Covenant and Fresh Fire guidelines as listed below:
-              </p>
+            <CardContent className="space-y-8">
+              <div className="bg-orange-50 p-4 rounded-lg border-l-4 border-orange-400">
+                <p className="text-gray-700">
+                  Fresh Fire is a ministry within the Worship Arts department at CLC. Therefore,
+                  each worshipper must abide by the governing principles in the Worship Arts
+                  Covenant and Fresh Fire guidelines as listed below:
+                </p>
+              </div>
               
-              <div className="space-y-6">
-                <div>
-                  <h4 className="font-semibold mb-2">Spiritual Requirements</h4>
-                  <ul className="list-disc list-inside space-y-2 ml-4">
-                    <li>Every member of Fresh Fire Dance Ministry must be a believer and follower of Jesus Christ and has accepted Him as their personal Lord and Savior with baptism by immersion in water</li>
-                    <li>Worshippers must stay connected to the Trinity (God the Father, The Son, and The Holy Spirit) through daily prayer and scriptural reading. They must also participate in corporate fasting periods orchestrated by CLC Senior Pastors and biblical study as determined by the Fresh Fire Dance Director and/or Spiritual Advisor. Each dancer is required to write devotionals per the schedule created by the Fresh Fire Prayer Ministry Team. Finally, it is expected that dancers attend corporate prayer with the Worship Arts department, every Tuesday morning at 6am EST on Zoom. The last Tuesday of every month, Fresh Fire will lead, and attendance and participation is mandatory</li>
+              <div className="grid gap-8">
+                {/* Spiritual Requirements */}
+                <div className="bg-gradient-to-r from-purple-50 to-pink-50 p-6 rounded-lg">
+                  <h4 className="text-xl font-bold text-purple-800 mb-4 flex items-center">
+                    <span className="w-2 h-8 bg-purple-600 rounded mr-3"></span>
+                    Spiritual Requirements
+                  </h4>
+                  <ul className="space-y-3 ml-6">
+                    <li className="flex items-start">
+                      <span className="w-2 h-2 bg-purple-400 rounded-full mt-2 mr-3 flex-shrink-0"></span>
+                      <span>Every member of Fresh Fire Dance Ministry must be a believer and follower of Jesus Christ and has accepted Him as their personal Lord and Savior with baptism by immersion in water</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="w-2 h-2 bg-purple-400 rounded-full mt-2 mr-3 flex-shrink-0"></span>
+                      <span>Worshippers must stay connected to the Trinity (God the Father, The Son, and The Holy Spirit) through daily prayer and scriptural reading. They must also participate in corporate fasting periods orchestrated by CLC Senior Pastors and biblical study as determined by the Fresh Fire Dance Director and/or Spiritual Advisor. Each dancer is required to write devotionals per the schedule created by the Fresh Fire Prayer Ministry Team. Finally, it is expected that dancers attend corporate prayer with the Worship Arts department, every Tuesday morning at 6am EST on Zoom. The last Tuesday of every month, Fresh Fire will lead, and attendance and participation is mandatory</span>
+                    </li>
                   </ul>
                 </div>
 
-                <div>
-                  <h4 className="font-semibold mb-2">Youth Dance Worshippers (high school):</h4>
-                  <ul className="list-disc list-inside space-y-2 ml-4">
-                    <li>Are required to be active members of Powerhouse and attend worship services on a regular basis</li>
-                    <li>Have attended Youth Camp/Youth Encounter/Collide Revival Services</li>
-                    <li>Have attended Youth School of Discipleship (SOD)</li>
+                {/* Youth and Adult Requirements */}
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-6 rounded-lg border border-blue-200">
+                    <h4 className="text-lg font-bold text-blue-800 mb-4">Youth Dance Worshippers</h4>
+                    <p className="text-sm text-blue-600 mb-3 font-medium">(High School)</p>
+                    <ul className="space-y-2">
+                      <li className="flex items-start">
+                        <span className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-2 mr-2 flex-shrink-0"></span>
+                        <span className="text-sm">Are required to be active members of Powerhouse and attend worship services on a regular basis</span>
+                      </li>
+                      <li className="flex items-start">
+                        <span className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-2 mr-2 flex-shrink-0"></span>
+                        <span className="text-sm">Have attended Youth Camp/Youth Encounter/Collide Revival Services</span>
+                      </li>
+                      <li className="flex items-start">
+                        <span className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-2 mr-2 flex-shrink-0"></span>
+                        <span className="text-sm">Have attended Youth School of Discipleship (SOD)</span>
+                      </li>
+                    </ul>
+                  </div>
+
+                  <div className="bg-gradient-to-br from-green-50 to-emerald-50 p-6 rounded-lg border border-green-200">
+                    <h4 className="text-lg font-bold text-green-800 mb-4">Adult Dance Worshippers</h4>
+                    <ul className="space-y-2">
+                      <li className="flex items-start">
+                        <span className="w-1.5 h-1.5 bg-green-500 rounded-full mt-2 mr-2 flex-shrink-0"></span>
+                        <span className="text-sm">Are required to be active members of Christian Life Center and regularly attend worship services and give tithes/offerings</span>
+                      </li>
+                      <li className="flex items-start">
+                        <span className="w-1.5 h-1.5 bg-green-500 rounded-full mt-2 mr-2 flex-shrink-0"></span>
+                        <span className="text-sm">Have attended Encounter and completed School of Discipleship (under the Director's discretion, dancer may minister while attending SOD)</span>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+
+                {/* Social Media Conduct */}
+                <div className="bg-gradient-to-r from-red-50 to-orange-50 p-6 rounded-lg border-l-4 border-red-400">
+                  <h4 className="text-xl font-bold text-red-800 mb-4">Social Media Conduct</h4>
+                  <ul className="space-y-3">
+                    <li className="flex items-start">
+                      <span className="w-2 h-2 bg-red-400 rounded-full mt-2 mr-3 flex-shrink-0"></span>
+                      <span>All dancers must conduct themselves in a manner consistent with being a worshipper of the Most High God Therefore, social media presence should align with biblical values and principles.</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="w-2 h-2 bg-red-400 rounded-full mt-2 mr-3 flex-shrink-0"></span>
+                      <span>To maintain the integrity of Fresh Fire Dance Ministry, dancers must make social media accounts accessible to Fresh Fire leadership</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="w-2 h-2 bg-red-400 rounded-full mt-2 mr-3 flex-shrink-0"></span>
+                      <span>If social media posts made by Fresh Fire Dancers deviate from the values of the ministry, the dancer will be held accountable with consequences determined by the Director</span>
+                    </li>
                   </ul>
                 </div>
 
-                <div>
-                  <h4 className="font-semibold mb-2">Adult Dance Worshippers:</h4>
-                  <ul className="list-disc list-inside space-y-2 ml-4">
-                    <li>Are required to be active members of Christian Life Center and regularly attend worship services and give tithes/offerings</li>
-                    <li>Have attended Encounter and completed School of Discipleship (under the Director's discretion, dancer may minister while attending SOD)</li>
-                  </ul>
+                {/* Dance Necessities & Monthly Donations */}
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div className="bg-gray-50 p-6 rounded-lg border border-gray-200">
+                    <h4 className="text-lg font-bold text-gray-800 mb-4">Dance Necessities</h4>
+                    <p className="text-sm text-gray-600 mb-3">Every dancer is required to purchase:</p>
+                    <div className="grid grid-cols-2 gap-2 text-sm">
+                      <div className="bg-white p-2 rounded border">Black long-sleeved leotard</div>
+                      <div className="bg-white p-2 rounded border">White long-sleeved leotard</div>
+                      <div className="bg-white p-2 rounded border">Black Humble pants</div>
+                      <div className="bg-white p-2 rounded border">White Humble pants</div>
+                      <div className="bg-white p-2 rounded border">Black leggings</div>
+                      <div className="bg-white p-2 rounded border">White leggings</div>
+                      <div className="bg-white p-2 rounded border col-span-2">Assigned books or educational material</div>
+                    </div>
+                  </div>
+
+                  <div className="bg-yellow-50 p-6 rounded-lg border border-yellow-200">
+                    <h4 className="text-lg font-bold text-yellow-800 mb-4">Monthly Donations</h4>
+                    <p className="text-sm text-yellow-700 mb-3">Every dancer is required to donate to the ministry each month to support ministry operations inclusive of:</p>
+                    <ul className="space-y-2 text-sm">
+                      <li className="flex items-center">
+                        <span className="w-1.5 h-1.5 bg-yellow-500 rounded-full mr-2"></span>
+                        Garments
+                      </li>
+                      <li className="flex items-center">
+                        <span className="w-1.5 h-1.5 bg-yellow-500 rounded-full mr-2"></span>
+                        Instruments (flags, banners, streamers, tambourines, mattah sticks, billows, etc.)
+                      </li>
+                      <li className="flex items-center">
+                        <span className="w-1.5 h-1.5 bg-yellow-500 rounded-full mr-2"></span>
+                        Community enrichment activities
+                      </li>
+                      <li className="flex items-center">
+                        <span className="w-1.5 h-1.5 bg-yellow-500 rounded-full mr-2"></span>
+                        External training and conferences
+                      </li>
+                    </ul>
+                  </div>
                 </div>
 
-                <div>
-                  <h4 className="font-semibold mb-2">Dancers Social Media Conduct</h4>
-                  <ul className="list-disc list-inside space-y-2 ml-4">
-                    <li>All dancers must conduct themselves in a manner consistent with being a worshipper of the Most High God Therefore, social media presence should align with biblical values and principles.</li>
-                    <li>To maintain the integrity of Fresh Fire Dance Ministry, dancers must make social media accounts accessible to Fresh Fire leadership</li>
-                    <li>If social media posts made by Fresh Fire Dancers deviate from the values of the ministry, the dancer will be held accountable with consequences determined by the Director</li>
-                  </ul>
-                </div>
+                {/* Rehearsal Protocols */}
+                <div className="bg-gradient-to-br from-indigo-50 to-purple-50 p-6 rounded-lg border border-indigo-200">
+                  <h4 className="text-xl font-bold text-indigo-800 mb-6">Rehearsal Protocols</h4>
+                  
+                  <div className="space-y-6">
+                    {/* Schedule */}
+                    <div className="bg-white p-4 rounded-lg border">
+                      <h5 className="font-bold text-indigo-700 mb-3">Fresh Fire Rehearsal Schedule</h5>
+                      <div className="grid md:grid-cols-2 gap-4">
+                        <div className="flex items-center p-3 bg-indigo-50 rounded">
+                          <span className="font-medium text-indigo-800">Sundays:</span>
+                          <span className="ml-2">1:30-4pm EST</span>
+                        </div>
+                        <div className="flex items-center p-3 bg-indigo-50 rounded">
+                          <span className="font-medium text-indigo-800">Thursdays:</span>
+                          <span className="ml-2">6:30-8:30pm EST</span>
+                        </div>
+                      </div>
+                      <p className="text-sm text-indigo-600 mt-2 italic">*Practice days and times are subject to change</p>
+                    </div>
 
-                <div>
-                  <h4 className="font-semibold mb-2">Dance Necessities:</h4>
-                  <p className="mb-2">Every dancer is required to purchase:</p>
-                  <ul className="list-disc list-inside space-y-1 ml-4">
-                    <li>Black long-sleeved leotard</li>
-                    <li>White long-sleeved leotard</li>
-                    <li>Black Humble pants</li>
-                    <li>White Humble pants</li>
-                    <li>Black leggings</li>
-                    <li>White leggings</li>
-                    <li>Assigned books or educational material</li>
-                  </ul>
-                </div>
-
-                <div>
-                  <h4 className="font-semibold mb-2">Monthly Donations:</h4>
-                  <p className="mb-2">Every dancer is required to donate to the ministry each month to support ministry operations inclusive of:</p>
-                  <ul className="list-disc list-inside space-y-1 ml-4">
-                    <li>Garments</li>
-                    <li>Instruments (flags, banners, streamers, tambourines, mattah sticks, billows, etc.)</li>
-                    <li>Community enrichment activities</li>
-                    <li>External training and conferences</li>
-                  </ul>
-                </div>
-
-                <div>
-                  <h4 className="font-semibold mb-2">Rehearsal Protocols:</h4>
-                  <div className="space-y-4">
-                    <div>
-                      <p className="font-medium">Fresh Fire rehearsal schedule:</p>
-                      <ul className="list-disc list-inside space-y-1 ml-4">
-                        <li>Sundays from 1:30-4pm EST</li>
-                        <li>Thursdays from 6:30-8:30pm EST</li>
-                        <li>Practice days and times are subject to change</li>
+                    {/* Attendance Requirements */}
+                    <div className="bg-white p-4 rounded-lg border">
+                      <h5 className="font-bold text-red-700 mb-3">Attendance Requirements</h5>
+                      <ul className="space-y-2">
+                        <li className="flex items-start">
+                          <span className="w-2 h-2 bg-red-400 rounded-full mt-2 mr-3 flex-shrink-0"></span>
+                          <span>Dancers are expected to attend ALL rehearsals and be on time.</span>
+                        </li>
+                        <li className="flex items-start">
+                          <span className="w-2 h-2 bg-red-400 rounded-full mt-2 mr-3 flex-shrink-0"></span>
+                          <span>Dancers must notify the Director in advance, if they will be absent or late to rehearsals</span>
+                        </li>
+                        <li className="flex items-start">
+                          <span className="w-2 h-2 bg-red-400 rounded-full mt-2 mr-3 flex-shrink-0"></span>
+                          <span>If a dancer is late and does not have Director's approval, the dancer is required to run laps, for each minute late, from the scheduled practice time</span>
+                        </li>
+                        <li className="flex items-start">
+                          <span className="w-2 h-2 bg-red-400 rounded-full mt-2 mr-3 flex-shrink-0"></span>
+                          <span>Unless granted approval by the Director, a dancer will not be permitted to participate if they exceed the allowable number of exceptions within a given season. Exceptions are determined by the Director and may include, but are not limited to, absences from mandatory rehearsals, late devotional submissions, missed attendance at Tuesday Worship Prayer meetings, and missed accountability workouts with their assigned brother or sister. Seasons are defined as Christmas, Easter, and Summer</span>
+                        </li>
                       </ul>
                     </div>
-                    
-                    <div>
-                      <p className="font-medium">Attendance Requirements:</p>
-                      <ul className="list-disc list-inside space-y-2 ml-4">
-                        <li>Dancers are expected to attend ALL rehearsals and be on time.</li>
-                        <li>Dancers must notify the Director in advance, if they will be absent or late to rehearsals</li>
-                        <li>If a dancer is late and does not have Director's approval, the dancer is required to run laps, for each minute late, from the scheduled practice time</li>
-                        <li>Unless granted approval by the Director, a dancer will not be permitted to participate if they exceed the allowable number of exceptions within a given season. Exceptions are determined by the Director and may include, but are not limited to, absences from mandatory rehearsals, late devotional submissions, missed attendance at Tuesday Worship Prayer meetings, and missed accountability workouts with their assigned brother or sister. Seasons are defined as Christmas, Easter, and Summer</li>
-                      </ul>
-                    </div>
 
-                    <div>
-                      <p className="font-medium">Dancer rehearsal attire:</p>
-                      <p className="mb-2">Dancer attire is modest; therefore, a dancer should not wear tight clothing, jeans, mid-drift shirts, shorts above the knee, tank tops, or any piece of revealing clothing at rehearsals or during preparation time before ministering</p>
+                    {/* Dancer Attire */}
+                    <div className="bg-white p-4 rounded-lg border">
+                      <h5 className="font-bold text-purple-700 mb-3">Dancer Rehearsal Attire</h5>
+                      <p className="text-sm text-gray-600 mb-4 bg-purple-50 p-3 rounded">Dancer attire is modest; therefore, a dancer should not wear tight clothing, jeans, mid-drift shirts, shorts above the knee, tank tops, or any piece of revealing clothing at rehearsals or during preparation time before ministering</p>
                       
-                      <div className="ml-4 space-y-3">
-                        <div>
-                          <p className="font-medium">Women</p>
-                          <ul className="list-disc list-inside space-y-1 ml-4">
-                            <li>Black Tee Shirt (Fresh Fire, CLC or Christian Based)</li>
-                            <li>Sports bra</li>
-                            <li>Black joggers/leggings/palazzos/sweatpants</li>
-                            <li>"Wrap arounds" which is a garment tied around the dancer's waist (scarf, sweater, long sleeve shirt, etc.)</li>
+                      <div className="grid md:grid-cols-2 gap-4">
+                        <div className="bg-pink-50 p-4 rounded border border-pink-200">
+                          <h6 className="font-bold text-pink-800 mb-3">Women</h6>
+                          <ul className="space-y-1 text-sm">
+                            <li>• Black Tee Shirt (Fresh Fire, CLC or Christian Based)</li>
+                            <li>• Sports bra</li>
+                            <li>• Black joggers/leggings/palazzos/sweatpants</li>
+                            <li>• "Wrap arounds" which is a garment tied around the dancer's waist (scarf, sweater, long sleeve shirt, etc.)</li>
                           </ul>
                         </div>
                         
-                        <div>
-                          <p className="font-medium">Men</p>
-                          <ul className="list-disc list-inside space-y-1 ml-4">
-                            <li>Black Tee Shirt (Fresh Fire, CLC or Christian Based)</li>
-                            <li>Loose fit black joggers/sweatpants</li>
+                        <div className="bg-blue-50 p-4 rounded border border-blue-200">
+                          <h6 className="font-bold text-blue-800 mb-3">Men</h6>
+                          <ul className="space-y-1 text-sm">
+                            <li>• Black Tee Shirt (Fresh Fire, CLC or Christian Based)</li>
+                            <li>• Loose fit black joggers/sweatpants</li>
                           </ul>
                         </div>
                       </div>
 
-                      <div className="mt-4 space-y-2">
-                        <p>When at rehearsal and ministering, dancer's appearance must be honorable so that nothing will distract from the working of the Lord</p>
-                        <ul className="list-disc list-inside space-y-1 ml-4">
-                          <li>Hair is required to be neatly pulled away from a dancer's face into a bun, ponytail, or pinned up style. No flowing hair is allowed</li>
-                          <li>Studded earrings, wedding or promise rings are the only jewelry allowed (no necklaces, bracelets, etc.)</li>
+                      <div className="mt-4 p-3 bg-gray-50 rounded">
+                        <p className="text-sm font-medium mb-2">Appearance Guidelines:</p>
+                        <ul className="text-sm space-y-1">
+                          <li>• Hair is required to be neatly pulled away from a dancer's face into a bun, ponytail, or pinned up style. No flowing hair is allowed</li>
+                          <li>• Studded earrings, wedding or promise rings are the only jewelry allowed (no necklaces, bracelets, etc.)</li>
                         </ul>
                       </div>
                     </div>
 
-                    <div>
-                      <p className="font-medium">Hygiene Requirements:</p>
-                      <p className="mb-2">Our bodies are the temple of the Holy Spirit (1 Corinthians 6:19)! We must always maintain proper hygiene at rehearsals and ministry engagements.</p>
-                      <ul className="list-disc list-inside space-y-1 ml-4">
-                        <li>Dancers should bring a hygiene kit to rehearsal and ministry engagements inclusive of deodorant, cleansing wipes, body spray/perfume/cologne, extra undergarments, etc.</li>
-                      </ul>
-                    </div>
+                    {/* Additional Rules */}
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div className="bg-white p-4 rounded-lg border">
+                        <h5 className="font-bold text-green-700 mb-3">Hygiene Requirements</h5>
+                        <p className="text-sm text-gray-600 mb-2 italic">"Our bodies are the temple of the Holy Spirit (1 Corinthians 6:19)!"</p>
+                        <p className="text-sm">Dancers should bring a hygiene kit to rehearsal and ministry engagements inclusive of deodorant, cleansing wipes, body spray/perfume/cologne, extra undergarments, etc.</p>
+                      </div>
 
-                    <div>
-                      <p className="font-medium">Additional Rehearsal Rules:</p>
-                      <ul className="list-disc list-inside space-y-1 ml-4">
-                        <li>During rehearsal there will be no gossiping, complaining, negative comments, or eating (only water is allowed)</li>
-                        <li>Practices are closed. NO friends/family/children allowed. If there is an unforeseen circumstance where a child needs to stay during practice, Director approval is required</li>
-                        <li>Corporate rehearsal is not enough!! Dancers are required to practice at home and maintain consistent workouts in between scheduled rehearsals</li>
-                      </ul>
+                      <div className="bg-white p-4 rounded-lg border">
+                        <h5 className="font-bold text-orange-700 mb-3">Additional Rehearsal Rules</h5>
+                        <ul className="text-sm space-y-1">
+                          <li>• No gossiping, complaining, negative comments, or eating (only water allowed)</li>
+                          <li>• Practices are closed - NO friends/family/children allowed</li>
+                          <li>• Dancers must practice at home and maintain consistent workouts</li>
+                        </ul>
+                      </div>
                     </div>
                   </div>
                 </div>
 
-                <div>
-                  <h4 className="font-semibold mb-2">Ministry Engagement Protocols:</h4>
-                  <div className="space-y-4">
-                    <ul className="list-disc list-inside space-y-2 ml-4">
-                      <li>All worshippers will be required to participate in a consecration period prior to ministering in dance. Consecration includes, but is not limited to, fasting with dedicated times of prayer and worship. Often these times will require removal of distractions and dependencies such as food, social media, secular music/movies/shows, etc.</li>
-                    </ul>
-                    
-                    <div>
-                      <p className="font-medium">On the day of in-house ministry:</p>
-                      <ul className="list-disc list-inside space-y-2 ml-4">
-                        <li>Worshippers will be required to be on time for sound check and run throughs per the direction of Worship Arts leadership</li>
-                        <li>For weekly worship, dancers are required to attend pre-service prayer with the Worship Arts department before ministering</li>
+                {/* Ministry Engagement Protocols */}
+                <div className="bg-gradient-to-br from-amber-50 to-orange-50 p-6 rounded-lg border border-amber-200">
+                  <h4 className="text-xl font-bold text-amber-800 mb-6">Ministry Engagement Protocols</h4>
+                  
+                  <div className="space-y-6">
+                    <div className="bg-white p-4 rounded-lg border">
+                      <h5 className="font-bold text-amber-700 mb-3">Consecration Period</h5>
+                      <p className="text-sm">All worshippers will be required to participate in a consecration period prior to ministering in dance. Consecration includes, but is not limited to, fasting with dedicated times of prayer and worship. Often these times will require removal of distractions and dependencies such as food, social media, secular music/movies/shows, etc.</p>
+                    </div>
+
+                    <div className="bg-white p-4 rounded-lg border">
+                      <h5 className="font-bold text-amber-700 mb-3">Day of In-House Ministry</h5>
+                      <ul className="space-y-2 text-sm mb-4">
+                        <li>• Worshippers will be required to be on time for sound check and run throughs per the direction of Worship Arts leadership</li>
+                        <li>• For weekly worship, dancers are required to attend pre-service prayer with the Worship Arts department before ministering</li>
                       </ul>
                       
-                      <div className="mt-3">
-                        <p className="font-medium">Dancers shall be dressed in dance foundations as follows:</p>
-                        <div className="ml-4 space-y-3 mt-2">
-                          <div>
-                            <p className="font-medium">Women</p>
-                            <ul className="list-disc list-inside space-y-1 ml-4">
-                              <li>Leotard</li>
-                              <li>Black tee shirt or sweatshirt over leotards "wrap-around" garment around dancer's waist</li>
-                              <li>Humble pants, palazzos, or loose-fitting pants</li>
-                            </ul>
-                          </div>
-                          
-                          <div>
-                            <p className="font-medium">Men</p>
-                            <ul className="list-disc list-inside space-y-1 ml-4">
-                              <li>Black tee shirt or sweatshirt with V-neck undershirt underneath</li>
-                              <li>Loose-fitting pants</li>
-                            </ul>
-                          </div>
+                      <div className="grid md:grid-cols-2 gap-4">
+                        <div className="bg-pink-50 p-3 rounded border border-pink-200">
+                          <h6 className="font-bold text-pink-800 mb-2">Women Foundation Attire</h6>
+                          <ul className="text-sm space-y-1">
+                            <li>• Leotard</li>
+                            <li>• Black tee shirt or sweatshirt over leotards</li>
+                            <li>• "Wrap-around" garment around dancer's waist</li>
+                            <li>• Humble pants, palazzos, or loose-fitting pants</li>
+                          </ul>
+                        </div>
+                        
+                        <div className="bg-blue-50 p-3 rounded border border-blue-200">
+                          <h6 className="font-bold text-blue-800 mb-2">Men Foundation Attire</h6>
+                          <ul className="text-sm space-y-1">
+                            <li>• Black tee shirt or sweatshirt with V-neck undershirt underneath</li>
+                            <li>• Loose-fitting pants</li>
+                          </ul>
                         </div>
                       </div>
                     </div>
 
-                    <div>
-                      <p className="font-medium">All rehearsal protocol is required for ministry engagements with the following additions:</p>
-                      <div className="ml-4 space-y-3 mt-2">
-                        <div>
-                          <p className="font-medium">Women</p>
-                          <ul className="list-disc list-inside space-y-1 ml-4">
-                            <li>Nail color: only neutral (pastels and nudes) fingernail polish can be worn. Bold and dark nail colors with excessive designs are not acceptable</li>
-                            <li>Undergarments: only solid (no printed designs) black- or flesh-colored supportive bras (no razorback) and underwear are allowed. Make sure that undergarments support body movement and offer full coverage (i.e. brief underwear/sports bras)</li>
+                    <div className="bg-white p-4 rounded-lg border">
+                      <h5 className="font-bold text-amber-700 mb-3">Additional Ministry Engagement Requirements</h5>
+                      <p className="text-sm mb-3">All rehearsal protocol is required for ministry engagements with the following additions:</p>
+                      
+                      <div className="grid md:grid-cols-2 gap-4">
+                        <div className="bg-pink-50 p-3 rounded border border-pink-200">
+                          <h6 className="font-bold text-pink-800 mb-2">Women</h6>
+                          <ul className="text-sm space-y-1">
+                            <li>• Nail color: only neutral (pastels and nudes) fingernail polish can be worn. Bold and dark nail colors with excessive designs are not acceptable</li>
+                            <li>• Undergarments: only solid (no printed designs) black- or flesh-colored supportive bras (no razorback) and underwear are allowed. Make sure that undergarments support body movement and offer full coverage (i.e. brief underwear/sports bras)</li>
                           </ul>
                         </div>
                         
-                        <div>
-                          <p className="font-medium">Men</p>
-                          <ul className="list-disc list-inside space-y-1 ml-4">
-                            <li>Undergarments: black or white V neck undershirts.</li>
-                            <li>Make sure that undergarments support body movement and offer full coverage (i.e. briefs, no boxer shorts)</li>
+                        <div className="bg-blue-50 p-3 rounded border border-blue-200">
+                          <h6 className="font-bold text-blue-800 mb-2">Men</h6>
+                          <ul className="text-sm space-y-1">
+                            <li>• Undergarments: black or white V neck undershirts.</li>
+                            <li>• Make sure that undergarments support body movement and offer full coverage (i.e. briefs, no boxer shorts)</li>
                           </ul>
                         </div>
                       </div>
@@ -366,56 +449,122 @@ const AboutUs = () => {
 
                 <Separator />
 
-                <div>
-                  <h4 className="font-semibold text-primary mb-4">Ministry Associate Positions</h4>
+                <div className="bg-gradient-to-r from-slate-50 to-gray-50 p-6 rounded-lg border-l-4 border-slate-500">
+                  <h4 className="text-2xl font-bold text-slate-800 mb-6 flex items-center">
+                    <span className="w-3 h-8 bg-slate-600 rounded mr-3"></span>
+                    Ministry Associate Positions
+                  </h4>
                   
-                  <div className="space-y-4">
-                    <div>
-                      <h5 className="font-medium mb-2">Administrative Assistant</h5>
-                      <p className="mb-2">The Administrative Assistant supports the Assistant Director in overseeing the administrative and organizational functions of the ministry. This role assists with delegated tasks to ensure smooth ministry operations and serves as an additional resource to both the Assistant Director and Director.</p>
-                      <p className="font-medium mb-1">Responsibilities:</p>
-                      <ul className="list-disc list-inside space-y-1 ml-4">
-                        <li>Assist the Assistant Director with administrative tasks, including scheduling, communication, and documentation</li>
-                        <li>Help manage the distribution of information across all CLC campuses in coordination with the Assistant Director</li>
-                        <li>Support the Director by providing an extra set of hands for various ministry functions, including ministry engagement preparation, rehearsal logistics, and resource organization</li>
-                      </ul>
+                  <div className="grid gap-6">
+                    {/* Administrative Assistant */}
+                    <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
+                      <div className="flex items-start">
+                        <div className="w-3 h-3 bg-blue-500 rounded-full mt-2 mr-4 flex-shrink-0"></div>
+                        <div className="flex-1">
+                          <h5 className="text-lg font-bold text-blue-800 mb-3">Administrative Assistant</h5>
+                          <p className="text-gray-700 mb-4">The Administrative Assistant supports the Assistant Director in overseeing the administrative and organizational functions of the ministry. This role assists with delegated tasks to ensure smooth ministry operations and serves as an additional resource to both the Assistant Director and Director.</p>
+                          <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                            <p className="font-semibold text-blue-800 mb-2">Key Responsibilities:</p>
+                            <ul className="space-y-2 text-sm">
+                              <li className="flex items-start">
+                                <span className="w-1.5 h-1.5 bg-blue-400 rounded-full mt-2 mr-2 flex-shrink-0"></span>
+                                <span>Assist the Assistant Director with administrative tasks, including scheduling, communication, and documentation</span>
+                              </li>
+                              <li className="flex items-start">
+                                <span className="w-1.5 h-1.5 bg-blue-400 rounded-full mt-2 mr-2 flex-shrink-0"></span>
+                                <span>Help manage the distribution of information across all CLC campuses in coordination with the Assistant Director</span>
+                              </li>
+                              <li className="flex items-start">
+                                <span className="w-1.5 h-1.5 bg-blue-400 rounded-full mt-2 mr-2 flex-shrink-0"></span>
+                                <span>Support the Director by providing an extra set of hands for various ministry functions, including ministry engagement preparation, rehearsal logistics, and resource organization</span>
+                              </li>
+                            </ul>
+                          </div>
+                        </div>
+                      </div>
                     </div>
 
-                    <div>
-                      <h5 className="font-medium mb-2">Garments/Instrument Coordinator</h5>
-                      <p>The Garments/Instrument Coordinator is responsible for organizing and maintaining ministry garments and instruments. They oversee uniforms, flags, streamers, banners, and accessories, working with the Anointed Seamstress to make any necessary adjustments.</p>
+                    {/* Teams Grid */}
+                    <div className="grid md:grid-cols-2 gap-6">
+                      {/* Garments/Instrument Coordinator */}
+                      <div className="bg-white p-5 rounded-lg border border-purple-200 shadow-sm">
+                        <div className="flex items-center mb-3">
+                          <span className="w-3 h-3 bg-purple-500 rounded-full mr-3"></span>
+                          <h5 className="text-lg font-bold text-purple-800">Garments/Instrument Coordinator</h5>
+                        </div>
+                        <p className="text-gray-700 text-sm">The Garments/Instrument Coordinator is responsible for organizing and maintaining ministry garments and instruments. They oversee uniforms, flags, streamers, banners, and accessories, working with the Anointed Seamstress to make any necessary adjustments.</p>
+                      </div>
+
+                      {/* Marketing Team */}
+                      <div className="bg-white p-5 rounded-lg border border-pink-200 shadow-sm">
+                        <div className="flex items-center mb-3">
+                          <span className="w-3 h-3 bg-pink-500 rounded-full mr-3"></span>
+                          <h5 className="text-lg font-bold text-pink-800">Marketing Team</h5>
+                        </div>
+                        <p className="text-gray-700 text-sm">Members report to Director of Marketing (DOM) and work together to support the marketing strategy. Team will assist with reviewing videos, photos, and help devise promotional items under the direction of the DOM.</p>
+                      </div>
+
+                      {/* Choreography Team */}
+                      <div className="bg-white p-5 rounded-lg border border-amber-200 shadow-sm">
+                        <div className="flex items-center mb-3">
+                          <span className="w-3 h-3 bg-amber-500 rounded-full mr-3"></span>
+                          <h5 className="text-lg font-bold text-amber-800">Choreography Team</h5>
+                        </div>
+                        <p className="text-gray-700 text-sm">The team is responsible for the creation and vision of dance choreography and is under the leaders of the Director of Choreography. Members will work in unison to create and teach ministry pieces to the ministry. The team is held at a higher standard to upkeep the vision of choreography. Unless excused by the Director of Choreography, each member of the team is required to attend all external and in-house trainings and workshops.</p>
+                      </div>
+
+                      {/* Prayer Ministry Team */}
+                      <div className="bg-white p-5 rounded-lg border border-green-200 shadow-sm">
+                        <div className="flex items-center mb-3">
+                          <span className="w-3 h-3 bg-green-500 rounded-full mr-3"></span>
+                          <h5 className="text-lg font-bold text-green-800">Prayer Ministry Team</h5>
+                        </div>
+                        <p className="text-gray-700 text-sm">The team serves as an intercessory group dedicated to supporting the Spiritual Advisor and the Fresh Fire Dance Ministry through prayer, encouragement, and spiritual covering. This team ensures that prayer remains a foundational aspect of the ministry, fostering a spiritually strong and united dance community. The team regularly prays for the dance ministry, its leadership, members, and any specific needs that arise They also assist the Spiritual Advisor in carrying out prayer initiatives, the devotional calendar, and spiritual encouragement under the direction of the Spiritual Advisor</p>
+                      </div>
                     </div>
 
-                    <div>
-                      <h5 className="font-medium mb-2">Marketing Team</h5>
-                      <p>Members report to Director of Marketing (DOM) and work together to support the marketing strategy. Team will assist with reviewing videos, photos, and help devise promotional items under the direction of the DOM.</p>
-                    </div>
+                    {/* Specialized Teams */}
+                    <div className="space-y-4">
+                      {/* Fresh Fire Flags Worship Team */}
+                      <div className="bg-gradient-to-r from-orange-50 to-red-50 p-5 rounded-lg border border-orange-200">
+                        <div className="flex items-center mb-3">
+                          <span className="w-4 h-4 bg-gradient-to-r from-orange-500 to-red-500 rounded-full mr-3"></span>
+                          <h5 className="text-lg font-bold text-orange-800">Fresh Fire Flags Worship Team</h5>
+                        </div>
+                        <p className="text-gray-700 text-sm">The Fresh Fire Flags Worship Team serves as the frontline dancers, ministering weekly during church services. Through movement and the use of worship instruments—including flags, banners, tambourines, mattah sticks, and streamers—this team ushers in the presence of God and ministers to His people under the guidance of the Holy Spirit. As a consistent part of worship, team members are committed to executing with excellence, discipline, and spiritual sensitivity. The team operates under the leadership of the Director, along with appointed dancers from the collective ministry, to ensure alignment with the vision and flow of worship.</p>
+                      </div>
 
-                    <div>
-                      <h5 className="font-medium mb-2">Choreography Team</h5>
-                      <p>The team is responsible for the creation and vision of dance choreography and is under the leaders of the Director of Choreography. Members will work in unison to create and teach ministry pieces to the ministry. The team is held at a higher standard to upkeep the vision of choreography. Unless excused by the Director of Choreography, each member of the team is required to attend all external and in-house trainings and workshops.</p>
-                    </div>
-
-                    <div>
-                      <h5 className="font-medium mb-2">Prayer Ministry Team</h5>
-                      <p>The team serves as an intercessory group dedicated to supporting the Spiritual Advisor and the Fresh Fire Dance Ministry through prayer, encouragement, and spiritual covering. This team ensures that prayer remains a foundational aspect of the ministry, fostering a spiritually strong and united dance community. The team regularly prays for the dance ministry, its leadership, members, and any specific needs that arise They also assist the Spiritual Advisor in carrying out prayer initiatives, the devotional calendar, and spiritual encouragement under the direction of the Spiritual Advisor</p>
-                    </div>
-
-                    <div>
-                      <h5 className="font-medium mb-2">Fresh Fire Flags Worship Team</h5>
-                      <p>The Fresh Fire Flags Worship Team serves as the frontline dancers, ministering weekly during church services. Through movement and the use of worship instruments—including flags, banners, tambourines, mattah sticks, and streamers—this team ushers in the presence of God and ministers to His people under the guidance of the Holy Spirit. As a consistent part of worship, team members are committed to executing with excellence, discipline, and spiritual sensitivity. The team operates under the leadership of the Director, along with appointed dancers from the collective ministry, to ensure alignment with the vision and flow of worship.</p>
-                    </div>
-
-                    <div>
-                      <h5 className="font-medium mb-2">Dance Development Team</h5>
-                      <p className="mb-2">The Dance Development Team works under the leadership of the Director of Dance Development to promote the overall well-being and physical conditioning of the ministry's dancers. This team plays a crucial role in maintaining the ministry's standard of excellence by ensuring dancers are physically prepared for movement and ministry.</p>
-                      <p className="font-medium mb-1">Responsibilities:</p>
-                      <ul className="list-disc list-inside space-y-1 ml-4">
-                        <li>Assist in leading warm-ups before rehearsals, workshops, and production days</li>
-                        <li>Support the Director of Dance Development in organizing workouts, in-house conditioning sessions and training programs</li>
-                        <li>Provide encouragement and accountability to fellow dancers in maintaining temple stewardship (mind, body, soul, and spirit).</li>
-                        <li>Step in as needed to support any function required by the Director of Dance Development.</li>
-                      </ul>
+                      {/* Dance Development Team */}
+                      <div className="bg-gradient-to-r from-indigo-50 to-purple-50 p-5 rounded-lg border border-indigo-200">
+                        <div className="flex items-start">
+                          <span className="w-4 h-4 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full mt-1 mr-3 flex-shrink-0"></span>
+                          <div className="flex-1">
+                            <h5 className="text-lg font-bold text-indigo-800 mb-3">Dance Development Team</h5>
+                            <p className="text-gray-700 mb-4 text-sm">The Dance Development Team works under the leadership of the Director of Dance Development to promote the overall well-being and physical conditioning of the ministry's dancers. This team plays a crucial role in maintaining the ministry's standard of excellence by ensuring dancers are physically prepared for movement and ministry.</p>
+                            <div className="bg-indigo-50 p-4 rounded-lg border border-indigo-200">
+                              <p className="font-semibold text-indigo-800 mb-2 text-sm">Core Responsibilities:</p>
+                              <ul className="space-y-1 text-sm">
+                                <li className="flex items-start">
+                                  <span className="w-1.5 h-1.5 bg-indigo-400 rounded-full mt-1.5 mr-2 flex-shrink-0"></span>
+                                  <span>Assist in leading warm-ups before rehearsals, workshops, and production days</span>
+                                </li>
+                                <li className="flex items-start">
+                                  <span className="w-1.5 h-1.5 bg-indigo-400 rounded-full mt-1.5 mr-2 flex-shrink-0"></span>
+                                  <span>Support the Director of Dance Development in organizing workouts, in-house conditioning sessions and training programs</span>
+                                </li>
+                                <li className="flex items-start">
+                                  <span className="w-1.5 h-1.5 bg-indigo-400 rounded-full mt-1.5 mr-2 flex-shrink-0"></span>
+                                  <span>Provide encouragement and accountability to fellow dancers in maintaining temple stewardship (mind, body, soul, and spirit)</span>
+                                </li>
+                                <li className="flex items-start">
+                                  <span className="w-1.5 h-1.5 bg-indigo-400 rounded-full mt-1.5 mr-2 flex-shrink-0"></span>
+                                  <span>Step in as needed to support any function required by the Director of Dance Development</span>
+                                </li>
+                              </ul>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
