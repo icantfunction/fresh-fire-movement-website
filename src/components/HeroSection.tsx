@@ -4,7 +4,7 @@ import { Instagram, ExternalLink } from "lucide-react";
 
 const HeroSection = () => {
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20">
       {/* Simple Fire Gradient Background */}
       <div className="absolute inset-0 bg-gradient-to-br from-orange-600 via-red-600 to-yellow-500 z-0" />
       
