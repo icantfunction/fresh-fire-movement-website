@@ -32,7 +32,7 @@ const GallerySection = () => {
         <div className="text-center mt-12">
           <Card className="inline-block p-6 bg-white/80 backdrop-blur-sm border border-purple-200">
             <p className="text-gray-600 mb-2">More photos coming soon!</p>
-            <p className="text-sm text-gray-500">Follow us on Instagram for the latest updates</p>
+            <p className="text-sm text-gray-500">Follow us on Instagram @ffdanceministry for the latest updates</p>
           </Card>
         </div>
       </div>
