@@ -3,10 +3,10 @@ import { Card } from "@/components/ui/card";
 
 const GallerySection = () => {
   const galleryImages = [
-    "https://live.staticflickr.com/65535/54710760240_4d3c42f89e_c.jpg",
-    "https://live.staticflickr.com/65535/54710654874_df5c51ba2d_c.jpg", 
-    "https://live.staticflickr.com/65535/54710759055_14e9e41e9d_c.jpg",
-    "https://live.staticflickr.com/65535/54709592352_b2c8bc12d7_c.jpg"
+    "https://live.staticflickr.com/65535/54709595432_047bf4f33f_c.jpg",
+    "https://live.staticflickr.com/65535/54710654874_630c048d4a_c.jpg",
+    "https://live.staticflickr.com/65535/54709592352_444cf18e91_c.jpg",
+    "https://live.staticflickr.com/65535/54710630223_429b866271_z.jpg"
   ];
 
   return (
