@@ -2,11 +2,11 @@
 import { Card } from "@/components/ui/card";
 
 const GallerySection = () => {
-  const placeholderImages = [
-    "https://images.unsplash.com/photo-1500375592092-40eb2168fd21?w=400&h=300&fit=crop",
-    "https://images.unsplash.com/photo-1470813740244-df37b8c1edcb?w=400&h=300&fit=crop",
-    "https://images.unsplash.com/photo-1500673922987-e212871fec22?w=400&h=300&fit=crop",
-    "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=400&h=300&fit=crop"
+  const galleryImages = [
+    "https://live.staticflickr.com/65535/54710760240_c8f4c4b8c4_c.jpg",
+    "https://live.staticflickr.com/65535/54710654874_8a7b8b9b8a_c.jpg", 
+    "https://live.staticflickr.com/65535/54710759055_d9e5e5c9d9_c.jpg",
+    "https://live.staticflickr.com/65535/54709592352_f1a1a1f1a1_c.jpg"
   ];
 
   return (
@@ -17,7 +17,7 @@ const GallerySection = () => {
         </h2>
         
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-          {placeholderImages.map((image, index) => (
+          {galleryImages.map((image, index) => (
             <Card key={index} className="overflow-hidden group cursor-pointer shadow-lg hover:shadow-2xl transition-all duration-300">
               <div 
                 className="aspect-square bg-cover bg-center group-hover:scale-110 transition-transform duration-500"
