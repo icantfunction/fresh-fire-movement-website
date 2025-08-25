@@ -11,7 +11,7 @@ const CountdownSection = () => {
   });
 
   // Set target date - you can modify this to the actual event date
-  const targetDate = new Date('2024-12-31T19:00:00').getTime();
+  const targetDate = new Date('2025-12-14T19:00:00').getTime();
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -35,7 +35,7 @@ const CountdownSection = () => {
     <section className="py-20 px-4 royal-gradient">
       <div className="max-w-4xl mx-auto text-center">
         <h2 className="text-4xl md:text-5xl font-bold mb-8 text-white">
-          Next Worship Production
+          Christmas Production
         </h2>
         
         <div className="bg-white/10 backdrop-blur-md rounded-2xl p-8 md:p-12 shadow-2xl border border-white/20 mb-8">
