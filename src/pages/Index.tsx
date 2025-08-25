@@ -1,4 +1,5 @@
 
+import Navigation from "@/components/Navigation";
 import HeroSection from "@/components/HeroSection";
 import AboutSection from "@/components/AboutSection";
 import CountdownSection from "@/components/CountdownSection";
@@ -11,14 +12,17 @@ import Footer from "@/components/Footer";
 const Index = () => {
   return (
     <div className="min-h-screen">
-      <HeroSection />
-      <AboutSection />
-      <CountdownSection />
-      <TestimonialSection />
-      <GallerySection />
-      <BibleVersesSection />
-      <FormsSection />
-      <Footer />
+      <Navigation />
+      <div className="pt-20">
+        <HeroSection />
+        <AboutSection />
+        <CountdownSection />
+        <TestimonialSection />
+        <GallerySection />
+        <BibleVersesSection />
+        <FormsSection />
+        <Footer />
+      </div>
     </div>
   );
 };
