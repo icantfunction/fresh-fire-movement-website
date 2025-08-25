@@ -23,13 +23,6 @@ const BibleVersesSection = () => {
             </blockquote>
             <cite className="text-fire-gold font-semibold">Psalm 30:11</cite>
           </Card>
-          
-          <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-8 border border-white/10">
-            <p className="text-white/80 text-lg leading-relaxed">
-              Space reserved for additional verses that speak to the heart of Fresh Fire's ministry. 
-              Each verse carefully chosen to inspire movement, surrender, and worship.
-            </p>
-          </div>
         </div>
       </div>
     </section>
