@@ -23,9 +23,7 @@ const GallerySection = () => {
                 className="aspect-square bg-cover bg-center group-hover:scale-110 transition-transform duration-500"
                 style={{ backgroundImage: `url(${image})` }}
               >
-                <div className="w-full h-full bg-gradient-to-t from-fire-purple/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
-                  <span className="text-white font-semibold text-sm">Fresh Fire in Action</span>
-                </div>
+                <div className="w-full h-full bg-gradient-to-t from-fire-purple/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               </div>
             </Card>
           ))}
