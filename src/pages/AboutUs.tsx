@@ -1,12 +1,9 @@
-import Navigation from "@/components/Navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 
 const AboutUs = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-secondary/20">
-      <Navigation />
-      <div className="pt-20">
       <div className="max-w-6xl mx-auto px-4 py-20">
         <div className="text-center mb-12">
           <h1 className="text-4xl md:text-6xl font-bold mb-6 text-fire-gradient">
@@ -537,7 +534,6 @@ const AboutUs = () => {
             </CardContent>
           </Card>
         </div>
-      </div>
       </div>
     </div>
   );

@@ -1,10 +1,11 @@
 
 import { Button } from "@/components/ui/button";
-import { Instagram, ExternalLink } from "lucide-react";
+import { Instagram, ExternalLink, Info } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const HeroSection = () => {
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20">
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
       {/* Simple Fire Gradient Background */}
       <div className="absolute inset-0 bg-gradient-to-br from-orange-600 via-red-600 to-yellow-500 z-0" />
       
@@ -53,6 +54,20 @@ const HeroSection = () => {
               <ExternalLink className="w-5 h-5" />
               clcftl.org
             </a>
+          </Button>
+
+          <Button 
+            asChild
+            size="lg"
+            className="bg-gradient-to-r from-yellow-500 to-orange-600 hover:from-yellow-600 hover:to-orange-700 text-white transition-all duration-300 font-semibold px-8 py-3 shadow-2xl"
+          >
+            <Link 
+              to="/about"
+              className="flex items-center gap-2"
+            >
+              <Info className="w-5 h-5" />
+              About Us
+            </Link>
           </Button>
         </div>
       </div>
