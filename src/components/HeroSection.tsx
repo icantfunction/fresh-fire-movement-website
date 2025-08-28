@@ -31,8 +31,8 @@ const HeroSection = () => {
         {backgroundImages.map((image, index) => (
           <div
             key={index}
-            className={`absolute inset-0 w-full h-full bg-cover bg-center filter blur-sm scale-110 ${
-              index === currentImageIndex ? 'animate-fade-in opacity-100' : 'animate-fade-out opacity-0'
+            className={`absolute inset-0 w-full h-full bg-cover bg-center filter blur-sm scale-110 transition-opacity duration-[2000ms] ease-in-out ${
+              index === currentImageIndex ? 'opacity-100' : 'opacity-0'
             }`}
             style={{ backgroundImage: `url(${image})` }}
           />
