@@ -26,11 +26,12 @@ const HeroSection = () => {
       <div className="absolute inset-0 z-0">
         <Carousel
           plugins={[plugin.current]}
-          className="w-full h-full"
+          className="w-full h-full [&>div]:h-full"
+          opts={{ loop: true }}
         >
-          <CarouselContent className="w-full h-full">
+          <CarouselContent className="w-full h-full ml-0 [&>div]:h-full [&>div]:pl-0">
             {backgroundImages.map((image, index) => (
-              <CarouselItem key={index} className="w-full h-full">
+              <CarouselItem key={index} className="w-full h-full pl-0 basis-full">
                 <div 
                   className="w-full h-full bg-cover bg-center filter blur-sm scale-110"
                   style={{ backgroundImage: `url(${image})` }}
@@ -42,7 +43,7 @@ const HeroSection = () => {
       </div>
       
       {/* Strong Fire Gradient Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-br from-orange-600/80 via-red-600/85 to-yellow-500/80 z-10" />
+      <div className="absolute inset-0 bg-gradient-to-br from-orange-600/50 via-red-600/60 to-yellow-500/50 z-10" />
       
       {/* Main Content */}
       <div className="relative z-30 text-center px-4 max-w-4xl mx-auto">
