@@ -2,14 +2,10 @@
 import { Button } from "@/components/ui/button";
 import { Instagram, ExternalLink, Info } from "lucide-react";
 import { Link } from "react-router-dom";
-import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
-import Autoplay from "embla-carousel-autoplay";
-import { useRef } from "react";
+import { useState, useEffect } from "react";
 
 const HeroSection = () => {
-  const plugin = useRef(
-    Autoplay({ delay: 4000, stopOnInteraction: false })
-  );
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   const backgroundImages = [
     "https://live.staticflickr.com/65535/54710633118_ed0842bac6_c.jpg",
@@ -20,26 +16,27 @@ const HeroSection = () => {
     "https://live.staticflickr.com/65535/54710654874_630c048d4a_c.jpg"
   ];
 
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentImageIndex((prev) => (prev + 1) % backgroundImages.length);
+    }, 4000);
+
+    return () => clearInterval(interval);
+  }, [backgroundImages.length]);
+
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
       {/* Background Slideshow */}
       <div className="absolute inset-0 z-0">
-        <Carousel
-          plugins={[plugin.current]}
-          className="w-full h-full [&>div]:h-full"
-          opts={{ loop: true }}
-        >
-          <CarouselContent className="w-full h-full ml-0 [&>div]:h-full [&>div]:pl-0">
-            {backgroundImages.map((image, index) => (
-              <CarouselItem key={index} className="w-full h-full pl-0 basis-full">
-                <div 
-                  className="w-full h-full bg-cover bg-center filter blur-sm scale-110"
-                  style={{ backgroundImage: `url(${image})` }}
-                />
-              </CarouselItem>
-            ))}
-          </CarouselContent>
-        </Carousel>
+        {backgroundImages.map((image, index) => (
+          <div
+            key={index}
+            className={`absolute inset-0 w-full h-full bg-cover bg-center filter blur-sm scale-110 transition-opacity duration-1000 ${
+              index === currentImageIndex ? 'opacity-100' : 'opacity-0'
+            }`}
+            style={{ backgroundImage: `url(${image})` }}
+          />
+        ))}
       </div>
       
       {/* Strong Fire Gradient Overlay */}
