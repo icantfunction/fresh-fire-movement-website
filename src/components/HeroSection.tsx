@@ -2,44 +2,27 @@
 import { Button } from "@/components/ui/button";
 import { Instagram, ExternalLink, Info } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useState, useEffect } from "react";
+import HeroSlideshow, { type Slide } from "@/components/HeroSlideshow";
 
 const HeroSection = () => {
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
-
-  const backgroundImages = [
-    "https://live.staticflickr.com/65535/54710633118_ed0842bac6_c.jpg",
-    "https://live.staticflickr.com/65535/54710632548_dfee898a4f_c.jpg",
-    "https://live.staticflickr.com/65535/54710427846_106fc692f2_c.jpg",
-    "https://live.staticflickr.com/65535/54710656484_22638b28b0_c.jpg",
-    "https://live.staticflickr.com/65535/54710426256_2ff009e34e_c.jpg",
-    "https://live.staticflickr.com/65535/54710654874_630c048d4a_c.jpg"
+  const backgroundImages: Slide[] = [
+    { src: "https://live.staticflickr.com/65535/54710633118_ed0842bac6_c.jpg", alt: "Fresh Fire Dance Ministry performance" },
+    { src: "https://live.staticflickr.com/65535/54710632548_dfee898a4f_c.jpg", alt: "Dance ministry worship" },
+    { src: "https://live.staticflickr.com/65535/54710427846_106fc692f2_c.jpg", alt: "Ministry movement and surrender" },
+    { src: "https://live.staticflickr.com/65535/54710656484_22638b28b0_c.jpg", alt: "Fire dance ministry" },
+    { src: "https://live.staticflickr.com/65535/54710426256_2ff009e34e_c.jpg", alt: "Worship through dance" },
+    { src: "https://live.staticflickr.com/65535/54710654874_630c048d4a_c.jpg", alt: "Fresh Fire ministry worship" }
   ];
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentImageIndex((prev) => (prev + 1) % backgroundImages.length);
-    }, 7000); // Longer interval to allow for fade transition
-
-    return () => clearInterval(interval);
-  }, [backgroundImages.length]);
 
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
       {/* Background Slideshow */}
       <div className="absolute inset-0 z-0">
-        {backgroundImages.map((image, index) => (
-          <div
-            key={index}
-            className={`absolute inset-0 w-full h-full bg-cover bg-center filter blur-sm scale-110 transition-opacity duration-[4000ms] ease-in-out ${
-              index === currentImageIndex ? 'opacity-100' : 'opacity-0'
-            }`}
-            style={{ 
-              backgroundImage: `url(${image})`,
-              zIndex: index === currentImageIndex ? 1 : 0
-            }}
-          />
-        ))}
+        <HeroSlideshow 
+          images={backgroundImages} 
+          intervalMs={6000} 
+          className="h-full w-full"
+        />
       </div>
       
       {/* Strong Fire Gradient Overlay */}
