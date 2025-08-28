@@ -4,46 +4,127 @@ import { Instagram, ExternalLink, Info } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 
-const HeroSection = () => {
+interface HeroSectionProps {
+  variant?: "standard" | "cinema";
+  fadeMs?: number;
+  kenBurns?: boolean;
+  blurPx?: number;
+  overlayGradient?: boolean;
+  overlay?: React.ReactNode;
+}
+
+const HeroSection = ({
+  variant = "standard",
+  fadeMs = 3000,
+  kenBurns = true,
+  blurPx = 2,
+  overlayGradient = true,
+  overlay
+}: HeroSectionProps = {}) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
 
   const backgroundImages = [
-    "https://live.staticflickr.com/65535/54710633118_ed0842bac6_c.jpg",
-    "https://live.staticflickr.com/65535/54710632548_dfee898a4f_c.jpg",
-    "https://live.staticflickr.com/65535/54710427846_106fc692f2_c.jpg",
-    "https://live.staticflickr.com/65535/54710656484_22638b28b0_c.jpg",
-    "https://live.staticflickr.com/65535/54710426256_2ff009e34e_c.jpg",
-    "https://live.staticflickr.com/65535/54710654874_630c048d4a_c.jpg"
+    { src: "https://live.staticflickr.com/65535/54710633118_ed0842bac6_c.jpg", alt: "Fresh Fire Dance Ministry performance" },
+    { src: "https://live.staticflickr.com/65535/54710632548_dfee898a4f_c.jpg", alt: "Dance worship session" },
+    { src: "https://live.staticflickr.com/65535/54710427846_106fc692f2_c.jpg", alt: "Ministry team performance" },
+    { src: "https://live.staticflickr.com/65535/54710656484_22638b28b0_c.jpg", alt: "Worship dance ministry" },
+    { src: "https://live.staticflickr.com/65535/54710426256_2ff009e34e_c.jpg", alt: "Fresh Fire dance team" },
+    { src: "https://live.staticflickr.com/65535/54710654874_630c048d4a_c.jpg", alt: "Dance ministry worship" }
   ];
+
+  useEffect(() => {
+    // Check for reduced motion preference
+    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    setPrefersReducedMotion(mediaQuery.matches);
+    
+    const handleChange = (event: MediaQueryListEvent) => {
+      setPrefersReducedMotion(event.matches);
+    };
+    
+    mediaQuery.addEventListener('change', handleChange);
+    return () => mediaQuery.removeEventListener('change', handleChange);
+  }, []);
 
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentImageIndex((prev) => (prev + 1) % backgroundImages.length);
-    }, 7000); // Longer interval to allow for fade transition
+    }, 7000);
 
     return () => clearInterval(interval);
   }, [backgroundImages.length]);
+
+  // Preload next image
+  useEffect(() => {
+    const nextIndex = (currentImageIndex + 1) % backgroundImages.length;
+    const nextImage = backgroundImages[nextIndex];
+    
+    const link = document.createElement('link');
+    link.rel = 'preload';
+    link.as = 'image';
+    link.href = nextImage.src;
+    document.head.appendChild(link);
+    
+    return () => {
+      if (document.head.contains(link)) {
+        document.head.removeChild(link);
+      }
+    };
+  }, [currentImageIndex, backgroundImages]);
+
+  const getTransitionDuration = () => {
+    if (prefersReducedMotion) return "duration-300";
+    return variant === "cinema" ? `duration-[${fadeMs}ms]` : "duration-[4000ms]";
+  };
+
+  const getKenBurnsClasses = (isActive: boolean) => {
+    if (!kenBurns || prefersReducedMotion || variant !== "cinema") return "";
+    
+    if (isActive) {
+      return `scale-110 md:scale-105 blur-[1px] md:blur-[${blurPx}px] transition-transform duration-[7000ms] ease-linear`;
+    }
+    return "scale-100 blur-0 transition-transform duration-[7000ms] ease-linear";
+  };
 
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
       {/* Background Slideshow */}
       <div className="absolute inset-0 z-0">
-        {backgroundImages.map((image, index) => (
-          <div
-            key={index}
-            className={`absolute inset-0 w-full h-full bg-cover bg-center filter blur-sm scale-110 transition-opacity duration-[4000ms] ease-in-out ${
-              index === currentImageIndex ? 'opacity-100' : 'opacity-0'
-            }`}
-            style={{ 
-              backgroundImage: `url(${image})`,
-              zIndex: index === currentImageIndex ? 1 : 0
-            }}
-          />
-        ))}
+        {backgroundImages.map((image, index) => {
+          const isActive = index === currentImageIndex;
+          return (
+            <div key={index} className="absolute inset-0 w-full h-full">
+              <img
+                src={image.src}
+                alt={image.alt}
+                className={`
+                  absolute inset-0 w-full h-full object-cover
+                  ${variant === "cinema" 
+                    ? `transition-opacity ${getTransitionDuration()} ease-in-out ${
+                        isActive ? "opacity-100" : "opacity-0"
+                      } ${getKenBurnsClasses(isActive)}`
+                    : `filter blur-sm scale-110 transition-opacity ${getTransitionDuration()} ease-in-out ${
+                        isActive ? "opacity-100" : "opacity-0"
+                      }`
+                  }
+                `}
+                loading={index === 0 ? "eager" : "lazy"}
+                style={variant === "cinema" ? { willChange: "opacity, transform" } : undefined}
+              />
+            </div>
+          );
+        })}
       </div>
       
-      {/* Strong Fire Gradient Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-br from-orange-600/50 via-red-600/60 to-yellow-500/50 z-10" />
+      {/* Overlay gradient */}
+      {variant === "cinema" && overlayGradient ? (
+        <div className="pointer-events-none absolute inset-0 z-10 bg-gradient-to-br from-orange-600/40 via-red-600/50 to-yellow-500/40 mix-blend-multiply" />
+      ) : (
+        <div className="absolute inset-0 bg-gradient-to-br from-orange-600/50 via-red-600/60 to-yellow-500/50 z-10" />
+      )}
+      
+      {/* Optional overlay content slot */}
+      {overlay && <div className="absolute inset-0 z-20 flex items-center justify-center">{overlay}</div>}
       
       {/* Main Content */}
       <div className="relative z-30 text-center px-4 max-w-4xl mx-auto">
