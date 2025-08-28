@@ -2,12 +2,47 @@
 import { Button } from "@/components/ui/button";
 import { Instagram, ExternalLink, Info } from "lucide-react";
 import { Link } from "react-router-dom";
+import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
+import Autoplay from "embla-carousel-autoplay";
+import { useRef } from "react";
 
 const HeroSection = () => {
+  const plugin = useRef(
+    Autoplay({ delay: 4000, stopOnInteraction: false })
+  );
+
+  const backgroundImages = [
+    "https://live.staticflickr.com/65535/54710633118_ed0842bac6_c.jpg",
+    "https://live.staticflickr.com/65535/54710632548_dfee898a4f_c.jpg",
+    "https://live.staticflickr.com/65535/54710427846_106fc692f2_c.jpg",
+    "https://live.staticflickr.com/65535/54710656484_22638b28b0_c.jpg",
+    "https://live.staticflickr.com/65535/54710426256_2ff009e34e_c.jpg",
+    "https://live.staticflickr.com/65535/54710654874_630c048d4a_c.jpg"
+  ];
+
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-      {/* Simple Fire Gradient Background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-orange-600 via-red-600 to-yellow-500 z-0" />
+      {/* Background Slideshow */}
+      <div className="absolute inset-0 z-0">
+        <Carousel
+          plugins={[plugin.current]}
+          className="w-full h-full"
+        >
+          <CarouselContent className="w-full h-full">
+            {backgroundImages.map((image, index) => (
+              <CarouselItem key={index} className="w-full h-full">
+                <div 
+                  className="w-full h-full bg-cover bg-center filter blur-sm scale-110"
+                  style={{ backgroundImage: `url(${image})` }}
+                />
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+        </Carousel>
+      </div>
+      
+      {/* Strong Fire Gradient Overlay */}
+      <div className="absolute inset-0 bg-gradient-to-br from-orange-600/80 via-red-600/85 to-yellow-500/80 z-10" />
       
       {/* Main Content */}
       <div className="relative z-30 text-center px-4 max-w-4xl mx-auto">
