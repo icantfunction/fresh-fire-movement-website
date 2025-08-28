@@ -17,14 +17,9 @@ const HeroSection = () => {
   ];
 
   useEffect(() => {
-    console.log('Setting up slideshow timer');
     const interval = setInterval(() => {
-      setCurrentImageIndex((prev) => {
-        const next = (prev + 1) % backgroundImages.length;
-        console.log('Switching from image', prev, 'to image', next);
-        return next;
-      });
-    }, 4000);
+      setCurrentImageIndex((prev) => (prev + 1) % backgroundImages.length);
+    }, 7000); // Longer interval to allow for fade transition
 
     return () => clearInterval(interval);
   }, [backgroundImages.length]);
@@ -36,17 +31,15 @@ const HeroSection = () => {
         {backgroundImages.map((image, index) => (
           <div
             key={index}
-            className={`absolute inset-0 w-full h-full bg-cover bg-center filter blur-sm scale-110 transition-all duration-[2000ms] ease-in-out ${
-              index === currentImageIndex ? 'opacity-100 z-10' : 'opacity-0 z-0'
+            className={`absolute inset-0 w-full h-full bg-cover bg-center filter blur-sm scale-110 transition-opacity duration-[4000ms] ease-in-out ${
+              index === currentImageIndex ? 'opacity-100' : 'opacity-0'
             }`}
-            style={{ backgroundImage: `url(${image})` }}
-            onLoad={() => console.log(`Image ${index} loaded`)}
+            style={{ 
+              backgroundImage: `url(${image})`,
+              zIndex: index === currentImageIndex ? 1 : 0
+            }}
           />
         ))}
-        {/* Debug indicator */}
-        <div className="absolute top-4 left-4 bg-white/80 text-black p-2 rounded z-50">
-          Current: {currentImageIndex}
-        </div>
       </div>
       
       {/* Strong Fire Gradient Overlay */}
