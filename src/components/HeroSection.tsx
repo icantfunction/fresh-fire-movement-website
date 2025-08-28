@@ -26,7 +26,7 @@ const HeroSection = () => {
       </div>
       
       {/* Strong Fire Gradient Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-br from-orange-600/50 via-red-600/60 to-yellow-500/50 z-10" />
+      <div className="absolute inset-0 bg-gradient-to-br from-orange-600/30 via-red-600/40 to-yellow-500/30 z-10" />
       
       {/* Main Content */}
       <div className="relative z-30 text-center px-4 max-w-4xl mx-auto">

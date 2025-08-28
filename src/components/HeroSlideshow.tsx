@@ -8,6 +8,7 @@ import {
   type CarouselApi,
 } from "@/components/ui/carousel";
 import { cn } from "@/lib/utils";
+import Autoplay from "embla-carousel-autoplay";
 
 export type Slide = {
   src: string;
@@ -57,7 +58,12 @@ const HeroSlideshow: React.FC<HeroSlideshowProps> = ({
       onFocus={() => setPaused(true)}
       onBlur={() => setPaused(false)}
     >
-      <Carousel setApi={setApi} opts={{ loop: true }} className="h-full w-full">
+      <Carousel 
+        setApi={setApi} 
+        opts={{ loop: true }} 
+        plugins={[Autoplay({ delay: intervalMs, stopOnInteraction: true })]}
+        className="h-full w-full"
+      >
         <CarouselContent className="h-full">
           {images.map((img, idx) => (
             <CarouselItem key={idx} className="h-full p-0">
