@@ -68,7 +68,11 @@ export default {
 					magenta: '#C026D3',
 					gold: '#F59E0B',
 					deep: '#4C1D95'
-				}
+				},
+				'hero-text': 'hsl(var(--hero-text))',
+				'hero-text-secondary': 'hsl(var(--hero-text-secondary))',
+				'fire-overlay': 'hsl(var(--fire-overlay))',
+				'fire-overlay-strong': 'hsl(var(--fire-overlay-strong))'
 			},
 			borderRadius: {
 				lg: 'var(--radius)',

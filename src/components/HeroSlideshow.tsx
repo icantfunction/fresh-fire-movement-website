@@ -71,15 +71,19 @@ const HeroSlideshow: React.FC<HeroSlideshowProps> = ({
                 <img
                   src={img.src}
                   alt={img.alt}
-                  className="absolute inset-0 h-full w-full object-cover filter blur-sm scale-110"
+                  className="absolute inset-0 h-full w-full object-cover filter blur-sm scale-110 transition-opacity duration-700"
                   loading={idx === 0 ? "eager" : "lazy"}
+                  onError={(e) => {
+                    console.log(`Failed to load image: ${img.src}`);
+                    e.currentTarget.style.display = 'none';
+                  }}
                 />
               </div>
             </CarouselItem>
           ))}
         </CarouselContent>
-        <CarouselPrevious className="-left-4 md:-left-12 bg-white/20 hover:bg-white/30 text-white border-white/30 backdrop-blur-sm" />
-        <CarouselNext className="-right-4 md:-right-12 bg-white/20 hover:bg-white/30 text-white border-white/30 backdrop-blur-sm" />
+        <CarouselPrevious className="-left-4 md:-left-12 bg-background/20 hover:bg-background/30 text-hero-text border-hero-text/30 backdrop-blur-sm" />
+        <CarouselNext className="-right-4 md:-right-12 bg-background/20 hover:bg-background/30 text-hero-text border-hero-text/30 backdrop-blur-sm" />
       </Carousel>
 
       <div className="absolute bottom-4 left-1/2 z-[1] -translate-x-1/2">
@@ -90,8 +94,8 @@ const HeroSlideshow: React.FC<HeroSlideshowProps> = ({
               aria-label={`Go to slide ${i + 1}`}
               onClick={() => api?.scrollTo(i)}
               className={cn(
-                "h-2 w-2 rounded-full transition-colors",
-                i === selectedIndex ? "bg-white" : "bg-white/50"
+                "h-2 w-2 rounded-full transition-all duration-300",
+                i === selectedIndex ? "bg-hero-text scale-125" : "bg-hero-text/50 hover:bg-hero-text/70"
               )}
             />
           ))}

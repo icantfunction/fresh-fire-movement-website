@@ -25,19 +25,19 @@ const HeroSection = () => {
         />
       </div>
       
-      {/* Strong Fire Gradient Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-br from-orange-600/30 via-red-600/40 to-yellow-500/30 z-10" />
+      {/* Fire Ministry Overlay - Using design system */}
+      <div className="absolute inset-0 fire-gradient opacity-30 z-10" />
       
       {/* Main Content */}
       <div className="relative z-30 text-center px-4 max-w-4xl mx-auto">
-        <h1 className="text-6xl md:text-8xl font-bold text-white mb-6 leading-tight drop-shadow-2xl">
+        <h1 className="text-6xl md:text-8xl font-bold text-hero-text mb-6 leading-tight drop-shadow-2xl animate-gentle-float">
           Fresh Fire
-          <span className="block bg-gradient-to-r from-yellow-300 via-orange-400 to-red-500 bg-clip-text text-transparent">
+          <span className="block text-fire-gradient animate-fire-glow">
             Dance Ministry
           </span>
         </h1>
         
-        <p className="text-xl md:text-2xl text-orange-100 mb-8 font-light drop-shadow-lg">
+        <p className="text-xl md:text-2xl text-hero-text-secondary mb-8 font-light drop-shadow-lg">
           A Ministry of Movement, Surrender, and Fire
         </p>
         
@@ -45,7 +45,7 @@ const HeroSection = () => {
           <Button 
             asChild
             size="lg"
-            className="bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white transition-all duration-300 font-semibold px-8 py-3 shadow-2xl"
+            className="fire-gradient hover:opacity-90 text-primary-foreground transition-all duration-300 font-semibold px-8 py-3 shadow-2xl animate-fire-glow"
           >
             <a 
               href="https://instagram.com/ffdanceministry" 
@@ -62,7 +62,7 @@ const HeroSection = () => {
             asChild
             variant="outline"
             size="lg"
-            className="border-2 border-white/70 bg-white/90 text-gray-800 hover:bg-white hover:border-white transition-all duration-300 font-semibold px-8 py-3 shadow-xl"
+            className="border-2 border-hero-text/70 bg-background/90 text-foreground hover:bg-background hover:border-hero-text transition-all duration-300 font-semibold px-8 py-3 shadow-xl"
           >
             <a 
               href="https://clcftl.org" 
@@ -78,7 +78,7 @@ const HeroSection = () => {
           <Button 
             asChild
             size="lg"
-            className="bg-gradient-to-r from-yellow-500 to-orange-600 hover:from-yellow-600 hover:to-orange-700 text-white transition-all duration-300 font-semibold px-8 py-3 shadow-2xl"
+            className="royal-gradient hover:opacity-90 text-primary-foreground transition-all duration-300 font-semibold px-8 py-3 shadow-2xl"
           >
             <Link 
               to="/about"
