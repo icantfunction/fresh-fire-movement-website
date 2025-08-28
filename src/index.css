@@ -35,12 +35,6 @@
     --input: 214.3 31.8% 91.4%;
     --ring: 259 84% 60%;
 
-    /* Fire Ministry Theme */
-    --fire-overlay: 24 100% 50% / 0.3;
-    --fire-overlay-strong: 24 100% 50% / 0.5;
-    --hero-text: 0 0% 100%;
-    --hero-text-secondary: 24 100% 85%;
-
     --radius: 0.5rem;
   }
 
