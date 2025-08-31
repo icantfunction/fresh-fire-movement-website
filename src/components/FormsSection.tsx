@@ -6,6 +6,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 
 const FormsSection = () => {
@@ -132,28 +134,80 @@ const FormsSection = () => {
           
           <TabsContent value="newsletter">
             <Card className="p-8 bg-white/80 backdrop-blur-sm shadow-xl border border-purple-200 animate-gentle-float">
-              <form onSubmit={(e) => handleSubmit(e, "newsletter signup")} className="space-y-6">
+              <form onSubmit={(e) => handleSubmit(e, "audition application")} className="space-y-6">
                 <div className="text-center mb-6">
-                  <h3 className="text-2xl font-bold text-fire-gold mb-2">Join the Fresh Fire Family</h3>
-                  <p className="text-gray-600">Stay updated on events, testimonies, and ministry news.</p>
+                  <h3 className="text-2xl font-bold text-fire-gold mb-2">Join Our Fire - Audition Form</h3>
+                  <p className="text-gray-600">Apply to become part of the Fresh Fire Dance Ministry family.</p>
                 </div>
                 
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="newsletter-name">First Name</Label>
-                    <Input id="newsletter-name" placeholder="Your first name" required />
+                    <Label htmlFor="audition-name">Full Name *</Label>
+                    <Input id="audition-name" placeholder="Your full name" required />
                   </div>
                   <div>
-                    <Label htmlFor="newsletter-email">Email Address</Label>
-                    <Input id="newsletter-email" type="email" placeholder="your@email.com" required />
+                    <Label htmlFor="audition-dob">Date of Birth *</Label>
+                    <Input id="audition-dob" type="date" required />
                   </div>
                 </div>
                 
+                <div>
+                  <Label htmlFor="audition-email">Email Address *</Label>
+                  <Input id="audition-email" type="email" placeholder="your@email.com" required />
+                </div>
+                
+                <div className="space-y-4">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox id="baptized" />
+                    <Label htmlFor="baptized" className="text-sm">
+                      I have been baptized
+                    </Label>
+                  </div>
+                  
+                  <div className="flex items-center space-x-2">
+                    <Checkbox id="believer" />
+                    <Label htmlFor="believer" className="text-sm">
+                      I am a believer in Jesus Christ
+                    </Label>
+                  </div>
+                </div>
+                
+                <div>
+                  <Label htmlFor="clc-years">How many years have you been attending CLC? *</Label>
+                  <Select required>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select years" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="less-than-1">Less than 1 year</SelectItem>
+                      <SelectItem value="1-2">1-2 years</SelectItem>
+                      <SelectItem value="3-5">3-5 years</SelectItem>
+                      <SelectItem value="6-10">6-10 years</SelectItem>
+                      <SelectItem value="more-than-10">More than 10 years</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
                 <div className="flex items-center space-x-2">
-                  <input type="checkbox" id="updates" className="rounded" />
-                  <Label htmlFor="updates" className="text-sm">
-                    I want to receive updates about Fresh Fire events and ministry news
+                  <Checkbox id="encounter-youth-camp" />
+                  <Label htmlFor="encounter-youth-camp" className="text-sm">
+                    I have attended Encounter or Youth Camp
                   </Label>
+                </div>
+                
+                <div>
+                  <Label htmlFor="sod-level">Last level of SOD completed *</Label>
+                  <Select required>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select SOD level" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="sod-1">SOD 1</SelectItem>
+                      <SelectItem value="sod-2">SOD 2</SelectItem>
+                      <SelectItem value="sod-3">SOD 3</SelectItem>
+                      <SelectItem value="none">None completed</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
                 
                 <Button 
@@ -161,7 +215,7 @@ const FormsSection = () => {
                   disabled={isSubmitting}
                   className="w-full bg-fire-gold hover:bg-fire-gold/90 text-white transition-all duration-300 font-semibold"
                 >
-                  {isSubmitting ? "Joining..." : "Join the Fire"}
+                  {isSubmitting ? "Submitting Application..." : "Submit Audition Application"}
                 </Button>
               </form>
             </Card>
