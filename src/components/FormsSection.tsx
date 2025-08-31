@@ -68,7 +68,7 @@ const FormsSection = () => {
 
       toast({
         title: "Registration Successful!",
-        description: `Your ${formType} has been submitted and sent to our Google Sheet. We'll get back to you soon!`,
+        description: `Your ${formType} has been submitted and sent to our team. We'll get back to you soon!`,
       });
 
       // Reset form
