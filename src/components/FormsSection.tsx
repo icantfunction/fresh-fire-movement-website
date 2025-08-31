@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -13,19 +13,67 @@ import { useToast } from "@/hooks/use-toast";
 const FormsSection = () => {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const webhookUrl = "https://hooks.zapier.com/hooks/catch/23791564/uhfwx7o/";
+
+  const collectFormData = (form: HTMLFormElement, formType: string) => {
+    const formData = new FormData(form);
+    const data: Record<string, any> = {
+      formType,
+      timestamp: new Date().toISOString(),
+      source: window.location.origin,
+    };
+
+    // Convert FormData to object
+    for (const [key, value] of formData.entries()) {
+      data[key] = value;
+    }
+
+    // Handle checkboxes and selects that might not be in FormData
+    const checkboxes = form.querySelectorAll('input[type="checkbox"]');
+    checkboxes.forEach((checkbox) => {
+      const input = checkbox as HTMLInputElement;
+      data[input.id] = input.checked;
+    });
+
+    return data;
+  };
 
   const handleSubmit = async (e: React.FormEvent, formType: string) => {
     e.preventDefault();
     setIsSubmitting(true);
     
-    // Simulate form submission
-    setTimeout(() => {
-      toast({
-        title: "Form Submitted",
-        description: `Your ${formType} has been received. We'll get back to you soon!`,
+    const form = e.target as HTMLFormElement;
+    
+    try {
+      const formData = collectFormData(form, formType);
+      
+      const response = await fetch(webhookUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        mode: "no-cors",
+        body: JSON.stringify(formData),
       });
+
+      toast({
+        title: "Registration Successful!",
+        description: `Your ${formType} has been submitted and sent to our Google Sheet. We'll get back to you soon!`,
+      });
+
+      // Reset form
+      form.reset();
+      
+    } catch (error) {
+      console.error("Error submitting form:", error);
+      toast({
+        title: "Submission Error",
+        description: "There was an issue submitting your form. Please try again or contact us directly.",
+        variant: "destructive",
+      });
+    } finally {
       setIsSubmitting(false);
-    }, 1000);
+    }
   };
 
   return (
@@ -233,33 +281,33 @@ const FormsSection = () => {
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="workshop-name">Full Name *</Label>
-                    <Input id="workshop-name" placeholder="Your full name" required />
+                    <Input id="workshop-name" name="fullName" placeholder="Your full name" required />
                   </div>
                   <div>
                     <Label htmlFor="workshop-age">Age *</Label>
-                    <Input id="workshop-age" type="number" placeholder="Your age" required />
+                    <Input id="workshop-age" name="age" type="number" placeholder="Your age" required />
                   </div>
                 </div>
                 
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="workshop-email">Email Address *</Label>
-                    <Input id="workshop-email" type="email" placeholder="your@email.com" required />
+                    <Input id="workshop-email" name="email" type="email" placeholder="your@email.com" required />
                   </div>
                   <div>
                     <Label htmlFor="workshop-phone">Phone Number *</Label>
-                    <Input id="workshop-phone" type="tel" placeholder="(555) 123-4567" required />
+                    <Input id="workshop-phone" name="phone" type="tel" placeholder="(555) 123-4567" required />
                   </div>
                 </div>
                 
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="workshop-zip">Zip Code *</Label>
-                    <Input id="workshop-zip" placeholder="12345" required />
+                    <Input id="workshop-zip" name="zipCode" placeholder="12345" required />
                   </div>
                   <div>
                     <Label htmlFor="workshop-sod">Last SOD Level Finished *</Label>
-                    <Select required>
+                    <Select name="sodLevel" required>
                       <SelectTrigger>
                         <SelectValue placeholder="Select SOD level" />
                       </SelectTrigger>
@@ -276,7 +324,7 @@ const FormsSection = () => {
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="workshop-tshirt">T-Shirt Size *</Label>
-                    <Select required>
+                    <Select name="tshirtSize" required>
                       <SelectTrigger>
                         <SelectValue placeholder="Select size" />
                       </SelectTrigger>
@@ -293,24 +341,24 @@ const FormsSection = () => {
                   </div>
                   <div>
                     <Label htmlFor="workshop-instagram">Instagram Handle</Label>
-                    <Input id="workshop-instagram" placeholder="@yourusername" />
+                    <Input id="workshop-instagram" name="instagramHandle" placeholder="@yourusername" />
                   </div>
                 </div>
                 
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="emergency-contact-name">Emergency Contact Name *</Label>
-                    <Input id="emergency-contact-name" placeholder="Full name" required />
+                    <Input id="emergency-contact-name" name="emergencyContactName" placeholder="Full name" required />
                   </div>
                   <div>
                     <Label htmlFor="emergency-contact-phone">Emergency Contact Phone *</Label>
-                    <Input id="emergency-contact-phone" type="tel" placeholder="(555) 123-4567" required />
+                    <Input id="emergency-contact-phone" name="emergencyContactPhone" type="tel" placeholder="(555) 123-4567" required />
                   </div>
                 </div>
                 
                 <div>
                   <Label htmlFor="years-dancing">Years Dancing Prior *</Label>
-                  <Select required>
+                  <Select name="yearsDancing" required>
                     <SelectTrigger>
                       <SelectValue placeholder="Select years" />
                     </SelectTrigger>
@@ -328,6 +376,7 @@ const FormsSection = () => {
                   <Label htmlFor="injury-medical">Injury & Medical Notes</Label>
                   <Textarea 
                     id="injury-medical" 
+                    name="injuryMedicalNotes"
                     placeholder="Please list any injuries, medical conditions, or physical limitations we should be aware of..." 
                     rows={3}
                   />
@@ -337,6 +386,7 @@ const FormsSection = () => {
                   <Label htmlFor="additional-notes">Additional Notes</Label>
                   <Textarea 
                     id="additional-notes" 
+                    name="additionalNotes"
                     placeholder="Any additional information you'd like us to know..." 
                     rows={3}
                   />
