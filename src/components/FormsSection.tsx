@@ -38,11 +38,12 @@ const FormsSection = () => {
       data[key] = value;
     }
 
-    // Handle checkboxes and selects that might not be in FormData
+    // Handle checkboxes explicitly to ensure they always send a value
     const checkboxes = form.querySelectorAll('input[type="checkbox"]');
     checkboxes.forEach((checkbox) => {
       const input = checkbox as HTMLInputElement;
-      data[input.id] = input.checked;
+      const fieldName = input.name || input.id;
+      data[fieldName] = input.checked;
     });
 
     return data;
@@ -217,14 +218,14 @@ const FormsSection = () => {
                 
                 <div className="space-y-4">
                   <div className="flex items-center space-x-2">
-                    <Checkbox id="baptized" />
+                    <Checkbox id="baptized" name="baptized" />
                     <Label htmlFor="baptized" className="text-sm">
                       I have been baptized
                     </Label>
                   </div>
                   
                   <div className="flex items-center space-x-2">
-                    <Checkbox id="believer" />
+                    <Checkbox id="believer" name="believer" />
                     <Label htmlFor="believer" className="text-sm">
                       I am a believer in Jesus Christ
                     </Label>
