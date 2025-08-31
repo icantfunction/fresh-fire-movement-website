@@ -115,6 +115,8 @@ const FormsSection = () => {
     switch (formType) {
       case "audition application":
         return "https://hooks.zapier.com/hooks/catch/23791564/uhfg52w/";
+      case "prayer request":
+        return "https://hooks.zapier.com/hooks/catch/23791564/uhfq3fl/";
       case "workshop signup":
         return "https://hooks.zapier.com/hooks/catch/23791564/uhfwx7o/";
       default:
@@ -272,11 +274,11 @@ const FormsSection = () => {
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="prayer-name">Name (Optional)</Label>
-                    <Input id="prayer-name" placeholder="Your name" />
+                    <Input id="prayer-name" name="name" placeholder="Your name" />
                   </div>
                   <div>
                     <Label htmlFor="prayer-email">Email (Optional)</Label>
-                    <Input id="prayer-email" type="email" placeholder="your@email.com" />
+                    <Input id="prayer-email" name="email" type="email" placeholder="your@email.com" />
                   </div>
                 </div>
                 
@@ -284,6 +286,7 @@ const FormsSection = () => {
                   <Label htmlFor="prayer-request">Prayer Request</Label>
                   <Textarea 
                     id="prayer-request" 
+                    name="prayerRequest"
                     placeholder="Share your prayer request with us..." 
                     rows={5}
                     required 
