@@ -35,7 +35,7 @@ const FormsSection = () => {
           Connect with Fresh Fire
         </h2>
         
-        <Tabs defaultValue="contact" className="w-full">
+        <Tabs defaultValue="workshop" className="w-full">
           <TabsList className="grid w-full grid-cols-4 mb-8">
             <TabsTrigger value="contact">Collaboration</TabsTrigger>
             <TabsTrigger value="prayer">Prayer Request</TabsTrigger>
