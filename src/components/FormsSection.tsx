@@ -202,17 +202,17 @@ const FormsSection = () => {
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="audition-name">Full Name *</Label>
-                    <Input id="audition-name" placeholder="Your full name" required />
+                    <Input id="audition-name" name="fullName" placeholder="Your full name" required />
                   </div>
                   <div>
                     <Label htmlFor="audition-dob">Date of Birth *</Label>
-                    <Input id="audition-dob" type="date" required />
+                    <Input id="audition-dob" name="dateOfBirth" type="date" required />
                   </div>
                 </div>
                 
                 <div>
                   <Label htmlFor="audition-email">Email Address *</Label>
-                  <Input id="audition-email" type="email" placeholder="your@email.com" required />
+                  <Input id="audition-email" name="email" type="email" placeholder="your@email.com" required />
                 </div>
                 
                 <div className="space-y-4">
@@ -233,7 +233,7 @@ const FormsSection = () => {
                 
                 <div>
                   <Label htmlFor="clc-years">How many years have you been attending CLC? *</Label>
-                  <Select required>
+                  <Select name="clcYears" required>
                     <SelectTrigger>
                       <SelectValue placeholder="Select years" />
                     </SelectTrigger>
@@ -248,7 +248,7 @@ const FormsSection = () => {
                 </div>
                 
                 <div className="flex items-center space-x-2">
-                  <Checkbox id="encounter-youth-camp" />
+                  <Checkbox id="encounter-youth-camp" name="encounteredYouthCamp" />
                   <Label htmlFor="encounter-youth-camp" className="text-sm">
                     I have attended Encounter or Youth Camp
                   </Label>
@@ -256,7 +256,7 @@ const FormsSection = () => {
                 
                 <div>
                   <Label htmlFor="sod-level">Last level of SOD completed *</Label>
-                  <Select required>
+                  <Select name="sodLevel" required>
                     <SelectTrigger>
                       <SelectValue placeholder="Select SOD level" />
                     </SelectTrigger>
