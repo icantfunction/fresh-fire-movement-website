@@ -8,11 +8,108 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 
 const FormsSection = () => {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showAuditionDialog, setShowAuditionDialog] = useState(false);
+  const [pendingAuditionForm, setPendingAuditionForm] = useState<HTMLFormElement | null>(null);
+  const [auditionConfirmations, setAuditionConfirmations] = useState({
+    choreographed: false,
+    interview: false,
+    solo: false,
+    timing: false,
+    attire: false,
+    covering: false,
+    membership: false,
+    encounter: false,
+    believer: false,
+    readAll: false,
+    finalConfirmation: false,
+  });
+  const [showFinalConfirmation, setShowFinalConfirmation] = useState(false);
+  
+  const resetAuditionDialog = () => {
+    setAuditionConfirmations({
+      choreographed: false,
+      interview: false,
+      solo: false,
+      timing: false,
+      attire: false,
+      covering: false,
+      membership: false,
+      encounter: false,
+      believer: false,
+      readAll: false,
+      finalConfirmation: false,
+    });
+    setShowFinalConfirmation(false);
+    setShowAuditionDialog(false);
+    setPendingAuditionForm(null);
+  };
+
+  const handleAuditionCheckboxChange = (field: string, checked: boolean) => {
+    setAuditionConfirmations(prev => ({
+      ...prev,
+      [field]: checked
+    }));
+    
+    if (field === 'readAll' && checked) {
+      setShowFinalConfirmation(true);
+    } else if (field === 'readAll' && !checked) {
+      setShowFinalConfirmation(false);
+      setAuditionConfirmations(prev => ({
+        ...prev,
+        finalConfirmation: false
+      }));
+    }
+  };
+
+  const allRequiredChecked = Object.entries(auditionConfirmations)
+    .filter(([key]) => key !== 'finalConfirmation')
+    .every(([, value]) => value === true);
+
+  const canProceedWithSubmission = allRequiredChecked && auditionConfirmations.finalConfirmation;
+
+  const proceedWithAuditionSubmission = async () => {
+    if (!pendingAuditionForm || !canProceedWithSubmission) return;
+    
+    setIsSubmitting(true);
+    
+    try {
+      const formData = collectFormData(pendingAuditionForm, "audition application");
+      
+      const response = await fetch(getWebhookUrl("audition application"), {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        mode: "no-cors",
+        body: JSON.stringify(formData),
+      });
+
+      toast({
+        title: "Registration Successful!",
+        description: "Your audition application has been submitted and sent to our team. We'll get back to you soon!",
+      });
+
+      // Reset form and dialog
+      pendingAuditionForm.reset();
+      resetAuditionDialog();
+      
+    } catch (error) {
+      console.error("Error submitting form:", error);
+      toast({
+        title: "Submission Error",
+        description: "There was an issue submitting your form. Please try again or contact us directly.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
   
   const getWebhookUrl = (formType: string) => {
     switch (formType) {
@@ -194,7 +291,12 @@ const FormsSection = () => {
           
           <TabsContent value="newsletter">
             <Card className="p-8 bg-white/80 backdrop-blur-sm shadow-xl border border-purple-200">
-              <form onSubmit={(e) => handleSubmit(e, "audition application")} className="space-y-6">
+              <form onSubmit={(e) => {
+                e.preventDefault();
+                const form = e.target as HTMLFormElement;
+                setPendingAuditionForm(form);
+                setShowAuditionDialog(true);
+              }} className="space-y-6">
                 <div className="text-center mb-6">
                   <h3 className="text-2xl font-bold text-fire-gold mb-2">Join Our Fire - Audition Form</h3>
                   <p className="text-gray-600">Apply to become part of the Fresh Fire Dance Ministry family.</p>
@@ -415,6 +517,179 @@ const FormsSection = () => {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Audition Confirmation Dialog */}
+      <Dialog open={showAuditionDialog} onOpenChange={(open) => {
+        if (!open) {
+          resetAuditionDialog();
+        }
+      }}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold text-fire-gold mb-4">
+              Audition Requirements & Agreement
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-6">
+            <div className="text-lg font-semibold text-fire-purple mb-4">
+              Audition Breakdown:
+            </div>
+            
+            <div className="space-y-4">
+              <div className="flex items-start space-x-3">
+                <Checkbox 
+                  id="choreographed" 
+                  checked={auditionConfirmations.choreographed}
+                  onCheckedChange={(checked) => handleAuditionCheckboxChange('choreographed', checked as boolean)}
+                />
+                <Label htmlFor="choreographed" className="text-sm leading-relaxed">
+                  For the first portion of auditions, you will learn a choreographed piece with a group of dancers.
+                </Label>
+              </div>
+
+              <div className="flex items-start space-x-3">
+                <Checkbox 
+                  id="interview" 
+                  checked={auditionConfirmations.interview}
+                  onCheckedChange={(checked) => handleAuditionCheckboxChange('interview', checked as boolean)}
+                />
+                <Label htmlFor="interview" className="text-sm leading-relaxed">
+                  The second part of your audition will be an individual interview by the judges.
+                </Label>
+              </div>
+
+              <div className="flex items-start space-x-3">
+                <Checkbox 
+                  id="solo" 
+                  checked={auditionConfirmations.solo}
+                  onCheckedChange={(checked) => handleAuditionCheckboxChange('solo', checked as boolean)}
+                />
+                <Label htmlFor="solo" className="text-sm leading-relaxed">
+                  The last piece is a solo dance that you will need to prepare with timing around 30-60 second. This piece should be to any worship music of your choice and can be as creative as you like!
+                </Label>
+              </div>
+
+              <div className="flex items-start space-x-3">
+                <Checkbox 
+                  id="timing" 
+                  checked={auditionConfirmations.timing}
+                  onCheckedChange={(checked) => handleAuditionCheckboxChange('timing', checked as boolean)}
+                />
+                <Label htmlFor="timing" className="text-sm leading-relaxed">
+                  Auditions will begin promptly at 2:00pm in the main sanctuary.
+                </Label>
+              </div>
+
+              <div className="flex items-start space-x-3">
+                <Checkbox 
+                  id="attire" 
+                  checked={auditionConfirmations.attire}
+                  onCheckedChange={(checked) => handleAuditionCheckboxChange('attire', checked as boolean)}
+                />
+                <Label htmlFor="attire" className="text-sm leading-relaxed">
+                  Come dressed in loose fitting attire. You should wear a tee shirt (short or long sleeved), leggings or joggers. Make sure that your shirt covers your mid section so that when you lift your arms, no flesh is exposed.
+                </Label>
+              </div>
+
+              <div className="flex items-start space-x-3">
+                <Checkbox 
+                  id="covering" 
+                  checked={auditionConfirmations.covering}
+                  onCheckedChange={(checked) => handleAuditionCheckboxChange('covering', checked as boolean)}
+                />
+                <Label htmlFor="covering" className="text-sm leading-relaxed">
+                  Please bring a shirt, scarf or sweater to wrap around your waist to cover your bottom!
+                </Label>
+              </div>
+            </div>
+
+            <div className="text-lg font-semibold text-fire-purple mt-8 mb-4">
+              Prerequisites of being in FF:
+            </div>
+
+            <div className="space-y-4">
+              <div className="flex items-start space-x-3">
+                <Checkbox 
+                  id="membership" 
+                  checked={auditionConfirmations.membership}
+                  onCheckedChange={(checked) => handleAuditionCheckboxChange('membership', checked as boolean)}
+                />
+                <Label htmlFor="membership" className="text-sm leading-relaxed">
+                  Are required to be active members of Christian Life Center and regularly attend worship services and give tithes/offerings
+                </Label>
+              </div>
+
+              <div className="flex items-start space-x-3">
+                <Checkbox 
+                  id="encounter" 
+                  checked={auditionConfirmations.encounter}
+                  onCheckedChange={(checked) => handleAuditionCheckboxChange('encounter', checked as boolean)}
+                />
+                <Label htmlFor="encounter" className="text-sm leading-relaxed">
+                  Have attended Encounter and completed School of Discipleship (under the Director's discretion, dancer may minister while attending SOD)
+                </Label>
+              </div>
+
+              <div className="flex items-start space-x-3">
+                <Checkbox 
+                  id="believer" 
+                  checked={auditionConfirmations.believer}
+                  onCheckedChange={(checked) => handleAuditionCheckboxChange('believer', checked as boolean)}
+                />
+                <Label htmlFor="believer" className="text-sm leading-relaxed">
+                  Every member of Fresh Fire Dance Ministry must be a believer and follower of Jesus Christ and has accepted Him as their personal Lord and Savior with baptism by immersion in water
+                </Label>
+              </div>
+            </div>
+
+            <div className="border-t pt-6 mt-8">
+              <div className="flex items-start space-x-3">
+                <Checkbox 
+                  id="readAll" 
+                  checked={auditionConfirmations.readAll}
+                  onCheckedChange={(checked) => handleAuditionCheckboxChange('readAll', checked as boolean)}
+                />
+                <Label htmlFor="readAll" className="text-sm font-semibold">
+                  I have read all the requirements above
+                </Label>
+              </div>
+
+              {showFinalConfirmation && (
+                <div className="mt-4 p-4 bg-fire-gold/10 rounded-lg border border-fire-gold/30">
+                  <div className="flex items-start space-x-3">
+                    <Label htmlFor="finalConfirmation" className="text-sm font-semibold flex-1">
+                      Are you sure you read it and are in complete agreement??
+                    </Label>
+                    <Checkbox 
+                      id="finalConfirmation" 
+                      checked={auditionConfirmations.finalConfirmation}
+                      onCheckedChange={(checked) => handleAuditionCheckboxChange('finalConfirmation', checked as boolean)}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="flex gap-4 mt-8">
+              <Button 
+                variant="outline" 
+                onClick={resetAuditionDialog}
+                className="flex-1"
+              >
+                Cancel
+              </Button>
+              <Button 
+                onClick={proceedWithAuditionSubmission}
+                disabled={!canProceedWithSubmission || isSubmitting}
+                className="flex-1 bg-fire-gold hover:bg-fire-gold/90 text-white"
+              >
+                {isSubmitting ? "Submitting Application..." : "Submit Audition Application"}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </section>
   );
 };
