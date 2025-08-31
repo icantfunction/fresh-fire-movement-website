@@ -14,7 +14,7 @@ const Index = () => {
       <HeroSection />
       <AboutSection />
       <CountdownSection />
-      <TestimonialSection />
+      {/* <TestimonialSection /> */}
       <GallerySection />
       <BibleVersesSection />
       <FormsSection />
