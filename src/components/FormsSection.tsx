@@ -13,7 +13,17 @@ import { useToast } from "@/hooks/use-toast";
 const FormsSection = () => {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const webhookUrl = "https://hooks.zapier.com/hooks/catch/23791564/uhfwx7o/";
+  
+  const getWebhookUrl = (formType: string) => {
+    switch (formType) {
+      case "audition application":
+        return "https://hooks.zapier.com/hooks/catch/23791564/uhfg52w/";
+      case "workshop signup":
+        return "https://hooks.zapier.com/hooks/catch/23791564/uhfwx7o/";
+      default:
+        return "https://hooks.zapier.com/hooks/catch/23791564/uhfwx7o/";
+    }
+  };
 
   const collectFormData = (form: HTMLFormElement, formType: string) => {
     const formData = new FormData(form);
@@ -47,7 +57,7 @@ const FormsSection = () => {
     try {
       const formData = collectFormData(form, formType);
       
-      const response = await fetch(webhookUrl, {
+      const response = await fetch(getWebhookUrl(formType), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
