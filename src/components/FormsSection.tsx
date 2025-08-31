@@ -117,6 +117,8 @@ const FormsSection = () => {
         return "https://hooks.zapier.com/hooks/catch/23791564/uhfg52w/";
       case "prayer request":
         return "https://hooks.zapier.com/hooks/catch/23791564/uhfq3fl/";
+      case "collaboration inquiry":
+        return "https://hooks.zapier.com/hooks/catch/23791564/uhfqhto/";
       case "workshop signup":
         return "https://hooks.zapier.com/hooks/catch/23791564/uhfwx7o/";
       default:
@@ -224,28 +226,29 @@ const FormsSection = () => {
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="name">Full Name</Label>
-                    <Input id="name" placeholder="Your name" required />
+                    <Input id="name" name="fullName" placeholder="Your name" required />
                   </div>
                   <div>
                     <Label htmlFor="email">Email Address</Label>
-                    <Input id="email" type="email" placeholder="your@email.com" required />
+                    <Input id="email" name="email" type="email" placeholder="your@email.com" required />
                   </div>
                 </div>
                 
                 <div>
                   <Label htmlFor="phone">Phone Number</Label>
-                  <Input id="phone" type="tel" placeholder="(555) 123-4567" />
+                  <Input id="phone" name="phone" type="tel" placeholder="(555) 123-4567" />
                 </div>
                 
                 <div>
                   <Label htmlFor="interest">Area of Interest</Label>
-                  <Input id="interest" placeholder="Dance ministry, collaboration, etc." />
+                  <Input id="interest" name="areaOfInterest" placeholder="Dance ministry, collaboration, etc." />
                 </div>
                 
                 <div>
                   <Label htmlFor="message">Message</Label>
                   <Textarea 
                     id="message" 
+                    name="message"
                     placeholder="Tell us about your heart for worship through movement..." 
                     rows={4}
                     required 
