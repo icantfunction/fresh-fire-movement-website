@@ -43,7 +43,7 @@ const FormsSection = () => {
           </TabsList>
           
           <TabsContent value="contact">
-            <Card className="p-8 bg-white/80 backdrop-blur-sm shadow-xl border border-purple-200 animate-gentle-float">
+            <Card className="p-8 bg-white/80 backdrop-blur-sm shadow-xl border border-purple-200">
               <form onSubmit={(e) => handleSubmit(e, "collaboration inquiry")} className="space-y-6">
                 <div className="text-center mb-6">
                   <h3 className="text-2xl font-bold text-fire-purple mb-2">Ministry Collaboration</h3>
@@ -93,7 +93,7 @@ const FormsSection = () => {
           </TabsContent>
           
           <TabsContent value="prayer">
-            <Card className="p-8 bg-white/80 backdrop-blur-sm shadow-xl border border-purple-200 animate-dance-sway">
+            <Card className="p-8 bg-white/80 backdrop-blur-sm shadow-xl border border-purple-200">
               <form onSubmit={(e) => handleSubmit(e, "prayer request")} className="space-y-6">
                 <div className="text-center mb-6">
                   <h3 className="text-2xl font-bold text-fire-magenta mb-2">Prayer Request</h3>
@@ -133,7 +133,7 @@ const FormsSection = () => {
           </TabsContent>
           
           <TabsContent value="newsletter">
-            <Card className="p-8 bg-white/80 backdrop-blur-sm shadow-xl border border-purple-200 animate-gentle-float">
+            <Card className="p-8 bg-white/80 backdrop-blur-sm shadow-xl border border-purple-200">
               <form onSubmit={(e) => handleSubmit(e, "audition application")} className="space-y-6">
                 <div className="text-center mb-6">
                   <h3 className="text-2xl font-bold text-fire-gold mb-2">Join Our Fire - Audition Form</h3>
