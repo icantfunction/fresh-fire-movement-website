@@ -36,10 +36,11 @@ const FormsSection = () => {
         </h2>
         
         <Tabs defaultValue="contact" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-8">
+          <TabsList className="grid w-full grid-cols-4 mb-8">
             <TabsTrigger value="contact">Collaboration</TabsTrigger>
             <TabsTrigger value="prayer">Prayer Request</TabsTrigger>
             <TabsTrigger value="newsletter">Join Our Fire</TabsTrigger>
+            <TabsTrigger value="workshop">Workshop Signup</TabsTrigger>
           </TabsList>
           
           <TabsContent value="contact">
@@ -216,6 +217,137 @@ const FormsSection = () => {
                   className="w-full bg-fire-gold hover:bg-fire-gold/90 text-white transition-all duration-300 font-semibold"
                 >
                   {isSubmitting ? "Submitting Application..." : "Submit Audition Application"}
+                </Button>
+              </form>
+            </Card>
+          </TabsContent>
+          
+          <TabsContent value="workshop">
+            <Card className="p-8 bg-white/80 backdrop-blur-sm shadow-xl border border-purple-200">
+              <form onSubmit={(e) => handleSubmit(e, "workshop signup")} className="space-y-6">
+                <div className="text-center mb-6">
+                  <h3 className="text-2xl font-bold text-fire-gold mb-2">Workshop Signup</h3>
+                  <p className="text-gray-600">Register for our upcoming dance workshop.</p>
+                </div>
+                
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="workshop-name">Full Name *</Label>
+                    <Input id="workshop-name" placeholder="Your full name" required />
+                  </div>
+                  <div>
+                    <Label htmlFor="workshop-age">Age *</Label>
+                    <Input id="workshop-age" type="number" placeholder="Your age" required />
+                  </div>
+                </div>
+                
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="workshop-email">Email Address *</Label>
+                    <Input id="workshop-email" type="email" placeholder="your@email.com" required />
+                  </div>
+                  <div>
+                    <Label htmlFor="workshop-phone">Phone Number *</Label>
+                    <Input id="workshop-phone" type="tel" placeholder="(555) 123-4567" required />
+                  </div>
+                </div>
+                
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="workshop-zip">Zip Code *</Label>
+                    <Input id="workshop-zip" placeholder="12345" required />
+                  </div>
+                  <div>
+                    <Label htmlFor="workshop-sod">Last SOD Level Finished *</Label>
+                    <Select required>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select SOD level" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="sod-1">SOD 1</SelectItem>
+                        <SelectItem value="sod-2">SOD 2</SelectItem>
+                        <SelectItem value="sod-3">SOD 3</SelectItem>
+                        <SelectItem value="none">None completed</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="workshop-tshirt">T-Shirt Size *</Label>
+                    <Select required>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select size" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="xs">XS</SelectItem>
+                        <SelectItem value="s">S</SelectItem>
+                        <SelectItem value="m">M</SelectItem>
+                        <SelectItem value="l">L</SelectItem>
+                        <SelectItem value="xl">XL</SelectItem>
+                        <SelectItem value="2xl">2XL</SelectItem>
+                        <SelectItem value="3xl">3XL</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label htmlFor="workshop-instagram">Instagram Handle</Label>
+                    <Input id="workshop-instagram" placeholder="@yourusername" />
+                  </div>
+                </div>
+                
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="emergency-contact-name">Emergency Contact Name *</Label>
+                    <Input id="emergency-contact-name" placeholder="Full name" required />
+                  </div>
+                  <div>
+                    <Label htmlFor="emergency-contact-phone">Emergency Contact Phone *</Label>
+                    <Input id="emergency-contact-phone" type="tel" placeholder="(555) 123-4567" required />
+                  </div>
+                </div>
+                
+                <div>
+                  <Label htmlFor="years-dancing">Years Dancing Prior *</Label>
+                  <Select required>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select years" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="0">No prior experience</SelectItem>
+                      <SelectItem value="1-2">1-2 years</SelectItem>
+                      <SelectItem value="3-5">3-5 years</SelectItem>
+                      <SelectItem value="6-10">6-10 years</SelectItem>
+                      <SelectItem value="more-than-10">More than 10 years</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div>
+                  <Label htmlFor="injury-medical">Injury & Medical Notes</Label>
+                  <Textarea 
+                    id="injury-medical" 
+                    placeholder="Please list any injuries, medical conditions, or physical limitations we should be aware of..." 
+                    rows={3}
+                  />
+                </div>
+                
+                <div>
+                  <Label htmlFor="additional-notes">Additional Notes</Label>
+                  <Textarea 
+                    id="additional-notes" 
+                    placeholder="Any additional information you'd like us to know..." 
+                    rows={3}
+                  />
+                </div>
+                
+                <Button 
+                  type="submit" 
+                  disabled={isSubmitting}
+                  className="w-full bg-fire-gold hover:bg-fire-gold/90 text-white transition-all duration-300 font-semibold"
+                >
+                  {isSubmitting ? "Registering..." : "Register for Workshop"}
                 </Button>
               </form>
             </Card>
