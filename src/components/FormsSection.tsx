@@ -236,12 +236,12 @@ const FormsSection = () => {
                 
                 <div>
                   <Label htmlFor="phone">Phone Number</Label>
-                  <Input id="phone" name="phone" type="tel" placeholder="(555) 123-4567" />
+                  <Input id="phone" name="phone" type="tel" placeholder="(555) 123-4567" required />
                 </div>
                 
                 <div>
                   <Label htmlFor="interest">Area of Interest</Label>
-                  <Input id="interest" name="areaOfInterest" placeholder="Dance ministry, collaboration, etc." />
+                  <Input id="interest" name="areaOfInterest" placeholder="Dance ministry, collaboration, etc." required />
                 </div>
                 
                 <div>
