@@ -192,11 +192,23 @@ const FormsSection = () => {
         </h2>
         
         <Tabs defaultValue="workshop" className="w-full">
-          <TabsList className="grid w-full grid-cols-4 mb-8">
-            <TabsTrigger value="contact">Collaboration</TabsTrigger>
-            <TabsTrigger value="prayer">Prayer Request</TabsTrigger>
-            <TabsTrigger value="newsletter">Join Our Fire</TabsTrigger>
-            <TabsTrigger value="workshop">Workshop Signup</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 gap-1 md:gap-0 mb-8 h-auto p-1">
+            <TabsTrigger value="contact" className="text-xs md:text-sm px-2 py-3 md:px-3">
+              <span className="hidden sm:inline">Collaboration</span>
+              <span className="sm:hidden">Collab</span>
+            </TabsTrigger>
+            <TabsTrigger value="prayer" className="text-xs md:text-sm px-2 py-3 md:px-3">
+              <span className="hidden sm:inline">Prayer Request</span>
+              <span className="sm:hidden">Prayer</span>
+            </TabsTrigger>
+            <TabsTrigger value="newsletter" className="text-xs md:text-sm px-2 py-3 md:px-3">
+              <span className="hidden sm:inline">Join Our Fire</span>
+              <span className="sm:hidden">Join</span>
+            </TabsTrigger>
+            <TabsTrigger value="workshop" className="text-xs md:text-sm px-2 py-3 md:px-3">
+              <span className="hidden sm:inline">Workshop Signup</span>
+              <span className="sm:hidden">Workshop</span>
+            </TabsTrigger>
           </TabsList>
           
           <TabsContent value="contact">
