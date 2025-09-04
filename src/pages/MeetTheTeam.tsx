@@ -2,9 +2,22 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import lynette1 from "@/assets/lynette-photo-1.jpg";
+import lynette2 from "@/assets/lynette-photo-2.jpg";
 
 const MeetTheTeam = () => {
   const navigate = useNavigate();
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const images = [lynette1, lynette2];
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentImageIndex((prev) => (prev + 1) % images.length);
+    }, 4000); // Switch every 4 seconds
+
+    return () => clearInterval(interval);
+  }, [images.length]);
 
   return (
     <div className="min-h-screen fire-gradient">
@@ -25,9 +38,18 @@ const MeetTheTeam = () => {
 
           <Card className="bg-white/20 backdrop-blur-md border border-white/30 shadow-2xl">
             <CardHeader className="text-center">
-              <div className="mx-auto mb-6">
-                <div className="w-48 h-48 rounded-full bg-white/20 border-4 border-white/30 flex items-center justify-center mx-auto">
-                  <span className="text-white/60 text-sm">Photo Coming Soon</span>
+              <div className="mx-auto mb-6 relative">
+                <div className="w-48 h-48 rounded-full border-4 border-white/30 overflow-hidden mx-auto relative">
+                  {images.map((image, index) => (
+                    <img
+                      key={index}
+                      src={image}
+                      alt={`Mrs. Lynette Nelson - Photo ${index + 1}`}
+                      className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${
+                        index === currentImageIndex ? 'opacity-100' : 'opacity-0'
+                      }`}
+                    />
+                  ))}
                 </div>
               </div>
               <CardTitle className="text-3xl text-white mb-2">
