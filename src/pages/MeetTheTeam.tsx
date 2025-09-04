@@ -23,7 +23,7 @@ const MeetTheTeam = () => {
             Meet the Team
           </h1>
 
-          <Card className="bg-white/10 backdrop-blur-md border border-white/20">
+          <Card className="bg-white/20 backdrop-blur-md border border-white/30 shadow-2xl">
             <CardHeader className="text-center">
               <div className="mx-auto mb-6">
                 <div className="w-48 h-48 rounded-full bg-white/20 border-4 border-white/30 flex items-center justify-center mx-auto">
@@ -37,8 +37,8 @@ const MeetTheTeam = () => {
                 Executive Director
               </p>
             </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="text-white leading-relaxed space-y-4">
+            <CardContent className="space-y-6 bg-white/15 rounded-lg mx-4 mb-4 p-6">
+              <div className="text-gray-800 leading-relaxed space-y-4 text-base">
                 <p>
                   Lynette S. Nelson was destined to worship the Lord through dance. Born and raised in the south suburbs of Chicago, her journey began in childhood and was solidified in 1996 when her aunt taught her a praise dance to honor her grandparents' retirement—a moment that forever changed her life. She later joined the dance ministry at St. James AME Church, where she served as co-director of both the youth and adult dance ministries. In 2012, she was appointed Dance Coordinator for the Chicago Conference–South District of the AME Church, supporting over 20 churches until relocating in 2015.
                 </p>
@@ -56,9 +56,9 @@ const MeetTheTeam = () => {
                 </p>
               </div>
               
-              <div className="bg-white/10 rounded-lg p-6 text-center">
+              <div className="bg-white/25 rounded-lg p-6 text-center mt-6">
                 <h3 className="text-fire-gold font-semibold text-lg mb-3">Her Life Verse</h3>
-                <blockquote className="text-white italic text-lg">
+                <blockquote className="text-gray-800 italic text-lg font-medium">
                   "Nothing shall be able to separate us from the love of God, which is in Christ Jesus our Lord."
                 </blockquote>
                 <cite className="text-fire-gold font-semibold">Romans 8:39</cite>
