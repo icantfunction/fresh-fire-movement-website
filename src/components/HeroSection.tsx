@@ -1,6 +1,6 @@
 
 import { Button } from "@/components/ui/button";
-import { Instagram, ExternalLink, Info } from "lucide-react";
+import { Instagram, ExternalLink, Info, Users } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const HeroSection = () => {
@@ -65,6 +65,20 @@ const HeroSection = () => {
             >
               <Info className="w-5 h-5" />
               About Us
+            </Link>
+          </Button>
+
+          <Button 
+            asChild
+            size="lg"
+            className="bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white transition-all duration-300 font-semibold px-8 py-3 shadow-2xl"
+          >
+            <Link 
+              to="/meet-the-team"
+              className="flex items-center gap-2"
+            >
+              <Users className="w-5 h-5" />
+              Meet the Team
             </Link>
           </Button>
         </div>
