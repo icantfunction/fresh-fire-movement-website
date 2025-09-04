@@ -10,8 +10,9 @@ const AboutSection = () => {
           
           <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 md:p-12 shadow-2xl border border-purple-200">
             <p className="text-lg md:text-xl text-gray-700 leading-relaxed">
-              Fresh Fire is a dance ministry led by Ms. Lynette Nelson at Christian Life Center Fort Lauderdale. Open to anyone age 16 and up, Fresh Fire exists to ignite lives through movement, emphasizing surrender, consecration, and worship through dance. Whether you're a teen, adult, parent, or fellow worship artist, there's room for you in the fire.
+              "The world does not need another dance..." We are not performers; we are worshippers that minister in dance. Our purpose is to worship God in Spirit and in Truth (John 4:23). We are His vessels, consecrated for His work and for His glory! We use our broad range of spiritual gifts to serve the Lord and minister to others. Everything we do will be done with excellence…for an audience of One!
             </p>
+            <cite className="block mt-4 text-fire-gold font-semibold italic">- late Kimberly "Mama Kim" Smith</cite>
             
             <div className="mt-8 flex flex-wrap justify-center gap-4">
               <span className="px-4 py-2 bg-fire-purple/10 text-fire-purple rounded-full font-semibold">
