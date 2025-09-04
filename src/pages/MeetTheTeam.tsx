@@ -12,7 +12,7 @@ const MeetTheTeam = () => {
         <Button
           variant="outline"
           onClick={() => navigate("/")}
-          className="mb-8 text-white border-white/20 hover:bg-white/10"
+          className="mb-8 text-white border-white/30 bg-white/10 hover:bg-white/20 backdrop-blur-sm"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back to Home
