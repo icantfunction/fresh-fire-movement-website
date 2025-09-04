@@ -57,11 +57,11 @@ const MeetTheTeam = () => {
               </div>
               
               <div className="bg-white/25 rounded-lg p-6 text-center mt-6">
-                <h3 className="text-fire-gold font-semibold text-lg mb-3">Her Life Verse</h3>
+                <h3 className="text-white font-bold text-xl mb-3 bg-fire-purple/80 px-4 py-2 rounded-lg">Her Life Verse</h3>
                 <blockquote className="text-gray-800 italic text-lg font-medium">
                   "Nothing shall be able to separate us from the love of God, which is in Christ Jesus our Lord."
                 </blockquote>
-                <cite className="text-fire-gold font-semibold">Romans 8:39</cite>
+                <cite className="text-white font-bold bg-fire-magenta/80 px-3 py-1 rounded-md inline-block mt-2">Romans 8:39</cite>
               </div>
             </CardContent>
           </Card>
