@@ -195,7 +195,7 @@ const FormsSection = () => {
           Connect with Fresh Fire
         </h2>
         
-        <Tabs defaultValue="workshop" className="w-full">
+        <Tabs defaultValue="newsletter" className="w-full">
           <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 gap-1 md:gap-0 mb-8 h-auto p-1">
             <TabsTrigger value="contact" className="text-xs md:text-sm px-2 py-3 md:px-3">
               <span className="hidden sm:inline">Collaboration</span>
