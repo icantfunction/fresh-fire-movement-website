@@ -123,10 +123,6 @@ const HeroSection = () => {
                     <Input id="name" placeholder="Your full name" required />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
-                    <Input id="email" type="email" placeholder="your@email.com" required />
-                  </div>
-                  <div className="space-y-2">
                     <Label htmlFor="phone">Phone Number</Label>
                     <Input id="phone" type="tel" placeholder="(123) 456-7890" required />
                   </div>
