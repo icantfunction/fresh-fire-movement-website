@@ -1,9 +1,21 @@
-
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Instagram, ExternalLink, Info, Users } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useState } from "react";
 
 const HeroSection = () => {
+  const [spaghettiFormOpen, setSpaghettiFormOpen] = useState(false);
+
+  const handleSpaghettiOrder = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Will be connected to DynamoDB soon
+    setSpaghettiFormOpen(false);
+  };
+
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden fire-gradient">
       
@@ -81,6 +93,58 @@ const HeroSection = () => {
               Meet the Team
             </Link>
           </Button>
+        </div>
+
+        {/* Haitian Spaghetti Order Section */}
+        <div className="mt-16 max-w-2xl mx-auto">
+          <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-8 shadow-2xl border-2 border-orange-200">
+            <h2 className="text-3xl md:text-4xl font-bold text-fire-gold mb-4">Order Haitian Spaghetti</h2>
+            <p className="text-gray-700 text-lg mb-6">Support our ministry by ordering delicious homemade Haitian spaghetti!</p>
+            
+            <Dialog open={spaghettiFormOpen} onOpenChange={setSpaghettiFormOpen}>
+              <DialogTrigger asChild>
+                <Button 
+                  size="lg"
+                  className="w-full bg-fire-gold hover:bg-fire-gold/90 text-white transition-all duration-300 font-semibold text-xl py-6 shadow-xl"
+                >
+                  Place Your Order
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Order Haitian Spaghetti</DialogTitle>
+                  <DialogDescription>
+                    Fill out the form below to place your order. We'll contact you soon!
+                  </DialogDescription>
+                </DialogHeader>
+                <form onSubmit={handleSpaghettiOrder} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="name">Name</Label>
+                    <Input id="name" placeholder="Your full name" required />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Email</Label>
+                    <Input id="email" type="email" placeholder="your@email.com" required />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="phone">Phone Number</Label>
+                    <Input id="phone" type="tel" placeholder="(123) 456-7890" required />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="quantity">Quantity</Label>
+                    <Input id="quantity" type="number" min="1" placeholder="Number of orders" required />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="notes">Special Instructions (Optional)</Label>
+                    <Textarea id="notes" placeholder="Any dietary restrictions or special requests..." />
+                  </div>
+                  <Button type="submit" className="w-full bg-fire-gold hover:bg-fire-gold/90">
+                    Submit Order
+                  </Button>
+                </form>
+              </DialogContent>
+            </Dialog>
+          </div>
         </div>
       </div>
     </section>
