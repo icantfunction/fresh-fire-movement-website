@@ -3,17 +3,74 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Instagram, ExternalLink, Info, Users } from "lucide-react";
+import { Instagram, ExternalLink, Info, Users, Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { orderSchema, type OrderFormData } from "@/schemas/orderSchema";
+import { submitSpaghettiOrder } from "@/services/orderService";
+import { toast } from "@/hooks/use-toast";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 
 const HeroSection = () => {
   const [spaghettiFormOpen, setSpaghettiFormOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSpaghettiOrder = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Will be connected to DynamoDB soon
-    setSpaghettiFormOpen(false);
+  const form = useForm<OrderFormData>({
+    resolver: zodResolver(orderSchema),
+    defaultValues: {
+      name: "",
+      phone: "",
+      email: "",
+      quantity: 1,
+      notes: "",
+    },
+  });
+
+  const handleSpaghettiOrder = async (data: OrderFormData) => {
+    setIsSubmitting(true);
+    
+    try {
+      const response = await submitSpaghettiOrder({
+        name: data.name,
+        phone: data.phone,
+        email: data.email || undefined,
+        quantity: data.quantity,
+        notes: data.notes || undefined,
+      });
+
+      toast({
+        title: "Order received!",
+        description: `We'll confirm your order soon. Order ID: ${response.orderId}`,
+      });
+
+      form.reset();
+      setTimeout(() => setSpaghettiFormOpen(false), 2000);
+    } catch (error) {
+      if (error instanceof Error && error.message.includes("Failed to fetch")) {
+        toast({
+          title: "Network error",
+          description: "Unable to connect. Please check your internet and try again.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Something went wrong",
+          description: "Please try again or contact us directly.",
+          variant: "destructive",
+        });
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -117,27 +174,112 @@ const HeroSection = () => {
                     Fill out the form below to place your order. We'll contact you soon!
                   </DialogDescription>
                 </DialogHeader>
-                <form onSubmit={handleSpaghettiOrder} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="name">Name</Label>
-                    <Input id="name" placeholder="Your full name" required />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="phone">Phone Number</Label>
-                    <Input id="phone" type="tel" placeholder="(123) 456-7890" required />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="quantity">Quantity</Label>
-                    <Input id="quantity" type="number" min="1" placeholder="Number of orders" required />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="notes">Special Instructions (Optional)</Label>
-                    <Textarea id="notes" placeholder="Any dietary restrictions or special requests..." />
-                  </div>
-                  <Button type="submit" className="w-full bg-fire-gold hover:bg-fire-gold/90">
-                    Submit Order
-                  </Button>
-                </form>
+                <Form {...form}>
+                  <form onSubmit={form.handleSubmit(handleSpaghettiOrder)} className="space-y-4">
+                    {/* Honeypot field for spam prevention */}
+                    <input
+                      type="text"
+                      name="honeypot"
+                      style={{ display: "none" }}
+                      tabIndex={-1}
+                      autoComplete="off"
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="name"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Name</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Your full name" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="phone"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Phone Number</FormLabel>
+                          <FormControl>
+                            <Input type="tel" placeholder="(123) 456-7890" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="email"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Email (Optional)</FormLabel>
+                          <FormControl>
+                            <Input type="email" placeholder="your.email@example.com" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="quantity"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Quantity</FormLabel>
+                          <FormControl>
+                            <Input 
+                              type="number" 
+                              min="1" 
+                              placeholder="Number of orders" 
+                              {...field}
+                              onChange={(e) => field.onChange(Number(e.target.value))}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="notes"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Special Instructions (Optional)</FormLabel>
+                          <FormControl>
+                            <Textarea 
+                              placeholder="Any dietary restrictions or special requests..." 
+                              {...field} 
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <Button 
+                      type="submit" 
+                      className="w-full bg-fire-gold hover:bg-fire-gold/90"
+                      disabled={isSubmitting}
+                    >
+                      {isSubmitting ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Submitting...
+                        </>
+                      ) : (
+                        "Submit Order"
+                      )}
+                    </Button>
+                  </form>
+                </Form>
               </DialogContent>
             </Dialog>
           </div>
