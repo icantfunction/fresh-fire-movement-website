@@ -1,3 +1,4 @@
+import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
@@ -12,7 +13,9 @@ const cognitoAuthConfig = {
 };
 
 createRoot(document.getElementById("root")!).render(
-  <AuthProvider {...cognitoAuthConfig}>
-    <App />
-  </AuthProvider>
+  <StrictMode>
+    <AuthProvider {...cognitoAuthConfig}>
+      <App />
+    </AuthProvider>
+  </StrictMode>
 );

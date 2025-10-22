@@ -19,4 +19,7 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  optimizeDeps: {
+    include: ["react", "react-dom", "react-oidc-context", "oidc-client-ts"],
+  },
 }));
