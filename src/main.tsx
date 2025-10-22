@@ -5,11 +5,11 @@ import './index.css'
 import { AuthProvider } from "react-oidc-context";
 
 const cognitoAuthConfig = {
-  authority: "https://tkryybz2t.auth.us-east-1.amazoncognito.com",
-  client_id: "s4b5hmn7ha98njtkcs23ikdp3",
+  authority: "https://cognito-idp.us-east-1.amazonaws.com/us-east-1_Ih0cOkd65",
+  client_id: "5a0jpdmleoq56l76otr1udlue5",
   redirect_uri: window.location.origin,
   response_type: "code",
-  scope: "email openid phone",
+  scope: "email openid profile",
 };
 
 createRoot(document.getElementById("root")!).render(
