@@ -5,7 +5,7 @@ import './index.css'
 import { AuthProvider } from "react-oidc-context";
 
 const cognitoAuthConfig = {
-  authority: "https://cognito-idp.us-east-1.amazonaws.com/us-east-1_TkrYyBz2T",
+  authority: "https://tkryybz2t.auth.us-east-1.amazoncognito.com",
   client_id: "s4b5hmn7ha98njtkcs23ikdp3",
   redirect_uri: window.location.origin,
   response_type: "code",
