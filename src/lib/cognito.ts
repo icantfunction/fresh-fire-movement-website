@@ -87,6 +87,26 @@ export const getIdToken = (
   });
 };
 
+// Get Access token from current session
+export const getAccessToken = (
+  onSuccess: (token: string) => void,
+  onError: (message: string) => void
+) => {
+  const user = getCurrentUser();
+  if (!user) {
+    onError("Not authenticated");
+    return;
+  }
+
+  user.getSession((err: Error | null, session: CognitoUserSession | null) => {
+    if (err || !session?.isValid()) {
+      onError("Session expired. Please sign in again.");
+      return;
+    }
+    onSuccess(session.getAccessToken().getJwtToken());
+  });
+};
+
 // Sign in with phone number (as username) and password
 export const signIn = (
   username: string,

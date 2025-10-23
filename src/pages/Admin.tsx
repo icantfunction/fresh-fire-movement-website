@@ -5,9 +5,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Navigation from "@/components/Navigation";
-import { Loader2 } from "lucide-react";
+import { Loader2, ChevronDown, ChevronUp } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { getCurrentSession, signIn, signOut, getIdToken, parseJwt } from "@/lib/cognito";
+import { getCurrentSession, signIn, signOut, getIdToken, getAccessToken, parseJwt } from "@/lib/cognito";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 const API_BASE = "https://y5w6n0i9vc.execute-api.us-east-1.amazonaws.com/prod";
 
@@ -32,6 +33,12 @@ const Admin = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isSigningIn, setIsSigningIn] = useState(false);
   const [totalOrders, setTotalOrders] = useState(0);
+  
+  // Debug state
+  const [lastFetchStatus, setLastFetchStatus] = useState<number | null>(null);
+  const [lastFetchBody, setLastFetchBody] = useState<string>("");
+  const [lastTokenType, setLastTokenType] = useState<"id" | "access" | null>(null);
+  const [showDebug, setShowDebug] = useState(false);
 
   // Try to restore session on mount
   useEffect(() => {
@@ -91,22 +98,72 @@ const Admin = () => {
 
   const fetchOrders = async () => {
     setIsLoading(true);
+    
+    const tryFetch = async (token: string, tokenType: "id" | "access") => {
+      const response = await fetch(`${API_BASE}/admin?method=list`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      
+      const responseText = await response.text();
+      setLastFetchStatus(response.status);
+      setLastFetchBody(responseText);
+      setLastTokenType(tokenType);
+      
+      if (!response.ok) {
+        return { ok: false, status: response.status, data: null };
+      }
+      
+      const data = JSON.parse(responseText);
+      return { ok: true, status: response.status, data };
+    };
+    
     getIdToken(
-      async (token) => {
+      async (idToken) => {
         try {
-          const response = await fetch(`${API_BASE}/admin?method=list`, {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          });
-
-          if (!response.ok) {
-            throw new Error(`Failed to fetch orders: ${response.status}`);
+          // Try with ID token first
+          let result = await tryFetch(idToken, "id");
+          
+          // If 401/403, retry with Access token
+          if (!result.ok && (result.status === 401 || result.status === 403)) {
+            getAccessToken(
+              async (accessToken) => {
+                try {
+                  result = await tryFetch(accessToken, "access");
+                  
+                  if (!result.ok) {
+                    throw new Error(`Failed to fetch orders: ${result.status}`);
+                  }
+                  
+                  const items = result.data?.items || result.data?.data?.items || result.data?.orders || [];
+                  setOrders(items);
+                  setTotalOrders(items.length);
+                } catch (error) {
+                  toast({
+                    title: "Error",
+                    description: error instanceof Error ? error.message : "Failed to fetch orders",
+                    variant: "destructive",
+                  });
+                } finally {
+                  setIsLoading(false);
+                }
+              },
+              (error) => {
+                setAuthError(error);
+                setIsLoading(false);
+              }
+            );
+            return;
           }
-
-          const data = await response.json();
-          setOrders(data.items || []);
-          setTotalOrders(data.items?.length || 0);
+          
+          if (!result.ok) {
+            throw new Error(`Failed to fetch orders: ${result.status}`);
+          }
+          
+          const items = result.data?.items || result.data?.data?.items || result.data?.orders || [];
+          setOrders(items);
+          setTotalOrders(items.length);
         } catch (error) {
           toast({
             title: "Error",
@@ -125,27 +182,74 @@ const Admin = () => {
   };
 
   const handleApprove = async (orderId: string) => {
+    const tryApprove = async (token: string, tokenType: "id" | "access") => {
+      const response = await fetch(
+        `${API_BASE}/admin?method=approve&orderId=${encodeURIComponent(orderId)}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      
+      const responseText = await response.text();
+      setLastFetchStatus(response.status);
+      setLastFetchBody(responseText);
+      setLastTokenType(tokenType);
+      
+      return { ok: response.ok, status: response.status };
+    };
+    
     getIdToken(
-      async (token) => {
+      async (idToken) => {
         try {
-          const response = await fetch(
-            `${API_BASE}/admin?method=approve&orderId=${encodeURIComponent(orderId)}`,
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
+          let result = await tryApprove(idToken, "id");
+          
+          // If 401/403, retry with Access token
+          if (!result.ok && (result.status === 401 || result.status === 403)) {
+            getAccessToken(
+              async (accessToken) => {
+                try {
+                  result = await tryApprove(accessToken, "access");
+                  
+                  if (!result.ok) {
+                    throw new Error(`Failed to approve order: ${result.status}`);
+                  }
+                  
+                  toast({
+                    title: "Success",
+                    description: "Order approved successfully",
+                  });
+                  
+                  fetchOrders();
+                } catch (error) {
+                  toast({
+                    title: "Error",
+                    description: error instanceof Error ? error.message : "Failed to approve order",
+                    variant: "destructive",
+                  });
+                }
               },
-            }
-          );
-
-          if (!response.ok) {
-            throw new Error(`Failed to approve order: ${response.status}`);
+              (error) => {
+                toast({
+                  title: "Error",
+                  description: error,
+                  variant: "destructive",
+                });
+              }
+            );
+            return;
           }
-
+          
+          if (!result.ok) {
+            throw new Error(`Failed to approve order: ${result.status}`);
+          }
+          
           toast({
             title: "Success",
             description: "Order approved successfully",
           });
-
+          
           fetchOrders();
         } catch (error) {
           toast({
@@ -334,6 +438,72 @@ const Admin = () => {
                   </TableBody>
                 </Table>
               </CardContent>
+            </Card>
+            
+            {/* Debug Panel */}
+            <Card className="mt-8 border-dashed">
+              <Collapsible open={showDebug} onOpenChange={setShowDebug}>
+                <CollapsibleTrigger asChild>
+                  <CardHeader className="cursor-pointer hover:bg-muted/50">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <CardTitle className="text-sm">Debug Details</CardTitle>
+                        <CardDescription className="text-xs">
+                          Token and API response diagnostics
+                        </CardDescription>
+                      </div>
+                      {showDebug ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                    </div>
+                  </CardHeader>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <CardContent className="space-y-3 text-xs font-mono">
+                    <div>
+                      <span className="font-semibold">Token Type:</span>{" "}
+                      <span className={lastTokenType === "access" ? "text-amber-600" : "text-blue-600"}>
+                        {lastTokenType || "N/A"}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="font-semibold">HTTP Status:</span>{" "}
+                      <span className={lastFetchStatus === 200 ? "text-green-600" : "text-red-600"}>
+                        {lastFetchStatus || "N/A"}
+                      </span>
+                    </div>
+                    {lastTokenType && (
+                      <div>
+                        <span className="font-semibold">Token Audience (first 40 chars):</span>{" "}
+                        <span className="text-muted-foreground break-all">
+                          {(() => {
+                            try {
+                              const tokenParts = lastFetchBody.split('Bearer ');
+                              if (tokenParts.length > 1) {
+                                const claims = parseJwt(tokenParts[1]);
+                                return (claims?.aud || claims?.client_id || "N/A").substring(0, 40);
+                              }
+                              return "N/A";
+                            } catch {
+                              return "N/A";
+                            }
+                          })()}
+                        </span>
+                      </div>
+                    )}
+                    <div>
+                      <span className="font-semibold">Response Body:</span>
+                      <pre className="mt-2 p-3 bg-muted rounded text-[10px] overflow-x-auto max-h-48">
+                        {lastFetchBody ? 
+                          (lastFetchBody.length > 1000 ? 
+                            lastFetchBody.substring(0, 1000) + "..." : 
+                            lastFetchBody
+                          ) : 
+                          "No response yet"
+                        }
+                      </pre>
+                    </div>
+                  </CardContent>
+                </CollapsibleContent>
+              </Collapsible>
             </Card>
           </>
         )}
