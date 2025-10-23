@@ -10,7 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { getCurrentSession, signIn, signOut, getIdToken, getAccessToken, parseJwt } from "@/lib/cognito";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
-const API_BASE = import.meta.env.VITE_API_BASE || "https://y5w6n0i9vc.execute-api.us-east-1.amazonaws.com/prod";
+const API_BASE = "https://y5w6n0i9vc.execute-api.us-east-1.amazonaws.com/prod";
 
 interface Order {
   orderId: string;
@@ -38,20 +38,16 @@ const Admin = () => {
   const [lastFetchStatus, setLastFetchStatus] = useState<number | null>(null);
   const [lastFetchBody, setLastFetchBody] = useState<string>("");
   const [lastTokenType, setLastTokenType] = useState<"id" | "access" | null>(null);
-  const [lastTokenClaims, setLastTokenClaims] = useState<{ iss?: string; aud?: string; client_id?: string; exp?: number } | null>(null);
-  const [lastResponseKeys, setLastResponseKeys] = useState<string[] | null>(null);
-  const [normalizedCount, setNormalizedCount] = useState<number | null>(null);
   const [showDebug, setShowDebug] = useState(false);
 
   // Try to restore session on mount
   useEffect(() => {
-    console.log('API_BASE=', API_BASE);
     getCurrentSession(
       (session) => {
         const idToken = session.getIdToken().getJwtToken();
         const claims = parseJwt(idToken);
         setWho(claims?.email || claims?.["cognito:username"] || "admin");
-        fetchOrders(session);
+        fetchOrders();
       },
       () => {
         setWho(null);
@@ -74,7 +70,7 @@ const Admin = () => {
         setWho(claims?.email || claims?.["cognito:username"] || username);
         setPassword("");
         setIsSigningIn(false);
-        fetchOrders(session);
+        fetchOrders();
       },
       onFailure: (error) => {
         setAuthError(error);
@@ -100,129 +96,31 @@ const Admin = () => {
     setPassword("");
   };
 
-  // Helpers: unwrap DynamoDB AttributeValue shapes and normalize list responses
-  const unwrap = (v: any): any => {
-    if (v && typeof v === "object") {
-      if ("S" in v) return (v as any).S;
-      if ("N" in v) return Number((v as any).N);
-      if ("BOOL" in v) return !!(v as any).BOOL;
-      if ("M" in v) return Object.fromEntries(Object.entries((v as any).M).map(([k, val]) => [k, unwrap(val)]));
-      if ("L" in v) return (v as any).L.map(unwrap);
-    }
-    return v;
-  };
-
-  const normalizeOrders = (payload: any): Order[] => {
-    const raw =
-      payload?.items ??
-      payload?.data?.items ??
-      payload?.orders ??
-      payload?.Items ??
-      payload?.data?.orders ??
-      [];
-
-    const arr = Array.isArray(raw) ? raw : [];
-    return arr.map((it: any) => {
-      const obj = unwrap(it);
-      return {
-        orderId: obj.orderId ?? obj.id ?? "",
-        name: obj.name ?? "",
-        phone: obj.phone ?? obj.phoneNumber ?? "",
-        email: obj.email ?? "",
-        quantity: Number(obj.quantity ?? obj.qty ?? 1),
-        specialInstructions: obj.specialInstructions ?? obj.notes ?? undefined,
-        status: obj.status ?? "pending",
-        createdAt: obj.createdAt ?? obj.created_at ?? obj.timestamp ?? new Date().toISOString(),
-      } as Order;
-    });
-  };
-
-  const fetchOrders = async (sessionOverride?: any) => {
-    console.log("[admin] fetchOrders: starting", sessionOverride ? "with session override" : "fetching session");
-    console.log('Fetching orders from', `${API_BASE}/admin?method=list`);
+  const fetchOrders = async () => {
     setIsLoading(true);
-    setNormalizedCount(null);
-    const tryFetch = async (token: string, tokenType: "id" | "access") => {
-      setLastTokenType(tokenType);
-      try {
-        const claims = parseJwt(token);
-        setLastTokenClaims(claims ? { iss: claims.iss, aud: claims.aud, client_id: claims.client_id, exp: claims.exp } : null);
-      } catch {
-        setLastTokenClaims(null);
-      }
-      try {
-        console.log("[admin] requesting", `${API_BASE}/admin?method=list`);
-        const response = await fetch(`${API_BASE}/admin?method=list`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        const responseText = await response.text();
-        setLastFetchStatus(response.status);
-        setLastFetchBody(responseText);
-        let data: any = null;
-        try {
-          data = responseText ? JSON.parse(responseText) : null;
-        } catch {
-          data = null;
-        }
-        setLastResponseKeys(data && typeof data === "object" ? Object.keys(data) : null);
-        if (!response.ok) {
-          return { ok: false, status: response.status, data };
-        }
-        return { ok: true, status: response.status, data };
-      } catch (err: any) {
-        console.error("[admin] fetch failed", err);
-        setLastFetchStatus(-1);
-        setLastFetchBody(err?.message || "Network error");
-        setLastResponseKeys(null);
-        toast({
-          title: "Network/CORS Error",
-          description: "Failed to connect to the API. Check console for details.",
-          variant: "destructive",
-        });
-        return { ok: false, status: -1, data: null };
-      }
-    };
     
-    // If session is provided directly, use it; otherwise retrieve from storage
-    if (sessionOverride) {
-      console.log("[admin] using provided session");
-      const idToken = sessionOverride.getIdToken().getJwtToken();
-      const accessToken = sessionOverride.getAccessToken().getJwtToken();
+    const tryFetch = async (token: string, tokenType: "id" | "access") => {
+      const response = await fetch(`${API_BASE}/admin?method=list`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       
-      try {
-        // Try with ID token first
-        let result = await tryFetch(idToken, "id");
-        
-        // If 401/403, retry with Access token
-        if (!result.ok && (result.status === 401 || result.status === 403)) {
-          result = await tryFetch(accessToken, "access");
-        }
-        
-        if (!result.ok) {
-          throw new Error(`Failed to fetch orders: ${result.status}`);
-        }
-        
-        const items = normalizeOrders(result.data);
-        setOrders(items);
-        setTotalOrders(items.length);
-        setNormalizedCount(items.length);
-      } catch (error) {
-        toast({
-          title: "Error",
-          description: error instanceof Error ? error.message : "Failed to fetch orders",
-          variant: "destructive",
-        });
-      } finally {
-        setIsLoading(false);
+      const responseText = await response.text();
+      setLastFetchStatus(response.status);
+      setLastFetchBody(responseText);
+      setLastTokenType(tokenType);
+      
+      if (!response.ok) {
+        return { ok: false, status: response.status, data: null };
       }
-      return;
-    }
+      
+      const data = JSON.parse(responseText);
+      return { ok: true, status: response.status, data };
+    };
     
     getIdToken(
       async (idToken) => {
-        console.log("[admin] got ID token");
         try {
           // Try with ID token first
           let result = await tryFetch(idToken, "id");
@@ -238,10 +136,9 @@ const Admin = () => {
                     throw new Error(`Failed to fetch orders: ${result.status}`);
                   }
                   
-                  const items = normalizeOrders(result.data);
+                  const items = result.data?.items || result.data?.data?.items || result.data?.orders || [];
                   setOrders(items);
                   setTotalOrders(items.length);
-                  setNormalizedCount(items.length);
                 } catch (error) {
                   toast({
                     title: "Error",
@@ -264,10 +161,9 @@ const Admin = () => {
             throw new Error(`Failed to fetch orders: ${result.status}`);
           }
           
-          const items = normalizeOrders(result.data);
+          const items = result.data?.items || result.data?.data?.items || result.data?.orders || [];
           setOrders(items);
           setTotalOrders(items.length);
-          setNormalizedCount(items.length);
         } catch (error) {
           toast({
             title: "Error",
@@ -279,15 +175,7 @@ const Admin = () => {
         }
       },
       (error) => {
-        console.error("[admin] getIdToken error:", error);
         setAuthError(error);
-        setLastFetchStatus(-1);
-        setLastFetchBody(error || "Failed to get ID token");
-        toast({
-          title: "Authentication Error",
-          description: error || "Session expired. Please sign in again.",
-          variant: "destructive",
-        });
         setIsLoading(false);
       }
     );
@@ -295,35 +183,21 @@ const Admin = () => {
 
   const handleApprove = async (orderId: string) => {
     const tryApprove = async (token: string, tokenType: "id" | "access") => {
+      const response = await fetch(
+        `${API_BASE}/admin?method=approve&orderId=${encodeURIComponent(orderId)}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      
+      const responseText = await response.text();
+      setLastFetchStatus(response.status);
+      setLastFetchBody(responseText);
       setLastTokenType(tokenType);
-      try {
-        const claims = parseJwt(token);
-        setLastTokenClaims(claims ? { iss: claims.iss, aud: claims.aud, client_id: claims.client_id, exp: claims.exp } : null);
-      } catch {
-        setLastTokenClaims(null);
-      }
-      try {
-        const response = await fetch(
-          `${API_BASE}/admin?method=approve&orderId=${encodeURIComponent(orderId)}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-        
-        const responseText = await response.text();
-        setLastFetchStatus(response.status);
-        setLastFetchBody(responseText);
-        setLastResponseKeys(null);
-        
-        return { ok: response.ok, status: response.status };
-      } catch (err: any) {
-        setLastFetchStatus(-1);
-        setLastFetchBody(err?.message || "Network error");
-        setLastResponseKeys(null);
-        return { ok: false, status: -1 };
-      }
+      
+      return { ok: response.ok, status: response.status };
     };
     
     getIdToken(
@@ -458,22 +332,13 @@ const Admin = () => {
                   Logged in as: <span className="font-medium text-fire-purple">{who}</span>
                 </p>
               </div>
-              <div className="flex gap-2">
-                <Button
-                  onClick={fetchOrders}
-                  variant="secondary"
-                  size="sm"
-                >
-                  Run fetch (debug)
-                </Button>
-                <Button
-                  onClick={handleSignOut}
-                  variant="outline"
-                  className="border-fire-purple text-fire-purple hover:bg-fire-purple hover:text-white"
-                >
-                  Sign Out
-                </Button>
-              </div>
+              <Button
+                onClick={handleSignOut}
+                variant="outline"
+                className="border-fire-purple text-fire-purple hover:bg-fire-purple hover:text-white"
+              >
+                Sign Out
+              </Button>
             </div>
             
             <div className="flex gap-4 mb-8">
@@ -577,25 +442,7 @@ const Admin = () => {
             
             {/* Debug Panel */}
             <Card className="mt-8 border-dashed">
-              <Collapsible 
-                open={showDebug} 
-                onOpenChange={(open) => {
-                  setShowDebug(open);
-                  if (open) {
-                    getCurrentSession(
-                      (session) => {
-                        const idToken = session.getIdToken().getJwtToken();
-                        const claims = parseJwt(idToken);
-                        setLastTokenClaims(claims ? { iss: claims.iss, aud: claims.aud, client_id: claims.client_id, exp: claims.exp } : null);
-                      },
-                      () => {}
-                    );
-                  }
-                  if (open && lastFetchStatus === null) {
-                    fetchOrders();
-                  }
-                }}
-              >
+              <Collapsible open={showDebug} onOpenChange={setShowDebug}>
                 <CollapsibleTrigger asChild>
                   <CardHeader className="cursor-pointer hover:bg-muted/50">
                     <div className="flex items-center justify-between">
@@ -620,39 +467,28 @@ const Admin = () => {
                     <div>
                       <span className="font-semibold">HTTP Status:</span>{" "}
                       <span className={lastFetchStatus === 200 ? "text-green-600" : "text-red-600"}>
-                        {lastFetchStatus ?? "N/A"}
+                        {lastFetchStatus || "N/A"}
                       </span>
                     </div>
-                    <div>
-                      <span className="font-semibold">Token Issuer:</span>{" "}
-                      <span className="text-muted-foreground break-all">
-                        {lastTokenClaims?.iss || "N/A"}
-                      </span>
-                    </div>
-                    <div>
-                      <span className="font-semibold">Token Audience:</span>{" "}
-                      <span className="text-muted-foreground break-all">
-                        {lastTokenClaims?.aud || lastTokenClaims?.client_id || "N/A"}
-                      </span>
-                    </div>
-                    <div>
-                      <span className="font-semibold">Token Expiration:</span>{" "}
-                      <span className="text-muted-foreground">
-                        {lastTokenClaims?.exp ? new Date(lastTokenClaims.exp * 1000).toISOString() : "N/A"}
-                      </span>
-                    </div>
-                    <div>
-                      <span className="font-semibold">Response Keys:</span>{" "}
-                      <span className="text-muted-foreground">
-                        {lastResponseKeys?.join(", ") || "N/A"}
-                      </span>
-                    </div>
-                    <div>
-                      <span className="font-semibold">Normalized Items:</span>{" "}
-                      <span className="text-muted-foreground">
-                        {normalizedCount ?? "N/A"}
-                      </span>
-                    </div>
+                    {lastTokenType && (
+                      <div>
+                        <span className="font-semibold">Token Audience (first 40 chars):</span>{" "}
+                        <span className="text-muted-foreground break-all">
+                          {(() => {
+                            try {
+                              const tokenParts = lastFetchBody.split('Bearer ');
+                              if (tokenParts.length > 1) {
+                                const claims = parseJwt(tokenParts[1]);
+                                return (claims?.aud || claims?.client_id || "N/A").substring(0, 40);
+                              }
+                              return "N/A";
+                            } catch {
+                              return "N/A";
+                            }
+                          })()}
+                        </span>
+                      </div>
+                    )}
                     <div>
                       <span className="font-semibold">Response Body:</span>
                       <pre className="mt-2 p-3 bg-muted rounded text-[10px] overflow-x-auto max-h-48">

@@ -7,12 +7,9 @@ import {
 } from "amazon-cognito-identity-js";
 
 // Cognito configuration
-const REGION = import.meta.env.VITE_AWS_REGION || "us-east-1";
-const USER_POOL_ID = import.meta.env.VITE_COGNITO_USER_POOL_ID || "us-east-1_TkrYyBz2T";
-const CLIENT_ID = import.meta.env.VITE_COGNITO_CLIENT_ID || "5a0jpdmleoq56l76otr1udlue5";
-
-// Verify environment variables are loaded
-console.log('Cognito Config:', { REGION, USER_POOL_ID, CLIENT_ID });
+const REGION = "us-east-1";
+const USER_POOL_ID = "us-east-1_TkrYyBz2T";
+const CLIENT_ID = "5a0jpdmleoq56l76otr1udlue5";
 
 // Use sessionStorage for token persistence
 const Storage = {
