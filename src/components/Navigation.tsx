@@ -1,15 +1,40 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { useAuth } from "react-oidc-context";
 import { Button } from "./ui/button";
-import { cognitoLogout } from "@/utils/cognitoLogout";
 import { Loader2 } from "lucide-react";
+import { getCurrentSession, signOut, parseJwt } from "@/lib/cognito";
 
 const Navigation = () => {
-  const auth = useAuth();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userEmail, setUserEmail] = useState<string>("");
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    checkAuth();
+  }, []);
+
+  const checkAuth = () => {
+    setIsLoading(true);
+    getCurrentSession(
+      (session) => {
+        const idToken = session.getIdToken().getJwtToken();
+        const claims = parseJwt(idToken);
+        setUserEmail(claims?.email || claims?.["cognito:username"] || "");
+        setIsAuthenticated(true);
+        setIsLoading(false);
+      },
+      () => {
+        setIsAuthenticated(false);
+        setUserEmail("");
+        setIsLoading(false);
+      }
+    );
+  };
 
   const handleSignOut = () => {
-    auth.removeUser();
-    cognitoLogout();
+    signOut();
+    setIsAuthenticated(false);
+    setUserEmail("");
   };
 
   return (
@@ -32,9 +57,9 @@ const Navigation = () => {
               </Button>
             </Link>
 
-            {auth.isLoading ? (
+            {isLoading ? (
               <Loader2 className="h-4 w-4 animate-spin text-fire-purple" />
-            ) : auth.isAuthenticated ? (
+            ) : isAuthenticated ? (
               <>
                 <Link to="/admin">
                   <Button variant="ghost" className="text-muted-foreground hover:text-fire-purple">
@@ -42,7 +67,7 @@ const Navigation = () => {
                   </Button>
                 </Link>
                 <span className="text-sm text-muted-foreground">
-                  {auth.user?.profile.email}
+                  {userEmail}
                 </span>
                 <Button
                   onClick={handleSignOut}
@@ -54,13 +79,13 @@ const Navigation = () => {
                 </Button>
               </>
             ) : (
-              <Link to="/login">
+              <Link to="/admin">
                 <Button
                   variant="default"
                   size="sm"
                   className="bg-fire-purple hover:bg-fire-purple/90"
                 >
-                  Sign In
+                  Admin Sign In
                 </Button>
               </Link>
             )}
