@@ -492,19 +492,18 @@ const Admin = () => {
                       <TableHead>Status</TableHead>
                       <TableHead>Special Instructions</TableHead>
                       <TableHead>Date</TableHead>
-                      <TableHead>Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {isLoading ? (
                       <TableRow>
-                        <TableCell colSpan={8} className="text-center">
+                        <TableCell colSpan={7} className="text-center">
                           <Loader2 className="h-6 w-6 animate-spin mx-auto" />
                         </TableCell>
                       </TableRow>
                     ) : orders.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={8} className="text-center text-muted-foreground">
+                        <TableCell colSpan={7} className="text-center text-muted-foreground">
                           No orders yet
                         </TableCell>
                       </TableRow>
@@ -529,17 +528,6 @@ const Admin = () => {
                           <TableCell>{order.specialInstructions || "-"}</TableCell>
                           <TableCell>
                             {new Date(order.createdAt).toLocaleDateString()}
-                          </TableCell>
-                          <TableCell>
-                            {order.status === "pending" && (
-                              <Button
-                                size="sm"
-                                onClick={() => handleApprove(order.orderId)}
-                                className="bg-fire-purple hover:bg-fire-purple/90"
-                              >
-                                Approve
-                              </Button>
-                            )}
                           </TableCell>
                         </TableRow>
                       ))
