@@ -38,6 +38,9 @@ const Admin = () => {
   const [lastFetchStatus, setLastFetchStatus] = useState<number | null>(null);
   const [lastFetchBody, setLastFetchBody] = useState<string>("");
   const [lastTokenType, setLastTokenType] = useState<"id" | "access" | null>(null);
+  const [lastTokenClaims, setLastTokenClaims] = useState<{ iss?: string; aud?: string; client_id?: string; exp?: number } | null>(null);
+  const [lastResponseKeys, setLastResponseKeys] = useState<string[] | null>(null);
+  const [normalizedCount, setNormalizedCount] = useState<number | null>(null);
   const [showDebug, setShowDebug] = useState(false);
 
   // Try to restore session on mount
@@ -96,27 +99,80 @@ const Admin = () => {
     setPassword("");
   };
 
+  // Helpers: unwrap DynamoDB AttributeValue shapes and normalize list responses
+  const unwrap = (v: any): any => {
+    if (v && typeof v === "object") {
+      if ("S" in v) return (v as any).S;
+      if ("N" in v) return Number((v as any).N);
+      if ("BOOL" in v) return !!(v as any).BOOL;
+      if ("M" in v) return Object.fromEntries(Object.entries((v as any).M).map(([k, val]) => [k, unwrap(val)]));
+      if ("L" in v) return (v as any).L.map(unwrap);
+    }
+    return v;
+  };
+
+  const normalizeOrders = (payload: any): Order[] => {
+    const raw =
+      payload?.items ??
+      payload?.data?.items ??
+      payload?.orders ??
+      payload?.Items ??
+      payload?.data?.orders ??
+      [];
+
+    const arr = Array.isArray(raw) ? raw : [];
+    return arr.map((it: any) => {
+      const obj = unwrap(it);
+      return {
+        orderId: obj.orderId ?? obj.id ?? "",
+        name: obj.name ?? "",
+        phone: obj.phone ?? obj.phoneNumber ?? "",
+        email: obj.email ?? "",
+        quantity: Number(obj.quantity ?? obj.qty ?? 1),
+        specialInstructions: obj.specialInstructions ?? obj.notes ?? undefined,
+        status: obj.status ?? "pending",
+        createdAt: obj.createdAt ?? obj.created_at ?? obj.timestamp ?? new Date().toISOString(),
+      } as Order;
+    });
+  };
+
   const fetchOrders = async () => {
     setIsLoading(true);
-    
+    setNormalizedCount(null);
     const tryFetch = async (token: string, tokenType: "id" | "access") => {
-      const response = await fetch(`${API_BASE}/admin?method=list`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      
-      const responseText = await response.text();
-      setLastFetchStatus(response.status);
-      setLastFetchBody(responseText);
       setLastTokenType(tokenType);
-      
-      if (!response.ok) {
-        return { ok: false, status: response.status, data: null };
+      try {
+        const claims = parseJwt(token);
+        setLastTokenClaims(claims ? { iss: claims.iss, aud: claims.aud, client_id: claims.client_id, exp: claims.exp } : null);
+      } catch {
+        setLastTokenClaims(null);
       }
-      
-      const data = JSON.parse(responseText);
-      return { ok: true, status: response.status, data };
+      try {
+        const response = await fetch(`${API_BASE}/admin?method=list`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        const responseText = await response.text();
+        setLastFetchStatus(response.status);
+        setLastFetchBody(responseText);
+        let data: any = null;
+        try {
+          data = responseText ? JSON.parse(responseText) : null;
+        } catch {
+          data = null;
+        }
+        setLastResponseKeys(data && typeof data === "object" ? Object.keys(data) : null);
+        if (!response.ok) {
+          return { ok: false, status: response.status, data };
+        }
+        return { ok: true, status: response.status, data };
+      } catch (err: any) {
+        setLastFetchStatus(-1);
+        setLastFetchBody(err?.message || "Network error");
+        setLastResponseKeys(null);
+        return { ok: false, status: -1, data: null };
+      }
     };
     
     getIdToken(
@@ -136,9 +192,10 @@ const Admin = () => {
                     throw new Error(`Failed to fetch orders: ${result.status}`);
                   }
                   
-                  const items = result.data?.items || result.data?.data?.items || result.data?.orders || [];
+                  const items = normalizeOrders(result.data);
                   setOrders(items);
                   setTotalOrders(items.length);
+                  setNormalizedCount(items.length);
                 } catch (error) {
                   toast({
                     title: "Error",
@@ -161,9 +218,10 @@ const Admin = () => {
             throw new Error(`Failed to fetch orders: ${result.status}`);
           }
           
-          const items = result.data?.items || result.data?.data?.items || result.data?.orders || [];
+          const items = normalizeOrders(result.data);
           setOrders(items);
           setTotalOrders(items.length);
+          setNormalizedCount(items.length);
         } catch (error) {
           toast({
             title: "Error",
@@ -183,21 +241,35 @@ const Admin = () => {
 
   const handleApprove = async (orderId: string) => {
     const tryApprove = async (token: string, tokenType: "id" | "access") => {
-      const response = await fetch(
-        `${API_BASE}/admin?method=approve&orderId=${encodeURIComponent(orderId)}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      
-      const responseText = await response.text();
-      setLastFetchStatus(response.status);
-      setLastFetchBody(responseText);
       setLastTokenType(tokenType);
-      
-      return { ok: response.ok, status: response.status };
+      try {
+        const claims = parseJwt(token);
+        setLastTokenClaims(claims ? { iss: claims.iss, aud: claims.aud, client_id: claims.client_id, exp: claims.exp } : null);
+      } catch {
+        setLastTokenClaims(null);
+      }
+      try {
+        const response = await fetch(
+          `${API_BASE}/admin?method=approve&orderId=${encodeURIComponent(orderId)}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        
+        const responseText = await response.text();
+        setLastFetchStatus(response.status);
+        setLastFetchBody(responseText);
+        setLastResponseKeys(null);
+        
+        return { ok: response.ok, status: response.status };
+      } catch (err: any) {
+        setLastFetchStatus(-1);
+        setLastFetchBody(err?.message || "Network error");
+        setLastResponseKeys(null);
+        return { ok: false, status: -1 };
+      }
     };
     
     getIdToken(
