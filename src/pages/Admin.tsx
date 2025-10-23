@@ -50,7 +50,7 @@ const Admin = () => {
         const idToken = session.getIdToken().getJwtToken();
         const claims = parseJwt(idToken);
         setWho(claims?.email || claims?.["cognito:username"] || "admin");
-        fetchOrders();
+        fetchOrders(session);
       },
       () => {
         setWho(null);
@@ -73,7 +73,7 @@ const Admin = () => {
         setWho(claims?.email || claims?.["cognito:username"] || username);
         setPassword("");
         setIsSigningIn(false);
-        fetchOrders();
+        fetchOrders(session);
       },
       onFailure: (error) => {
         setAuthError(error);
@@ -136,8 +136,8 @@ const Admin = () => {
     });
   };
 
-  const fetchOrders = async () => {
-    console.log("[admin] fetchOrders: starting");
+  const fetchOrders = async (sessionOverride?: any) => {
+    console.log("[admin] fetchOrders: starting", sessionOverride ? "with session override" : "fetching session");
     setIsLoading(true);
     setNormalizedCount(null);
     const tryFetch = async (token: string, tokenType: "id" | "access") => {
@@ -182,6 +182,41 @@ const Admin = () => {
         return { ok: false, status: -1, data: null };
       }
     };
+    
+    // If session is provided directly, use it; otherwise retrieve from storage
+    if (sessionOverride) {
+      console.log("[admin] using provided session");
+      const idToken = sessionOverride.getIdToken().getJwtToken();
+      const accessToken = sessionOverride.getAccessToken().getJwtToken();
+      
+      try {
+        // Try with ID token first
+        let result = await tryFetch(idToken, "id");
+        
+        // If 401/403, retry with Access token
+        if (!result.ok && (result.status === 401 || result.status === 403)) {
+          result = await tryFetch(accessToken, "access");
+        }
+        
+        if (!result.ok) {
+          throw new Error(`Failed to fetch orders: ${result.status}`);
+        }
+        
+        const items = normalizeOrders(result.data);
+        setOrders(items);
+        setTotalOrders(items.length);
+        setNormalizedCount(items.length);
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: error instanceof Error ? error.message : "Failed to fetch orders",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+      return;
+    }
     
     getIdToken(
       async (idToken) => {
