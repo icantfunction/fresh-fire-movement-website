@@ -9,12 +9,25 @@ import { Loader2, ChevronDown, ChevronUp } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { getCurrentSession, signIn, signOut, getIdToken, getAccessToken, parseJwt } from "@/lib/cognito";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import * as AmazonCognitoIdentity from "amazon-cognito-identity-js";
+
+const USER_POOL_ID = import.meta.env.VITE_COGNITO_USER_POOL_ID || "us-east-1_TkrYyBz2T";
+const CLIENT_ID = import.meta.env.VITE_COGNITO_CLIENT_ID || "5a0jpdmleoq56l76otr1udlue5";
 
 const API_BASE =
   import.meta.env.VITE_API_BASE ||
   (typeof process !== "undefined" ? (process as any)?.env?.REACT_APP_API_BASE : undefined) ||
   "https://y5w6n0i9vc.execute-api.us-east-1.amazonaws.com/prod";
-console.log("API_BASE=", API_BASE);
+console.log("[admin] API_BASE =", API_BASE);
+
+// Helper to get Cognito session as Promise
+function getSessionPromise(pool: AmazonCognitoIdentity.CognitoUserPool) {
+  return new Promise<AmazonCognitoIdentity.CognitoUserSession>((resolve, reject) => {
+    const user = pool.getCurrentUser();
+    if (!user) return reject(new Error("No current user"));
+    user.getSession((err, sess) => (err ? reject(err) : resolve(sess)));
+  });
+}
 
 interface Order {
   orderId: string;
@@ -54,7 +67,7 @@ const Admin = () => {
         const idToken = session.getIdToken().getJwtToken();
         const claims = parseJwt(idToken);
         setWho(claims?.email || claims?.["cognito:username"] || "admin");
-        fetchOrders();
+        // fetchOrders() will be triggered by the useEffect([who]) below
       },
       () => {
         setWho(null);
@@ -65,7 +78,7 @@ const Admin = () => {
   // Fetch orders when user session is restored
   useEffect(() => {
     if (who) {
-      console.log("Session present; fetching orders…");
+      console.log("[admin] Session present; fetching orders…");
       fetchOrders();
     }
   }, [who]);
@@ -85,7 +98,7 @@ const Admin = () => {
         setWho(claims?.email || claims?.["cognito:username"] || username);
         setPassword("");
         setIsSigningIn(false);
-        console.log("API_BASE on login:", API_BASE);
+        console.log("[admin] API_BASE on login:", API_BASE);
         fetchOrders();
       },
       onFailure: (error) => {
@@ -150,119 +163,108 @@ const Admin = () => {
   };
 
   const fetchOrders = async () => {
-    console.log("[admin] fetchOrders: starting");
-    console.log("Fetching orders from", `${API_BASE}/admin?method=list`);
-    setIsLoading(true);
-    setNormalizedCount(null);
-    const tryFetch = async (token: string, tokenType: "id" | "access") => {
-      setLastTokenType(tokenType);
-      console.log("Using ID token:", token.slice(0, 25) + "...");
-      try {
-        const claims = parseJwt(token);
-        setLastTokenClaims(claims ? { iss: claims.iss, aud: claims.aud, client_id: claims.client_id, exp: claims.exp } : null);
-      } catch {
-        setLastTokenClaims(null);
-      }
-      try {
-        console.log("[admin] requesting", `${API_BASE}/admin?method=list`);
-        const response = await fetch(`${API_BASE}/admin?method=list`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        console.log("Orders status:", response.status);
-        const responseText = await response.text();
-        setLastFetchStatus(response.status);
-        setLastFetchBody(responseText);
-        console.log("Orders body:", responseText.substring(0, 200));
-        let data: any = null;
+    try {
+      setIsLoading(true);
+      console.log("[admin] fetchOrders: starting");
+      console.log("[admin] Fetching orders from", `${API_BASE}/admin?method=list`);
+      setNormalizedCount(null);
+
+      const pool = new AmazonCognitoIdentity.CognitoUserPool({
+        UserPoolId: USER_POOL_ID,
+        ClientId: CLIENT_ID,
+      });
+
+      // 1) Get session + ID token
+      const session = await getSessionPromise(pool);
+      if (!session?.isValid()) throw new Error("Session invalid");
+      const idToken = session.getIdToken().getJwtToken();
+      console.log("[admin] Using ID token:", idToken.slice(0, 25) + "…");
+
+      // Helper to log token claims
+      const logTokenClaims = (token: string, type: string) => {
         try {
-          data = responseText ? JSON.parse(responseText) : null;
+          const claims = parseJwt(token);
+          setLastTokenClaims(claims ? { iss: claims.iss, aud: claims.aud, client_id: claims.client_id, exp: claims.exp } : null);
         } catch {
-          data = null;
+          setLastTokenClaims(null);
         }
-        setLastResponseKeys(data && typeof data === "object" ? Object.keys(data) : null);
-        if (!response.ok) {
-          return { ok: false, status: response.status, data };
-        }
-        return { ok: true, status: response.status, data };
-      } catch (err: any) {
-        console.error("[admin] fetch failed", err);
+      };
+
+      logTokenClaims(idToken, "id");
+      setLastTokenType("id");
+
+      // 2) Try with ID token
+      let res = await fetch(`${API_BASE}/admin?method=list`, {
+        headers: { Authorization: `Bearer ${idToken}` },
+      }).catch((e) => {
+        console.error("[admin] fetch threw (ID token):", e);
         setLastFetchStatus(-1);
-        setLastFetchBody(err?.message || "Network error");
+        setLastFetchBody(e?.message || "Network error");
         setLastResponseKeys(null);
         toast({
           title: "Network/CORS Error",
           description: "Failed to connect to the API. Check console for details.",
           variant: "destructive",
         });
-        return { ok: false, status: -1, data: null };
-      }
-    };
-    
-    getIdToken(
-      async (idToken) => {
-        console.log("[admin] got ID token");
-        try {
-          // Try with ID token first
-          let result = await tryFetch(idToken, "id");
-          
-          // If 401/403, retry with Access token
-          if (!result.ok && (result.status === 401 || result.status === 403)) {
-            getAccessToken(
-              async (accessToken) => {
-                try {
-                  result = await tryFetch(accessToken, "access");
-                  
-                  if (!result.ok) {
-                    throw new Error(`Failed to fetch orders: ${result.status}`);
-                  }
-                  
-                  const items = normalizeOrders(result.data);
-                  setOrders(items);
-                  setTotalOrders(items.length);
-                  setNormalizedCount(items.length);
-                } catch (error) {
-                  toast({
-                    title: "Error",
-                    description: error instanceof Error ? error.message : "Failed to fetch orders",
-                    variant: "destructive",
-                  });
-                } finally {
-                  setIsLoading(false);
-                }
-              },
-              (error) => {
-                setAuthError(error);
-                setIsLoading(false);
-              }
-            );
-            return;
-          }
-          
-          if (!result.ok) {
-            throw new Error(`Failed to fetch orders: ${result.status}`);
-          }
-          
-          const items = normalizeOrders(result.data);
-          setOrders(items);
-          setTotalOrders(items.length);
-          setNormalizedCount(items.length);
-        } catch (error) {
+        throw e;
+      });
+
+      // 3) If unauthorized, retry with Access token
+      if (res.status === 401 || res.status === 403) {
+        const access = session.getAccessToken().getJwtToken();
+        console.log("[admin] Retrying with ACCESS token:", access.slice(0, 25) + "…");
+        logTokenClaims(access, "access");
+        setLastTokenType("access");
+        
+        res = await fetch(`${API_BASE}/admin?method=list`, {
+          headers: { Authorization: `Bearer ${access}` },
+        }).catch((e) => {
+          console.error("[admin] fetch threw (ACCESS token):", e);
+          setLastFetchStatus(-1);
+          setLastFetchBody(e?.message || "Network error");
+          setLastResponseKeys(null);
           toast({
-            title: "Error",
-            description: error instanceof Error ? error.message : "Failed to fetch orders",
+            title: "Network/CORS Error",
+            description: "Failed to connect to the API. Check console for details.",
             variant: "destructive",
           });
-        } finally {
-          setIsLoading(false);
-        }
-      },
-      (error) => {
-        setAuthError(error);
-        setIsLoading(false);
+          throw e;
+        });
       }
-    );
+
+      console.log("[admin] Orders status:", res.status);
+      const responseText = await res.text();
+      setLastFetchStatus(res.status);
+      setLastFetchBody(responseText);
+      console.log("[admin] Orders body:", responseText.substring(0, 200));
+
+      let data: any = null;
+      try {
+        data = responseText ? JSON.parse(responseText) : null;
+      } catch {
+        data = null;
+      }
+
+      setLastResponseKeys(data && typeof data === "object" ? Object.keys(data) : null);
+
+      if (!res.ok) {
+        throw new Error(`Failed to fetch orders: ${res.status}`);
+      }
+
+      const items = normalizeOrders(data);
+      setOrders(items);
+      setTotalOrders(items.length);
+      setNormalizedCount(items.length);
+    } catch (e: any) {
+      console.error("[admin] fetchOrders error:", e?.message || e);
+      toast({
+        title: "Error",
+        description: e instanceof Error ? e.message : "Failed to fetch orders",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleApprove = async (orderId: string) => {
