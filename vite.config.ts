@@ -14,12 +14,15 @@ export default defineConfig(({ mode }) => ({
     mode === 'development' &&
     componentTagger(),
   ].filter(Boolean),
+  define: {
+    global: 'globalThis',
+  },
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
   },
   optimizeDeps: {
-    include: ["react", "react-dom", "react-oidc-context", "oidc-client-ts"],
+    include: ["react", "react-dom", "amazon-cognito-identity-js"],
   },
 }));
