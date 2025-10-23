@@ -10,7 +10,8 @@ import { useToast } from "@/hooks/use-toast";
 import { getCurrentSession, signIn, signOut, getIdToken, getAccessToken, parseJwt } from "@/lib/cognito";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
-const API_BASE = "https://y5w6n0i9vc.execute-api.us-east-1.amazonaws.com/prod";
+const API_BASE = import.meta.env.VITE_API_BASE || "https://y5w6n0i9vc.execute-api.us-east-1.amazonaws.com/prod";
+console.log("API_BASE=", API_BASE);
 
 interface Order {
   orderId: string;
