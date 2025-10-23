@@ -10,7 +10,10 @@ import { useToast } from "@/hooks/use-toast";
 import { getCurrentSession, signIn, signOut, getIdToken, getAccessToken, parseJwt } from "@/lib/cognito";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
-const API_BASE = import.meta.env.VITE_API_BASE || "https://y5w6n0i9vc.execute-api.us-east-1.amazonaws.com/prod";
+const API_BASE =
+  import.meta.env.VITE_API_BASE ||
+  (typeof process !== "undefined" ? (process as any)?.env?.REACT_APP_API_BASE : undefined) ||
+  "https://y5w6n0i9vc.execute-api.us-east-1.amazonaws.com/prod";
 console.log("API_BASE=", API_BASE);
 
 interface Order {
@@ -59,6 +62,14 @@ const Admin = () => {
     );
   }, []);
 
+  // Fetch orders when user session is restored
+  useEffect(() => {
+    if (who) {
+      console.log("Session present; fetching orders…");
+      fetchOrders();
+    }
+  }, [who]);
+
   const handleSignIn = () => {
     setAuthError("");
     if (!username || !password) {
@@ -74,6 +85,7 @@ const Admin = () => {
         setWho(claims?.email || claims?.["cognito:username"] || username);
         setPassword("");
         setIsSigningIn(false);
+        console.log("API_BASE on login:", API_BASE);
         fetchOrders();
       },
       onFailure: (error) => {
@@ -139,10 +151,12 @@ const Admin = () => {
 
   const fetchOrders = async () => {
     console.log("[admin] fetchOrders: starting");
+    console.log("Fetching orders from", `${API_BASE}/admin?method=list`);
     setIsLoading(true);
     setNormalizedCount(null);
     const tryFetch = async (token: string, tokenType: "id" | "access") => {
       setLastTokenType(tokenType);
+      console.log("Using ID token:", token.slice(0, 25) + "...");
       try {
         const claims = parseJwt(token);
         setLastTokenClaims(claims ? { iss: claims.iss, aud: claims.aud, client_id: claims.client_id, exp: claims.exp } : null);
@@ -156,9 +170,11 @@ const Admin = () => {
             Authorization: `Bearer ${token}`,
           },
         });
+        console.log("Orders status:", response.status);
         const responseText = await response.text();
         setLastFetchStatus(response.status);
         setLastFetchBody(responseText);
+        console.log("Orders body:", responseText.substring(0, 200));
         let data: any = null;
         try {
           data = responseText ? JSON.parse(responseText) : null;
