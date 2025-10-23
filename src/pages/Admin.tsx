@@ -242,7 +242,15 @@ const Admin = () => {
         }
       },
       (error) => {
+        console.error("[admin] getIdToken error:", error);
         setAuthError(error);
+        setLastFetchStatus(-1);
+        setLastFetchBody(error || "Failed to get ID token");
+        toast({
+          title: "Authentication Error",
+          description: error || "Session expired. Please sign in again.",
+          variant: "destructive",
+        });
         setIsLoading(false);
       }
     );
@@ -536,6 +544,16 @@ const Admin = () => {
                 open={showDebug} 
                 onOpenChange={(open) => {
                   setShowDebug(open);
+                  if (open) {
+                    getCurrentSession(
+                      (session) => {
+                        const idToken = session.getIdToken().getJwtToken();
+                        const claims = parseJwt(idToken);
+                        setLastTokenClaims(claims ? { iss: claims.iss, aud: claims.aud, client_id: claims.client_id, exp: claims.exp } : null);
+                      },
+                      () => {}
+                    );
+                  }
                   if (open && lastFetchStatus === null) {
                     fetchOrders();
                   }
