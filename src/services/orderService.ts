@@ -1,6 +1,7 @@
 import { SpaghettiOrder, OrderResponse } from "@/types/order";
 
-const API_URL = "https://y5w6n0i9vc.execute-api.us-east-1.amazonaws.com/prod/orders";
+const API_BASE = import.meta.env.VITE_API_BASE || "https://y5w6n0i9vc.execute-api.us-east-1.amazonaws.com/prod";
+const API_URL = `${API_BASE}/orders`;
 
 export async function submitSpaghettiOrder(
   orderData: SpaghettiOrder

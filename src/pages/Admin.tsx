@@ -10,7 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { getCurrentSession, signIn, signOut, getIdToken, getAccessToken, parseJwt } from "@/lib/cognito";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
-const API_BASE = "https://y5w6n0i9vc.execute-api.us-east-1.amazonaws.com/prod";
+const API_BASE = import.meta.env.VITE_API_BASE || "https://y5w6n0i9vc.execute-api.us-east-1.amazonaws.com/prod";
 
 interface Order {
   orderId: string;
@@ -45,6 +45,7 @@ const Admin = () => {
 
   // Try to restore session on mount
   useEffect(() => {
+    console.log('API_BASE=', API_BASE);
     getCurrentSession(
       (session) => {
         const idToken = session.getIdToken().getJwtToken();
@@ -138,6 +139,7 @@ const Admin = () => {
 
   const fetchOrders = async (sessionOverride?: any) => {
     console.log("[admin] fetchOrders: starting", sessionOverride ? "with session override" : "fetching session");
+    console.log('Fetching orders from', `${API_BASE}/admin?method=list`);
     setIsLoading(true);
     setNormalizedCount(null);
     const tryFetch = async (token: string, tokenType: "id" | "access") => {
