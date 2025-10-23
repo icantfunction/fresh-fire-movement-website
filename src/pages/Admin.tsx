@@ -137,6 +137,7 @@ const Admin = () => {
   };
 
   const fetchOrders = async () => {
+    console.log("[admin] fetchOrders: starting");
     setIsLoading(true);
     setNormalizedCount(null);
     const tryFetch = async (token: string, tokenType: "id" | "access") => {
@@ -148,6 +149,7 @@ const Admin = () => {
         setLastTokenClaims(null);
       }
       try {
+        console.log("[admin] requesting", `${API_BASE}/admin?method=list`);
         const response = await fetch(`${API_BASE}/admin?method=list`, {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -168,15 +170,22 @@ const Admin = () => {
         }
         return { ok: true, status: response.status, data };
       } catch (err: any) {
+        console.error("[admin] fetch failed", err);
         setLastFetchStatus(-1);
         setLastFetchBody(err?.message || "Network error");
         setLastResponseKeys(null);
+        toast({
+          title: "Network/CORS Error",
+          description: "Failed to connect to the API. Check console for details.",
+          variant: "destructive",
+        });
         return { ok: false, status: -1, data: null };
       }
     };
     
     getIdToken(
       async (idToken) => {
+        console.log("[admin] got ID token");
         try {
           // Try with ID token first
           let result = await tryFetch(idToken, "id");
@@ -404,13 +413,22 @@ const Admin = () => {
                   Logged in as: <span className="font-medium text-fire-purple">{who}</span>
                 </p>
               </div>
-              <Button
-                onClick={handleSignOut}
-                variant="outline"
-                className="border-fire-purple text-fire-purple hover:bg-fire-purple hover:text-white"
-              >
-                Sign Out
-              </Button>
+              <div className="flex gap-2">
+                <Button
+                  onClick={fetchOrders}
+                  variant="secondary"
+                  size="sm"
+                >
+                  Run fetch (debug)
+                </Button>
+                <Button
+                  onClick={handleSignOut}
+                  variant="outline"
+                  className="border-fire-purple text-fire-purple hover:bg-fire-purple hover:text-white"
+                >
+                  Sign Out
+                </Button>
+              </div>
             </div>
             
             <div className="flex gap-4 mb-8">
@@ -514,7 +532,15 @@ const Admin = () => {
             
             {/* Debug Panel */}
             <Card className="mt-8 border-dashed">
-              <Collapsible open={showDebug} onOpenChange={setShowDebug}>
+              <Collapsible 
+                open={showDebug} 
+                onOpenChange={(open) => {
+                  setShowDebug(open);
+                  if (open && lastFetchStatus === null) {
+                    fetchOrders();
+                  }
+                }}
+              >
                 <CollapsibleTrigger asChild>
                   <CardHeader className="cursor-pointer hover:bg-muted/50">
                     <div className="flex items-center justify-between">
@@ -539,28 +565,39 @@ const Admin = () => {
                     <div>
                       <span className="font-semibold">HTTP Status:</span>{" "}
                       <span className={lastFetchStatus === 200 ? "text-green-600" : "text-red-600"}>
-                        {lastFetchStatus || "N/A"}
+                        {lastFetchStatus ?? "N/A"}
                       </span>
                     </div>
-                    {lastTokenType && (
-                      <div>
-                        <span className="font-semibold">Token Audience (first 40 chars):</span>{" "}
-                        <span className="text-muted-foreground break-all">
-                          {(() => {
-                            try {
-                              const tokenParts = lastFetchBody.split('Bearer ');
-                              if (tokenParts.length > 1) {
-                                const claims = parseJwt(tokenParts[1]);
-                                return (claims?.aud || claims?.client_id || "N/A").substring(0, 40);
-                              }
-                              return "N/A";
-                            } catch {
-                              return "N/A";
-                            }
-                          })()}
-                        </span>
-                      </div>
-                    )}
+                    <div>
+                      <span className="font-semibold">Token Issuer:</span>{" "}
+                      <span className="text-muted-foreground break-all">
+                        {lastTokenClaims?.iss || "N/A"}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="font-semibold">Token Audience:</span>{" "}
+                      <span className="text-muted-foreground break-all">
+                        {lastTokenClaims?.aud || lastTokenClaims?.client_id || "N/A"}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="font-semibold">Token Expiration:</span>{" "}
+                      <span className="text-muted-foreground">
+                        {lastTokenClaims?.exp ? new Date(lastTokenClaims.exp * 1000).toISOString() : "N/A"}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="font-semibold">Response Keys:</span>{" "}
+                      <span className="text-muted-foreground">
+                        {lastResponseKeys?.join(", ") || "N/A"}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="font-semibold">Normalized Items:</span>{" "}
+                      <span className="text-muted-foreground">
+                        {normalizedCount ?? "N/A"}
+                      </span>
+                    </div>
                     <div>
                       <span className="font-semibold">Response Body:</span>
                       <pre className="mt-2 p-3 bg-muted rounded text-[10px] overflow-x-auto max-h-48">
