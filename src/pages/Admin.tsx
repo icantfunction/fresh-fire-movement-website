@@ -418,11 +418,6 @@ const Admin = () => {
       setLastFetchBody(responseText);
 
       if (res.status === 404) {
-        toast({
-          title: "Not Found",
-          description: "Order not found (maybe already deleted)",
-          variant: "destructive",
-        });
         // Still remove from UI optimistically
         setOrders((prev) => prev.filter((o) => o.orderId !== orderId));
         setTotalOrders((prev) => Math.max(0, prev - 1));
@@ -439,11 +434,6 @@ const Admin = () => {
 
     } catch (e: any) {
       console.error("[admin] Delete error:", e?.message || e);
-      toast({
-        title: "Error",
-        description: e instanceof Error ? e.message : "Failed to delete order",
-        variant: "destructive",
-      });
     } finally {
       setIsLoading(false);
     }
