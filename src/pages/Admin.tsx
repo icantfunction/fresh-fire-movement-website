@@ -268,105 +268,189 @@ const Admin = () => {
   };
 
   const handleApprove = async (orderId: string) => {
-    const tryApprove = async (token: string, tokenType: "id" | "access") => {
-      setLastTokenType(tokenType);
+    try {
+      setIsLoading(true);
+      console.log("[admin] Approving order:", orderId);
+
+      const pool = new AmazonCognitoIdentity.CognitoUserPool({
+        UserPoolId: USER_POOL_ID,
+        ClientId: CLIENT_ID,
+      });
+
+      // 1) Get session + ID token
+      const session = await getSessionPromise(pool);
+      if (!session?.isValid()) throw new Error("Session invalid");
+      const idToken = session.getIdToken().getJwtToken();
+      console.log("[admin] Using ID token for approve:", idToken.slice(0, 25) + "…");
+
+      setLastTokenType("id");
       try {
-        const claims = parseJwt(token);
+        const claims = parseJwt(idToken);
         setLastTokenClaims(claims ? { iss: claims.iss, aud: claims.aud, client_id: claims.client_id, exp: claims.exp } : null);
       } catch {
         setLastTokenClaims(null);
       }
-      try {
-        const response = await fetch(
-          `${API_BASE}/admin?method=approve&orderId=${encodeURIComponent(orderId)}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-        
-        const responseText = await response.text();
-        setLastFetchStatus(response.status);
-        setLastFetchBody(responseText);
-        setLastResponseKeys(null);
-        
-        return { ok: response.ok, status: response.status };
-      } catch (err: any) {
+
+      // 2) Try with ID token
+      let res = await fetch(`${API_BASE}/admin?method=approve&orderId=${encodeURIComponent(orderId)}`, {
+        headers: { Authorization: `Bearer ${idToken}` },
+      }).catch((e) => {
+        console.error("[admin] approve fetch threw (ID token):", e);
         setLastFetchStatus(-1);
-        setLastFetchBody(err?.message || "Network error");
-        setLastResponseKeys(null);
-        return { ok: false, status: -1 };
-      }
-    };
-    
-    getIdToken(
-      async (idToken) => {
-        try {
-          let result = await tryApprove(idToken, "id");
-          
-          // If 401/403, retry with Access token
-          if (!result.ok && (result.status === 401 || result.status === 403)) {
-            getAccessToken(
-              async (accessToken) => {
-                try {
-                  result = await tryApprove(accessToken, "access");
-                  
-                  if (!result.ok) {
-                    throw new Error(`Failed to approve order: ${result.status}`);
-                  }
-                  
-                  toast({
-                    title: "Success",
-                    description: "Order approved successfully",
-                  });
-                  
-                  fetchOrders();
-                } catch (error) {
-                  toast({
-                    title: "Error",
-                    description: error instanceof Error ? error.message : "Failed to approve order",
-                    variant: "destructive",
-                  });
-                }
-              },
-              (error) => {
-                toast({
-                  title: "Error",
-                  description: error,
-                  variant: "destructive",
-                });
-              }
-            );
-            return;
-          }
-          
-          if (!result.ok) {
-            throw new Error(`Failed to approve order: ${result.status}`);
-          }
-          
-          toast({
-            title: "Success",
-            description: "Order approved successfully",
-          });
-          
-          fetchOrders();
-        } catch (error) {
-          toast({
-            title: "Error",
-            description: error instanceof Error ? error.message : "Failed to approve order",
-            variant: "destructive",
-          });
-        }
-      },
-      (error) => {
-        toast({
-          title: "Error",
-          description: error,
-          variant: "destructive",
+        setLastFetchBody(e?.message || "Network error");
+        throw e;
+      });
+
+      // 3) If unauthorized, retry with Access token
+      if (res.status === 401 || res.status === 403) {
+        const access = session.getAccessToken().getJwtToken();
+        console.log("[admin] Retrying approve with ACCESS token:", access.slice(0, 25) + "…");
+        setLastTokenType("access");
+        
+        res = await fetch(`${API_BASE}/admin?method=approve&orderId=${encodeURIComponent(orderId)}`, {
+          headers: { Authorization: `Bearer ${access}` },
+        }).catch((e) => {
+          console.error("[admin] approve fetch threw (ACCESS token):", e);
+          setLastFetchStatus(-1);
+          setLastFetchBody(e?.message || "Network error");
+          throw e;
         });
       }
-    );
+
+      console.log("[admin] Approve status:", res.status);
+      const responseText = await res.text();
+      setLastFetchStatus(res.status);
+      setLastFetchBody(responseText);
+
+      if (res.status === 404) {
+        toast({
+          title: "Not Found",
+          description: "Order not found (maybe already deleted)",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (!res.ok) {
+        throw new Error(`Failed to approve order: ${res.status}`);
+      }
+
+      toast({
+        title: "Success",
+        description: "Order approved successfully",
+      });
+
+      // Optimistically update UI
+      setOrders((prev) => prev.map((o) => 
+        o.orderId === orderId ? { ...o, status: "approved" } : o
+      ));
+
+    } catch (e: any) {
+      console.error("[admin] Approve error:", e?.message || e);
+      toast({
+        title: "Error",
+        description: e instanceof Error ? e.message : "Failed to approve order",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleDelete = async (orderId: string) => {
+    if (!confirm("Delete this order? This action cannot be undone.")) {
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      console.log("[admin] Deleting order:", orderId);
+
+      const pool = new AmazonCognitoIdentity.CognitoUserPool({
+        UserPoolId: USER_POOL_ID,
+        ClientId: CLIENT_ID,
+      });
+
+      // 1) Get session + ID token
+      const session = await getSessionPromise(pool);
+      if (!session?.isValid()) throw new Error("Session invalid");
+      const idToken = session.getIdToken().getJwtToken();
+      console.log("[admin] Using ID token for delete:", idToken.slice(0, 25) + "…");
+
+      setLastTokenType("id");
+      try {
+        const claims = parseJwt(idToken);
+        setLastTokenClaims(claims ? { iss: claims.iss, aud: claims.aud, client_id: claims.client_id, exp: claims.exp } : null);
+      } catch {
+        setLastTokenClaims(null);
+      }
+
+      // 2) Try with ID token
+      let res = await fetch(`${API_BASE}/admin?method=delete&orderId=${encodeURIComponent(orderId)}`, {
+        headers: { Authorization: `Bearer ${idToken}` },
+      }).catch((e) => {
+        console.error("[admin] delete fetch threw (ID token):", e);
+        setLastFetchStatus(-1);
+        setLastFetchBody(e?.message || "Network error");
+        throw e;
+      });
+
+      // 3) If unauthorized, retry with Access token
+      if (res.status === 401 || res.status === 403) {
+        const access = session.getAccessToken().getJwtToken();
+        console.log("[admin] Retrying delete with ACCESS token:", access.slice(0, 25) + "…");
+        setLastTokenType("access");
+        
+        res = await fetch(`${API_BASE}/admin?method=delete&orderId=${encodeURIComponent(orderId)}`, {
+          headers: { Authorization: `Bearer ${access}` },
+        }).catch((e) => {
+          console.error("[admin] delete fetch threw (ACCESS token):", e);
+          setLastFetchStatus(-1);
+          setLastFetchBody(e?.message || "Network error");
+          throw e;
+        });
+      }
+
+      console.log("[admin] Delete status:", res.status);
+      const responseText = await res.text();
+      setLastFetchStatus(res.status);
+      setLastFetchBody(responseText);
+
+      if (res.status === 404) {
+        toast({
+          title: "Not Found",
+          description: "Order not found (maybe already deleted)",
+          variant: "destructive",
+        });
+        // Still remove from UI optimistically
+        setOrders((prev) => prev.filter((o) => o.orderId !== orderId));
+        setTotalOrders((prev) => Math.max(0, prev - 1));
+        return;
+      }
+
+      if (!res.ok) {
+        throw new Error(`Failed to delete order: ${res.status}`);
+      }
+
+      toast({
+        title: "Success",
+        description: "Order deleted successfully",
+      });
+
+      // Optimistically remove from UI
+      setOrders((prev) => prev.filter((o) => o.orderId !== orderId));
+      setTotalOrders((prev) => Math.max(0, prev - 1));
+
+    } catch (e: any) {
+      console.error("[admin] Delete error:", e?.message || e);
+      toast({
+        title: "Error",
+        description: e instanceof Error ? e.message : "Failed to delete order",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -492,18 +576,19 @@ const Admin = () => {
                       <TableHead>Status</TableHead>
                       <TableHead>Special Instructions</TableHead>
                       <TableHead>Date</TableHead>
+                      <TableHead>Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {isLoading ? (
                       <TableRow>
-                        <TableCell colSpan={7} className="text-center">
+                        <TableCell colSpan={8} className="text-center">
                           <Loader2 className="h-6 w-6 animate-spin mx-auto" />
                         </TableCell>
                       </TableRow>
                     ) : orders.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={7} className="text-center text-muted-foreground">
+                        <TableCell colSpan={8} className="text-center text-muted-foreground">
                           No orders yet
                         </TableCell>
                       </TableRow>
@@ -528,6 +613,28 @@ const Admin = () => {
                           <TableCell>{order.specialInstructions || "-"}</TableCell>
                           <TableCell>
                             {new Date(order.createdAt).toLocaleDateString()}
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex gap-2">
+                              {order.status === "pending" && (
+                                <Button
+                                  size="sm"
+                                  onClick={() => handleApprove(order.orderId)}
+                                  className="bg-fire-purple hover:bg-fire-purple/90"
+                                  disabled={isLoading}
+                                >
+                                  Approve
+                                </Button>
+                              )}
+                              <Button
+                                size="sm"
+                                variant="destructive"
+                                onClick={() => handleDelete(order.orderId)}
+                                disabled={isLoading}
+                              >
+                                Delete
+                              </Button>
+                            </div>
                           </TableCell>
                         </TableRow>
                       ))
