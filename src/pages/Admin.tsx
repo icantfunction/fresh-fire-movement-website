@@ -433,11 +433,6 @@ const Admin = () => {
         throw new Error(`Failed to delete order: ${res.status}`);
       }
 
-      toast({
-        title: "Success",
-        description: "Order deleted successfully",
-      });
-
       // Optimistically remove from UI
       setOrders((prev) => prev.filter((o) => o.orderId !== orderId));
       setTotalOrders((prev) => Math.max(0, prev - 1));
