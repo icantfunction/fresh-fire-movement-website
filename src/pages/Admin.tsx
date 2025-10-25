@@ -562,7 +562,6 @@ const Admin = () => {
                           <TableHead className="min-w-[180px]">Email</TableHead>
                           <TableHead className="min-w-[80px]">Quantity</TableHead>
                           <TableHead className="min-w-[100px]">Status</TableHead>
-                          <TableHead className="min-w-[200px]">Special Instructions</TableHead>
                           <TableHead className="min-w-[120px]">Date</TableHead>
                           <TableHead className="sticky right-0 bg-card shadow-[-4px_0_8px_rgba(0,0,0,0.1)] min-w-[180px]">Actions</TableHead>
                         </TableRow>
@@ -570,13 +569,13 @@ const Admin = () => {
                       <TableBody>
                         {isLoading ? (
                           <TableRow>
-                            <TableCell colSpan={8} className="text-center">
+                            <TableCell colSpan={7} className="text-center">
                               <Loader2 className="h-6 w-6 animate-spin mx-auto" />
                             </TableCell>
                           </TableRow>
                         ) : orders.length === 0 ? (
                           <TableRow>
-                            <TableCell colSpan={8} className="text-center text-muted-foreground">
+                            <TableCell colSpan={7} className="text-center text-muted-foreground">
                               No orders yet
                             </TableCell>
                           </TableRow>
@@ -598,7 +597,6 @@ const Admin = () => {
                                   {order.status}
                                 </span>
                               </TableCell>
-                              <TableCell className="min-w-[200px]">{order.specialInstructions || "-"}</TableCell>
                               <TableCell className="min-w-[120px]">
                                 {new Date(order.createdAt).toLocaleDateString()}
                               </TableCell>

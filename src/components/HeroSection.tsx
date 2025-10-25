@@ -2,7 +2,6 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Instagram, ExternalLink, Info, Users, Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState } from "react";
@@ -31,7 +30,6 @@ const HeroSection = () => {
       phone: "",
       email: "",
       quantity: 1,
-      notes: "",
     },
   });
 
@@ -44,7 +42,6 @@ const HeroSection = () => {
         phone: data.phone,
         email: data.email || undefined,
         quantity: data.quantity,
-        notes: data.notes || undefined,
       });
 
       toast({
@@ -247,24 +244,7 @@ const HeroSection = () => {
                       )}
                     />
                     
-                    <FormField
-                      control={form.control}
-                      name="notes"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Special Instructions (Optional)</FormLabel>
-                          <FormControl>
-                            <Textarea 
-                              placeholder="Any dietary restrictions or special requests..." 
-                              {...field} 
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <Button 
+                    <Button
                       type="submit" 
                       className="w-full bg-fire-gold hover:bg-fire-gold/90"
                       disabled={isSubmitting}
