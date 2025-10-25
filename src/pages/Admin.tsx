@@ -9,6 +9,7 @@ import { Loader2, ChevronDown, ChevronUp } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { getCurrentSession, signIn, signOut, getIdToken, getAccessToken, parseJwt } from "@/lib/cognito";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import * as AmazonCognitoIdentity from "amazon-cognito-identity-js";
 
 const USER_POOL_ID = import.meta.env.VITE_COGNITO_USER_POOL_ID || "us-east-1_TkrYyBz2T";
@@ -565,82 +566,86 @@ const Admin = () => {
                 <CardTitle>Recent Orders</CardTitle>
                 <CardDescription>Latest Haitian spaghetti orders</CardDescription>
               </CardHeader>
-              <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Name</TableHead>
-                      <TableHead>Phone</TableHead>
-                      <TableHead>Email</TableHead>
-                      <TableHead>Quantity</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Special Instructions</TableHead>
-                      <TableHead>Date</TableHead>
-                      <TableHead>Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {isLoading ? (
-                      <TableRow>
-                        <TableCell colSpan={8} className="text-center">
-                          <Loader2 className="h-6 w-6 animate-spin mx-auto" />
-                        </TableCell>
-                      </TableRow>
-                    ) : orders.length === 0 ? (
-                      <TableRow>
-                        <TableCell colSpan={8} className="text-center text-muted-foreground">
-                          No orders yet
-                        </TableCell>
-                      </TableRow>
-                    ) : (
-                      orders.map((order) => (
-                        <TableRow key={order.orderId}>
-                          <TableCell>{order.name}</TableCell>
-                          <TableCell>{order.phone}</TableCell>
-                          <TableCell>{order.email}</TableCell>
-                          <TableCell>{order.quantity}</TableCell>
-                          <TableCell>
-                            <span
-                              className={`px-2 py-1 rounded-full text-xs ${
-                                order.status === "approved"
-                                  ? "bg-green-100 text-green-800"
-                                  : "bg-yellow-100 text-yellow-800"
-                              }`}
-                            >
-                              {order.status}
-                            </span>
-                          </TableCell>
-                          <TableCell>{order.specialInstructions || "-"}</TableCell>
-                          <TableCell>
-                            {new Date(order.createdAt).toLocaleDateString()}
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex gap-2">
-                              {order.status === "pending" && (
-                                <Button
-                                  size="sm"
-                                  onClick={() => handleApprove(order.orderId)}
-                                  className="bg-fire-purple hover:bg-fire-purple/90"
-                                  disabled={isLoading}
-                                >
-                                  Approve
-                                </Button>
-                              )}
-                              <Button
-                                size="sm"
-                                variant="destructive"
-                                onClick={() => handleDelete(order.orderId)}
-                                disabled={isLoading}
-                              >
-                                Delete
-                              </Button>
-                            </div>
-                          </TableCell>
+              <CardContent className="p-0">
+                <ScrollArea className="h-[600px] w-full">
+                  <div className="min-w-max">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="min-w-[150px]">Name</TableHead>
+                          <TableHead className="min-w-[120px]">Phone</TableHead>
+                          <TableHead className="min-w-[180px]">Email</TableHead>
+                          <TableHead className="min-w-[80px]">Quantity</TableHead>
+                          <TableHead className="min-w-[100px]">Status</TableHead>
+                          <TableHead className="min-w-[200px]">Special Instructions</TableHead>
+                          <TableHead className="min-w-[120px]">Date</TableHead>
+                          <TableHead className="sticky right-0 bg-card shadow-[-4px_0_8px_rgba(0,0,0,0.1)] min-w-[180px]">Actions</TableHead>
                         </TableRow>
-                      ))
-                    )}
-                  </TableBody>
-                </Table>
+                      </TableHeader>
+                      <TableBody>
+                        {isLoading ? (
+                          <TableRow>
+                            <TableCell colSpan={8} className="text-center">
+                              <Loader2 className="h-6 w-6 animate-spin mx-auto" />
+                            </TableCell>
+                          </TableRow>
+                        ) : orders.length === 0 ? (
+                          <TableRow>
+                            <TableCell colSpan={8} className="text-center text-muted-foreground">
+                              No orders yet
+                            </TableCell>
+                          </TableRow>
+                        ) : (
+                          orders.map((order) => (
+                            <TableRow key={order.orderId}>
+                              <TableCell className="min-w-[150px]">{order.name}</TableCell>
+                              <TableCell className="min-w-[120px]">{order.phone}</TableCell>
+                              <TableCell className="min-w-[180px]">{order.email}</TableCell>
+                              <TableCell className="min-w-[80px]">{order.quantity}</TableCell>
+                              <TableCell className="min-w-[100px]">
+                                <span
+                                  className={`px-2 py-1 rounded-full text-xs ${
+                                    order.status === "approved"
+                                      ? "bg-green-100 text-green-800"
+                                      : "bg-yellow-100 text-yellow-800"
+                                  }`}
+                                >
+                                  {order.status}
+                                </span>
+                              </TableCell>
+                              <TableCell className="min-w-[200px]">{order.specialInstructions || "-"}</TableCell>
+                              <TableCell className="min-w-[120px]">
+                                {new Date(order.createdAt).toLocaleDateString()}
+                              </TableCell>
+                              <TableCell className="sticky right-0 bg-card shadow-[-4px_0_8px_rgba(0,0,0,0.1)] min-w-[180px]">
+                                <div className="flex gap-2">
+                                  {order.status === "pending" && (
+                                    <Button
+                                      size="sm"
+                                      onClick={() => handleApprove(order.orderId)}
+                                      className="bg-fire-purple hover:bg-fire-purple/90"
+                                      disabled={isLoading}
+                                    >
+                                      Approve
+                                    </Button>
+                                  )}
+                                  <Button
+                                    size="sm"
+                                    variant="destructive"
+                                    onClick={() => handleDelete(order.orderId)}
+                                    disabled={isLoading}
+                                  >
+                                    Delete
+                                  </Button>
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          ))
+                        )}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </ScrollArea>
               </CardContent>
             </Card>
             
