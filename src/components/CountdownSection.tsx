@@ -10,8 +10,8 @@ const CountdownSection = () => {
     seconds: 0
   });
 
-  // Set target date - you can modify this to the actual event date
-  const targetDate = new Date('2025-12-14T19:00:00').getTime();
+  // Set target date - December 14th, 2025 at 9:00 AM
+  const targetDate = new Date('2025-12-14T09:00:00').getTime();
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -68,8 +68,12 @@ const CountdownSection = () => {
               2699 W Commercial Blvd, Fort Lauderdale, FL
             </div>
             <div className="flex items-center justify-center gap-2">
+              <Calendar className="w-5 h-5 text-fire-gold" />
+              <span className="text-lg font-semibold">December 14th</span>
+            </div>
+            <div className="flex items-center justify-center gap-2">
               <Clock className="w-5 h-5 text-fire-gold" />
-              <span className="text-lg font-semibold">7:00 PM</span>
+              <span className="text-lg font-semibold">9:00 AM</span>
             </div>
           </div>
         </div>
