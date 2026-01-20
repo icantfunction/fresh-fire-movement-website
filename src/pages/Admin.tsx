@@ -101,6 +101,20 @@ const Admin = () => {
   const [normalizedCount, setNormalizedCount] = useState<number | null>(null);
   const [showDebug, setShowDebug] = useState(false);
 
+  const isAuthMissing = (error: unknown) => {
+    const message = error instanceof Error ? error.message : String(error);
+    return message === "No current user" || message === "Not authenticated" || message === "Session invalid";
+  };
+
+  const handleAuthFailure = (error: unknown) => {
+    if (!isAuthMissing(error)) {
+      return false;
+    }
+    setWho(null);
+    setAuthError("Session expired. Please sign in again.");
+    return true;
+  };
+
   // Try to restore session on mount
   useEffect(() => {
     getCurrentSession(
@@ -141,7 +155,6 @@ const Admin = () => {
         setPassword("");
         setIsSigningIn(false);
         log("[admin] API_BASE on login:", API_BASE);
-        fetchOrders();
       },
       onFailure: (error) => {
         setAuthError(error);
@@ -308,6 +321,9 @@ const Admin = () => {
         setNormalizedCount(items.length);
       }
     } catch (e: any) {
+      if (handleAuthFailure(e)) {
+        return;
+      }
       console.error("[admin] fetchOrders error:", e?.message || e);
       toast({
         title: "Error",
@@ -357,6 +373,9 @@ const Admin = () => {
       setWorkshopRegistrations(items);
       setTotalRegistrations(items.length);
     } catch (e: any) {
+      if (handleAuthFailure(e)) {
+        return;
+      }
       console.error("[admin] fetchWorkshopRegistrations error:", e?.message || e);
       toast({
         title: "Error",
@@ -391,6 +410,9 @@ const Admin = () => {
         )
       );
     } catch (e: any) {
+      if (handleAuthFailure(e)) {
+        return;
+      }
       console.error("[admin] Attendance update error:", e?.message || e);
       toast({
         title: "Error",
@@ -484,6 +506,9 @@ const Admin = () => {
       ));
 
     } catch (e: any) {
+      if (handleAuthFailure(e)) {
+        return;
+      }
       console.error("[admin] Approve error:", e?.message || e);
       toast({
         title: "Error",
@@ -573,6 +598,9 @@ const Admin = () => {
       setTotalOrders((prev) => Math.max(0, prev - 1));
 
     } catch (e: any) {
+      if (handleAuthFailure(e)) {
+        return;
+      }
       console.error("[admin] Delete error:", e?.message || e);
     } finally {
       setIsLoading(false);
