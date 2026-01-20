@@ -27,44 +27,6 @@ log("[admin] API_BASE =", API_BASE);
 const WORKSHOP_API = `${API_BASE}/workshop`;
 const WORKSHOP_ATTENDANCE_API = `${API_BASE}/workshop/attendance`;
 
-// Helper to get Cognito session as Promise
-function getSessionPromise() {
-  return new Promise<CognitoUserSession>((resolve, reject) => {
-    const maxAttempts = 5;
-    const attempt = (attemptsLeft: number) => {
-      const user = userPool.getCurrentUser();
-      if (!user) {
-        if (attemptsLeft <= 0) {
-          reject(new Error("No current user"));
-          return;
-        }
-        setTimeout(() => attempt(attemptsLeft - 1), 200);
-        return;
-      }
-      user.getSession((err, sess) => (err ? reject(err) : resolve(sess)));
-    };
-
-    attempt(maxAttempts);
-  });
-}
-
-async function fetchWithAuth(url: string, options: RequestInit = {}) {
-  const session = await getSessionPromise();
-  if (!session?.isValid()) throw new Error("Session invalid");
-
-  const headers = new Headers(options.headers || {});
-  headers.set("Authorization", `Bearer ${session.getIdToken().getJwtToken()}`);
-
-  let res = await fetch(url, { ...options, headers });
-  if (res.status === 401 || res.status === 403) {
-    const retryHeaders = new Headers(options.headers || {});
-    retryHeaders.set("Authorization", `Bearer ${session.getAccessToken().getJwtToken()}`);
-    res = await fetch(url, { ...options, headers: retryHeaders });
-  }
-
-  return res;
-}
-
 interface Order {
   orderId: string;
   name: string;
@@ -96,6 +58,7 @@ const Admin = () => {
   const [password, setPassword] = useState("");
   const [who, setWho] = useState<string | null>(null);
   const [authError, setAuthError] = useState("");
+  const [activeSession, setActiveSession] = useState<CognitoUserSession | null>(null);
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isSigningIn, setIsSigningIn] = useState(false);
@@ -114,6 +77,54 @@ const Admin = () => {
   const [showDebug, setShowDebug] = useState(false);
   const authToastRef = useRef(0);
 
+  const getSessionPromise = () =>
+    new Promise<CognitoUserSession>((resolve, reject) => {
+      if (activeSession?.isValid()) {
+        resolve(activeSession);
+        return;
+      }
+
+      const maxAttempts = 5;
+      const attempt = (attemptsLeft: number) => {
+        const user = userPool.getCurrentUser();
+        if (!user) {
+          if (attemptsLeft <= 0) {
+            reject(new Error("No current user"));
+            return;
+          }
+          setTimeout(() => attempt(attemptsLeft - 1), 200);
+          return;
+        }
+        user.getSession((err, sess) => {
+          if (err || !sess?.isValid()) {
+            reject(err || new Error("Session invalid"));
+            return;
+          }
+          setActiveSession(sess);
+          resolve(sess);
+        });
+      };
+
+      attempt(maxAttempts);
+    });
+
+  const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
+    const session = await getSessionPromise();
+    if (!session?.isValid()) throw new Error("Session invalid");
+
+    const headers = new Headers(options.headers || {});
+    headers.set("Authorization", `Bearer ${session.getIdToken().getJwtToken()}`);
+
+    let res = await fetch(url, { ...options, headers });
+    if (res.status === 401 || res.status === 403) {
+      const retryHeaders = new Headers(options.headers || {});
+      retryHeaders.set("Authorization", `Bearer ${session.getAccessToken().getJwtToken()}`);
+      res = await fetch(url, { ...options, headers: retryHeaders });
+    }
+
+    return res;
+  };
+
   const isAuthMissing = (error: unknown) => {
     const message = error instanceof Error ? error.message : String(error);
     return message === "No current user" || message === "Not authenticated" || message === "Session invalid";
@@ -124,6 +135,7 @@ const Admin = () => {
       return false;
     }
     setWho(null);
+    setActiveSession(null);
     setAuthError("Session expired. Please sign in again.");
     const now = Date.now();
     if (now - authToastRef.current > 2000) {
@@ -144,22 +156,24 @@ const Admin = () => {
         const idToken = session.getIdToken().getJwtToken();
         const claims = parseJwt(idToken);
         setWho(claims?.email || claims?.["cognito:username"] || "admin");
-        // fetchOrders() will be triggered by the useEffect([who]) below
+        setActiveSession(session);
+        // fetchOrders() will be triggered by the useEffect([activeSession]) below
       },
       () => {
         setWho(null);
+        setActiveSession(null);
       }
     );
   }, []);
 
   // Fetch orders when user session is restored
   useEffect(() => {
-    if (who) {
+    if (activeSession) {
       log("[admin] Session present; fetching orders...");
       fetchOrders();
       fetchWorkshopRegistrations();
     }
-  }, [who]);
+  }, [activeSession]);
 
   const handleSignIn = () => {
     setAuthError("");
@@ -174,6 +188,7 @@ const Admin = () => {
         const idToken = session.getIdToken().getJwtToken();
         const claims = parseJwt(idToken);
         setWho(claims?.email || claims?.["cognito:username"] || username);
+        setActiveSession(session);
         setPassword("");
         setIsSigningIn(false);
         log("[admin] API_BASE on login:", API_BASE);
@@ -196,6 +211,7 @@ const Admin = () => {
   const handleSignOut = () => {
     signOut();
     setWho(null);
+    setActiveSession(null);
     setOrders([]);
     setTotalOrders(0);
     setWorkshopRegistrations([]);
