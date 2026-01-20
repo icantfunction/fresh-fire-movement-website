@@ -30,9 +30,21 @@ const WORKSHOP_ATTENDANCE_API = `${API_BASE}/workshop/attendance`;
 // Helper to get Cognito session as Promise
 function getSessionPromise() {
   return new Promise<CognitoUserSession>((resolve, reject) => {
-    const user = userPool.getCurrentUser();
-    if (!user) return reject(new Error("No current user"));
-    user.getSession((err, sess) => (err ? reject(err) : resolve(sess)));
+    const maxAttempts = 5;
+    const attempt = (attemptsLeft: number) => {
+      const user = userPool.getCurrentUser();
+      if (!user) {
+        if (attemptsLeft <= 0) {
+          reject(new Error("No current user"));
+          return;
+        }
+        setTimeout(() => attempt(attemptsLeft - 1), 200);
+        return;
+      }
+      user.getSession((err, sess) => (err ? reject(err) : resolve(sess)));
+    };
+
+    attempt(maxAttempts);
   });
 }
 
