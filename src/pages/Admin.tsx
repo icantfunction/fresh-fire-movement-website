@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
@@ -100,6 +100,7 @@ const Admin = () => {
   const [lastResponseKeys, setLastResponseKeys] = useState<string[] | null>(null);
   const [normalizedCount, setNormalizedCount] = useState<number | null>(null);
   const [showDebug, setShowDebug] = useState(false);
+  const authToastRef = useRef(0);
 
   const isAuthMissing = (error: unknown) => {
     const message = error instanceof Error ? error.message : String(error);
@@ -112,6 +113,15 @@ const Admin = () => {
     }
     setWho(null);
     setAuthError("Session expired. Please sign in again.");
+    const now = Date.now();
+    if (now - authToastRef.current > 2000) {
+      authToastRef.current = now;
+      toast({
+        title: "Session expired",
+        description: "Please sign in again to continue.",
+        variant: "destructive",
+      });
+    }
     return true;
   };
 
