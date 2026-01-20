@@ -7,27 +7,50 @@ import { Label } from "@/components/ui/label";
 import Navigation from "@/components/Navigation";
 import { Loader2, ChevronDown, ChevronUp } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { getCurrentSession, signIn, signOut, getIdToken, getAccessToken, parseJwt } from "@/lib/cognito";
+import { getCurrentSession, signIn, signOut, parseJwt, userPool } from "@/lib/cognito";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import * as AmazonCognitoIdentity from "amazon-cognito-identity-js";
-
-const USER_POOL_ID = import.meta.env.VITE_COGNITO_USER_POOL_ID || "us-east-1_TkrYyBz2T";
-const CLIENT_ID = import.meta.env.VITE_COGNITO_CLIENT_ID || "5a0jpdmleoq56l76otr1udlue5";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import type { CognitoUserSession } from "amazon-cognito-identity-js";
 
 const API_BASE =
   import.meta.env.VITE_API_BASE ||
   (typeof process !== "undefined" ? (process as any)?.env?.REACT_APP_API_BASE : undefined) ||
   "https://y5w6n0i9vc.execute-api.us-east-1.amazonaws.com/prod";
-console.log("[admin] API_BASE =", API_BASE);
+const isDev = import.meta.env.DEV;
+const log = (...args: unknown[]) => {
+  if (isDev) {
+    console.log(...args);
+  }
+};
+log("[admin] API_BASE =", API_BASE);
+const WORKSHOP_API = `${API_BASE}/workshop`;
+const WORKSHOP_ATTENDANCE_API = `${API_BASE}/workshop/attendance`;
 
 // Helper to get Cognito session as Promise
-function getSessionPromise(pool: AmazonCognitoIdentity.CognitoUserPool) {
-  return new Promise<AmazonCognitoIdentity.CognitoUserSession>((resolve, reject) => {
-    const user = pool.getCurrentUser();
+function getSessionPromise() {
+  return new Promise<CognitoUserSession>((resolve, reject) => {
+    const user = userPool.getCurrentUser();
     if (!user) return reject(new Error("No current user"));
     user.getSession((err, sess) => (err ? reject(err) : resolve(sess)));
   });
+}
+
+async function fetchWithAuth(url: string, options: RequestInit = {}) {
+  const session = await getSessionPromise();
+  if (!session?.isValid()) throw new Error("Session invalid");
+
+  const headers = new Headers(options.headers || {});
+  headers.set("Authorization", `Bearer ${session.getIdToken().getJwtToken()}`);
+
+  let res = await fetch(url, { ...options, headers });
+  if (res.status === 401 || res.status === 403) {
+    const retryHeaders = new Headers(options.headers || {});
+    retryHeaders.set("Authorization", `Bearer ${session.getAccessToken().getJwtToken()}`);
+    res = await fetch(url, { ...options, headers: retryHeaders });
+  }
+
+  return res;
 }
 
 interface Order {
@@ -41,6 +64,20 @@ interface Order {
   createdAt: string;
 }
 
+interface WorkshopRegistration {
+  registrationId: string;
+  firstName: string;
+  lastName: string;
+  phoneNumber: string;
+  yearsAtClc: number;
+  encounterCollide: boolean;
+  dateOfBirth: string;
+  grade: string;
+  audition: boolean;
+  present: boolean;
+  createdAt: string;
+}
+
 const Admin = () => {
   const { toast } = useToast();
   const [username, setUsername] = useState("");
@@ -51,6 +88,9 @@ const Admin = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isSigningIn, setIsSigningIn] = useState(false);
   const [totalOrders, setTotalOrders] = useState(0);
+  const [workshopRegistrations, setWorkshopRegistrations] = useState<WorkshopRegistration[]>([]);
+  const [isWorkshopLoading, setIsWorkshopLoading] = useState(false);
+  const [totalRegistrations, setTotalRegistrations] = useState(0);
   
   // Debug state
   const [lastFetchStatus, setLastFetchStatus] = useState<number | null>(null);
@@ -79,8 +119,9 @@ const Admin = () => {
   // Fetch orders when user session is restored
   useEffect(() => {
     if (who) {
-      console.log("[admin] Session present; fetching orders…");
+      log("[admin] Session present; fetching orders...");
       fetchOrders();
+      fetchWorkshopRegistrations();
     }
   }, [who]);
 
@@ -99,7 +140,7 @@ const Admin = () => {
         setWho(claims?.email || claims?.["cognito:username"] || username);
         setPassword("");
         setIsSigningIn(false);
-        console.log("[admin] API_BASE on login:", API_BASE);
+        log("[admin] API_BASE on login:", API_BASE);
         fetchOrders();
       },
       onFailure: (error) => {
@@ -122,6 +163,8 @@ const Admin = () => {
     setWho(null);
     setOrders([]);
     setTotalOrders(0);
+    setWorkshopRegistrations([]);
+    setTotalRegistrations(0);
     setUsername("");
     setPassword("");
   };
@@ -166,23 +209,19 @@ const Admin = () => {
   const fetchOrders = async () => {
     try {
       setIsLoading(true);
-      console.log("[admin] fetchOrders: starting");
-      console.log("[admin] Fetching orders from", `${API_BASE}/admin?method=list`);
-      setNormalizedCount(null);
-
-      const pool = new AmazonCognitoIdentity.CognitoUserPool({
-        UserPoolId: USER_POOL_ID,
-        ClientId: CLIENT_ID,
-      });
+      log("[admin] fetchOrders: starting");
+      log("[admin] Fetching orders from", `${API_BASE}/admin?method=list`);
+      if (isDev) {
+        setNormalizedCount(null);
+      }
 
       // 1) Get session + ID token
-      const session = await getSessionPromise(pool);
+      const session = await getSessionPromise();
       if (!session?.isValid()) throw new Error("Session invalid");
       const idToken = session.getIdToken().getJwtToken();
-      console.log("[admin] Using ID token:", idToken.slice(0, 25) + "…");
-
       // Helper to log token claims
-      const logTokenClaims = (token: string, type: string) => {
+      const logTokenClaims = (token: string) => {
+        if (!isDev) return;
         try {
           const claims = parseJwt(token);
           setLastTokenClaims(claims ? { iss: claims.iss, aud: claims.aud, client_id: claims.client_id, exp: claims.exp } : null);
@@ -191,17 +230,21 @@ const Admin = () => {
         }
       };
 
-      logTokenClaims(idToken, "id");
-      setLastTokenType("id");
+      logTokenClaims(idToken);
+      if (isDev) {
+        setLastTokenType("id");
+      }
 
       // 2) Try with ID token
       let res = await fetch(`${API_BASE}/admin?method=list`, {
         headers: { Authorization: `Bearer ${idToken}` },
       }).catch((e) => {
         console.error("[admin] fetch threw (ID token):", e);
-        setLastFetchStatus(-1);
-        setLastFetchBody(e?.message || "Network error");
-        setLastResponseKeys(null);
+        if (isDev) {
+          setLastFetchStatus(-1);
+          setLastFetchBody(e?.message || "Network error");
+          setLastResponseKeys(null);
+        }
         toast({
           title: "Network/CORS Error",
           description: "Failed to connect to the API. Check console for details.",
@@ -213,17 +256,20 @@ const Admin = () => {
       // 3) If unauthorized, retry with Access token
       if (res.status === 401 || res.status === 403) {
         const access = session.getAccessToken().getJwtToken();
-        console.log("[admin] Retrying with ACCESS token:", access.slice(0, 25) + "…");
-        logTokenClaims(access, "access");
-        setLastTokenType("access");
+        logTokenClaims(access);
+        if (isDev) {
+          setLastTokenType("access");
+        }
         
         res = await fetch(`${API_BASE}/admin?method=list`, {
           headers: { Authorization: `Bearer ${access}` },
         }).catch((e) => {
           console.error("[admin] fetch threw (ACCESS token):", e);
-          setLastFetchStatus(-1);
-          setLastFetchBody(e?.message || "Network error");
-          setLastResponseKeys(null);
+          if (isDev) {
+            setLastFetchStatus(-1);
+            setLastFetchBody(e?.message || "Network error");
+            setLastResponseKeys(null);
+          }
           toast({
             title: "Network/CORS Error",
             description: "Failed to connect to the API. Check console for details.",
@@ -233,11 +279,12 @@ const Admin = () => {
         });
       }
 
-      console.log("[admin] Orders status:", res.status);
+      log("[admin] Orders status:", res.status);
       const responseText = await res.text();
-      setLastFetchStatus(res.status);
-      setLastFetchBody(responseText);
-      console.log("[admin] Orders body:", responseText.substring(0, 200));
+      if (isDev) {
+        setLastFetchStatus(res.status);
+        setLastFetchBody(responseText);
+      }
 
       let data: any = null;
       try {
@@ -246,7 +293,9 @@ const Admin = () => {
         data = null;
       }
 
-      setLastResponseKeys(data && typeof data === "object" ? Object.keys(data) : null);
+      if (isDev) {
+        setLastResponseKeys(data && typeof data === "object" ? Object.keys(data) : null);
+      }
 
       if (!res.ok) {
         throw new Error(`Failed to fetch orders: ${res.status}`);
@@ -255,7 +304,9 @@ const Admin = () => {
       const items = normalizeOrders(data);
       setOrders(items);
       setTotalOrders(items.length);
-      setNormalizedCount(items.length);
+      if (isDev) {
+        setNormalizedCount(items.length);
+      }
     } catch (e: any) {
       console.error("[admin] fetchOrders error:", e?.message || e);
       toast({
@@ -268,28 +319,107 @@ const Admin = () => {
     }
   };
 
+  const normalizeWorkshopRegistrations = (payload: any): WorkshopRegistration[] => {
+    const raw = payload?.items ?? payload?.registrations ?? payload ?? [];
+    const arr = Array.isArray(raw) ? raw : [];
+    return arr.map((item: any) => ({
+      registrationId: item.registrationId ?? item.id ?? "",
+      firstName: item.firstName ?? "",
+      lastName: item.lastName ?? "",
+      phoneNumber: item.phoneNumber ?? item.phone ?? "",
+      yearsAtClc: Number(item.yearsAtClc ?? 0),
+      encounterCollide: !!item.encounterCollide,
+      dateOfBirth: item.dateOfBirth ?? "",
+      grade: item.grade ?? "",
+      audition: !!item.audition,
+      present: !!item.present,
+      createdAt: item.createdAt ?? "",
+    }));
+  };
+
+  const fetchWorkshopRegistrations = async () => {
+    try {
+      setIsWorkshopLoading(true);
+      const res = await fetchWithAuth(WORKSHOP_API);
+      const responseText = await res.text();
+      let data: any = null;
+      try {
+        data = responseText ? JSON.parse(responseText) : null;
+      } catch {
+        data = null;
+      }
+
+      if (!res.ok) {
+        throw new Error(`Failed to fetch registrations: ${res.status}`);
+      }
+
+      const items = normalizeWorkshopRegistrations(data);
+      setWorkshopRegistrations(items);
+      setTotalRegistrations(items.length);
+    } catch (e: any) {
+      console.error("[admin] fetchWorkshopRegistrations error:", e?.message || e);
+      toast({
+        title: "Error",
+        description: e instanceof Error ? e.message : "Failed to fetch registrations",
+        variant: "destructive",
+      });
+    } finally {
+      setIsWorkshopLoading(false);
+    }
+  };
+
+  const handleAttendanceToggle = async (registrationId: string, present: boolean) => {
+    try {
+      setIsWorkshopLoading(true);
+      const res = await fetchWithAuth(WORKSHOP_ATTENDANCE_API, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ registrationId, present }),
+      });
+
+      if (!res.ok) {
+        throw new Error(`Failed to update attendance: ${res.status}`);
+      }
+
+      setWorkshopRegistrations((prev) =>
+        prev.map((registration) =>
+          registration.registrationId === registrationId
+            ? { ...registration, present }
+            : registration
+        )
+      );
+    } catch (e: any) {
+      console.error("[admin] Attendance update error:", e?.message || e);
+      toast({
+        title: "Error",
+        description: e instanceof Error ? e.message : "Failed to update attendance",
+        variant: "destructive",
+      });
+    } finally {
+      setIsWorkshopLoading(false);
+    }
+  };
+
   const handleApprove = async (orderId: string) => {
     try {
       setIsLoading(true);
-      console.log("[admin] Approving order:", orderId);
-
-      const pool = new AmazonCognitoIdentity.CognitoUserPool({
-        UserPoolId: USER_POOL_ID,
-        ClientId: CLIENT_ID,
-      });
+      log("[admin] Approving order:", orderId);
 
       // 1) Get session + ID token
-      const session = await getSessionPromise(pool);
+      const session = await getSessionPromise();
       if (!session?.isValid()) throw new Error("Session invalid");
       const idToken = session.getIdToken().getJwtToken();
-      console.log("[admin] Using ID token for approve:", idToken.slice(0, 25) + "…");
 
-      setLastTokenType("id");
-      try {
-        const claims = parseJwt(idToken);
-        setLastTokenClaims(claims ? { iss: claims.iss, aud: claims.aud, client_id: claims.client_id, exp: claims.exp } : null);
-      } catch {
-        setLastTokenClaims(null);
+      if (isDev) {
+        setLastTokenType("id");
+        try {
+          const claims = parseJwt(idToken);
+          setLastTokenClaims(claims ? { iss: claims.iss, aud: claims.aud, client_id: claims.client_id, exp: claims.exp } : null);
+        } catch {
+          setLastTokenClaims(null);
+        }
       }
 
       // 2) Try with ID token
@@ -297,31 +427,38 @@ const Admin = () => {
         headers: { Authorization: `Bearer ${idToken}` },
       }).catch((e) => {
         console.error("[admin] approve fetch threw (ID token):", e);
-        setLastFetchStatus(-1);
-        setLastFetchBody(e?.message || "Network error");
+        if (isDev) {
+          setLastFetchStatus(-1);
+          setLastFetchBody(e?.message || "Network error");
+        }
         throw e;
       });
 
       // 3) If unauthorized, retry with Access token
       if (res.status === 401 || res.status === 403) {
         const access = session.getAccessToken().getJwtToken();
-        console.log("[admin] Retrying approve with ACCESS token:", access.slice(0, 25) + "…");
-        setLastTokenType("access");
+        if (isDev) {
+          setLastTokenType("access");
+        }
         
         res = await fetch(`${API_BASE}/admin?method=approve&orderId=${encodeURIComponent(orderId)}`, {
           headers: { Authorization: `Bearer ${access}` },
         }).catch((e) => {
           console.error("[admin] approve fetch threw (ACCESS token):", e);
-          setLastFetchStatus(-1);
-          setLastFetchBody(e?.message || "Network error");
+          if (isDev) {
+            setLastFetchStatus(-1);
+            setLastFetchBody(e?.message || "Network error");
+          }
           throw e;
         });
       }
 
-      console.log("[admin] Approve status:", res.status);
+      log("[admin] Approve status:", res.status);
       const responseText = await res.text();
-      setLastFetchStatus(res.status);
-      setLastFetchBody(responseText);
+      if (isDev) {
+        setLastFetchStatus(res.status);
+        setLastFetchBody(responseText);
+      }
 
       if (res.status === 404) {
         toast({
@@ -365,25 +502,21 @@ const Admin = () => {
 
     try {
       setIsLoading(true);
-      console.log("[admin] Deleting order:", orderId);
-
-      const pool = new AmazonCognitoIdentity.CognitoUserPool({
-        UserPoolId: USER_POOL_ID,
-        ClientId: CLIENT_ID,
-      });
+      log("[admin] Deleting order:", orderId);
 
       // 1) Get session + ID token
-      const session = await getSessionPromise(pool);
+      const session = await getSessionPromise();
       if (!session?.isValid()) throw new Error("Session invalid");
       const idToken = session.getIdToken().getJwtToken();
-      console.log("[admin] Using ID token for delete:", idToken.slice(0, 25) + "…");
 
-      setLastTokenType("id");
-      try {
-        const claims = parseJwt(idToken);
-        setLastTokenClaims(claims ? { iss: claims.iss, aud: claims.aud, client_id: claims.client_id, exp: claims.exp } : null);
-      } catch {
-        setLastTokenClaims(null);
+      if (isDev) {
+        setLastTokenType("id");
+        try {
+          const claims = parseJwt(idToken);
+          setLastTokenClaims(claims ? { iss: claims.iss, aud: claims.aud, client_id: claims.client_id, exp: claims.exp } : null);
+        } catch {
+          setLastTokenClaims(null);
+        }
       }
 
       // 2) Try with ID token
@@ -391,31 +524,38 @@ const Admin = () => {
         headers: { Authorization: `Bearer ${idToken}` },
       }).catch((e) => {
         console.error("[admin] delete fetch threw (ID token):", e);
-        setLastFetchStatus(-1);
-        setLastFetchBody(e?.message || "Network error");
+        if (isDev) {
+          setLastFetchStatus(-1);
+          setLastFetchBody(e?.message || "Network error");
+        }
         throw e;
       });
 
       // 3) If unauthorized, retry with Access token
       if (res.status === 401 || res.status === 403) {
         const access = session.getAccessToken().getJwtToken();
-        console.log("[admin] Retrying delete with ACCESS token:", access.slice(0, 25) + "…");
-        setLastTokenType("access");
+        if (isDev) {
+          setLastTokenType("access");
+        }
         
         res = await fetch(`${API_BASE}/admin?method=delete&orderId=${encodeURIComponent(orderId)}`, {
           headers: { Authorization: `Bearer ${access}` },
         }).catch((e) => {
           console.error("[admin] delete fetch threw (ACCESS token):", e);
-          setLastFetchStatus(-1);
-          setLastFetchBody(e?.message || "Network error");
+          if (isDev) {
+            setLastFetchStatus(-1);
+            setLastFetchBody(e?.message || "Network error");
+          }
           throw e;
         });
       }
 
-      console.log("[admin] Delete status:", res.status);
+      log("[admin] Delete status:", res.status);
       const responseText = await res.text();
-      setLastFetchStatus(res.status);
-      setLastFetchBody(responseText);
+      if (isDev) {
+        setLastFetchStatus(res.status);
+        setLastFetchBody(responseText);
+      }
 
       if (res.status === 404) {
         // Still remove from UI optimistically
@@ -503,13 +643,15 @@ const Admin = () => {
                 </p>
               </div>
               <div className="flex gap-2">
-                <Button
-                  onClick={fetchOrders}
-                  variant="secondary"
-                  size="sm"
-                >
-                  Run fetch (debug)
-                </Button>
+                {isDev && (
+                  <Button
+                    onClick={fetchOrders}
+                    variant="secondary"
+                    size="sm"
+                  >
+                    Run fetch (debug)
+                  </Button>
+                )}
                 <Button
                   onClick={handleSignOut}
                   variant="outline"
@@ -520,202 +662,334 @@ const Admin = () => {
               </div>
             </div>
             
-            <div className="flex gap-4 mb-8">
-              <Card className="max-w-sm">
-                <CardHeader>
-                  <CardTitle>Total Orders</CardTitle>
-                  <CardDescription>Haitian Spaghetti Orders</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-3xl font-bold">{totalOrders}</p>
-                </CardContent>
-              </Card>
-              <Button
-                onClick={fetchOrders}
-                disabled={isLoading}
-                variant="outline"
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Loading...
-                  </>
-                ) : (
-                  "Refresh Orders"
-                )}
-              </Button>
-            </div>
+            <Tabs defaultValue="orders" className="space-y-6">
+              <TabsList>
+                <TabsTrigger value="orders">Orders</TabsTrigger>
+                <TabsTrigger value="workshop">Workshop Registrations</TabsTrigger>
+              </TabsList>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>Recent Orders</CardTitle>
-                <CardDescription>Latest Haitian spaghetti orders</CardDescription>
-              </CardHeader>
-              <CardContent className="p-0">
-                <ScrollArea className="h-[600px] w-full">
-                  <div className="min-w-max">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead className="min-w-[150px]">Name</TableHead>
-                          <TableHead className="min-w-[120px]">Phone</TableHead>
-                          <TableHead className="min-w-[180px]">Email</TableHead>
-                          <TableHead className="min-w-[80px]">Quantity</TableHead>
-                          <TableHead className="min-w-[100px]">Status</TableHead>
-                          <TableHead className="min-w-[120px]">Date</TableHead>
-                          <TableHead className="sticky right-0 bg-card shadow-[-4px_0_8px_rgba(0,0,0,0.1)] min-w-[180px]">Actions</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {isLoading ? (
-                          <TableRow>
-                            <TableCell colSpan={7} className="text-center">
-                              <Loader2 className="h-6 w-6 animate-spin mx-auto" />
-                            </TableCell>
-                          </TableRow>
-                        ) : orders.length === 0 ? (
-                          <TableRow>
-                            <TableCell colSpan={7} className="text-center text-muted-foreground">
-                              No orders yet
-                            </TableCell>
-                          </TableRow>
-                        ) : (
-                          orders.map((order) => (
-                            <TableRow key={order.orderId}>
-                              <TableCell className="min-w-[150px]">{order.name}</TableCell>
-                              <TableCell className="min-w-[120px]">{order.phone}</TableCell>
-                              <TableCell className="min-w-[180px]">{order.email}</TableCell>
-                              <TableCell className="min-w-[80px]">{order.quantity}</TableCell>
-                              <TableCell className="min-w-[100px]">
-                                <span
-                                  className={`px-2 py-1 rounded-full text-xs ${
-                                    order.status === "approved"
-                                      ? "bg-green-100 text-green-800"
-                                      : "bg-yellow-100 text-yellow-800"
-                                  }`}
-                                >
-                                  {order.status}
-                                </span>
-                              </TableCell>
-                              <TableCell className="min-w-[120px]">
-                                {new Date(order.createdAt).toLocaleDateString()}
-                              </TableCell>
-                              <TableCell className="sticky right-0 bg-card shadow-[-4px_0_8px_rgba(0,0,0,0.1)] min-w-[180px]">
-                                <div className="flex gap-2">
-                                  {order.status === "pending" && (
+              <TabsContent value="orders" className="space-y-6">
+                <div className="flex gap-4">
+                  <Card className="max-w-sm">
+                    <CardHeader>
+                      <CardTitle>Total Orders</CardTitle>
+                      <CardDescription>Haitian Spaghetti Orders</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-3xl font-bold">{totalOrders}</p>
+                    </CardContent>
+                  </Card>
+                  <Button
+                    onClick={fetchOrders}
+                    disabled={isLoading}
+                    variant="outline"
+                  >
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Loading...
+                      </>
+                    ) : (
+                      "Refresh Orders"
+                    )}
+                  </Button>
+                </div>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Recent Orders</CardTitle>
+                    <CardDescription>Latest Haitian spaghetti orders</CardDescription>
+                  </CardHeader>
+                  <CardContent className="p-0">
+                    <ScrollArea className="h-[600px] w-full">
+                      <div className="min-w-max">
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead className="min-w-[150px]">Name</TableHead>
+                              <TableHead className="min-w-[120px]">Phone</TableHead>
+                              <TableHead className="min-w-[180px]">Email</TableHead>
+                              <TableHead className="min-w-[80px]">Quantity</TableHead>
+                              <TableHead className="min-w-[100px]">Status</TableHead>
+                              <TableHead className="min-w-[120px]">Date</TableHead>
+                              <TableHead className="sticky right-0 bg-card shadow-[-4px_0_8px_rgba(0,0,0,0.1)] min-w-[180px]">Actions</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {isLoading ? (
+                              <TableRow>
+                                <TableCell colSpan={7} className="text-center">
+                                  <Loader2 className="h-6 w-6 animate-spin mx-auto" />
+                                </TableCell>
+                              </TableRow>
+                            ) : orders.length === 0 ? (
+                              <TableRow>
+                                <TableCell colSpan={7} className="text-center text-muted-foreground">
+                                  No orders yet
+                                </TableCell>
+                              </TableRow>
+                            ) : (
+                              orders.map((order) => (
+                                <TableRow key={order.orderId}>
+                                  <TableCell className="min-w-[150px]">{order.name}</TableCell>
+                                  <TableCell className="min-w-[120px]">{order.phone}</TableCell>
+                                  <TableCell className="min-w-[180px]">{order.email}</TableCell>
+                                  <TableCell className="min-w-[80px]">{order.quantity}</TableCell>
+                                  <TableCell className="min-w-[100px]">
+                                    <span
+                                      className={`px-2 py-1 rounded-full text-xs ${
+                                        order.status === "approved"
+                                          ? "bg-green-100 text-green-800"
+                                          : "bg-yellow-100 text-yellow-800"
+                                      }`}
+                                    >
+                                      {order.status}
+                                    </span>
+                                  </TableCell>
+                                  <TableCell className="min-w-[120px]">
+                                    {new Date(order.createdAt).toLocaleDateString()}
+                                  </TableCell>
+                                  <TableCell className="sticky right-0 bg-card shadow-[-4px_0_8px_rgba(0,0,0,0.1)] min-w-[180px]">
+                                    <div className="flex gap-2">
+                                      {order.status === "pending" && (
+                                        <Button
+                                          size="sm"
+                                          onClick={() => handleApprove(order.orderId)}
+                                          className="bg-fire-purple hover:bg-fire-purple/90"
+                                          disabled={isLoading}
+                                        >
+                                          Approve
+                                        </Button>
+                                      )}
+                                      <Button
+                                        size="sm"
+                                        variant="destructive"
+                                        onClick={() => handleDelete(order.orderId)}
+                                        disabled={isLoading}
+                                      >
+                                        Delete
+                                      </Button>
+                                    </div>
+                                  </TableCell>
+                                </TableRow>
+                              ))
+                            )}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    </ScrollArea>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              <TabsContent value="workshop" className="space-y-6">
+                <div className="flex gap-4">
+                  <Card className="max-w-sm">
+                    <CardHeader>
+                      <CardTitle>Total Registrations</CardTitle>
+                      <CardDescription>Workshop Registration</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-3xl font-bold">{totalRegistrations}</p>
+                    </CardContent>
+                  </Card>
+                  <Button
+                    onClick={fetchWorkshopRegistrations}
+                    disabled={isWorkshopLoading}
+                    variant="outline"
+                  >
+                    {isWorkshopLoading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Loading...
+                      </>
+                    ) : (
+                      "Refresh Registrations"
+                    )}
+                  </Button>
+                </div>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Workshop Registrations</CardTitle>
+                    <CardDescription>February 1st, 2026 at 2:00 PM</CardDescription>
+                  </CardHeader>
+                  <CardContent className="p-0">
+                    <ScrollArea className="h-[600px] w-full">
+                      <div className="min-w-max">
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead className="min-w-[160px]">Name</TableHead>
+                              <TableHead className="min-w-[140px]">Phone</TableHead>
+                              <TableHead className="min-w-[120px]">Years at CLC</TableHead>
+                              <TableHead className="min-w-[160px]">Encounter/Collide</TableHead>
+                              <TableHead className="min-w-[140px]">Date of Birth</TableHead>
+                              <TableHead className="min-w-[120px]">Grade</TableHead>
+                              <TableHead className="min-w-[100px]">Audition</TableHead>
+                              <TableHead className="min-w-[120px]">Status</TableHead>
+                              <TableHead className="min-w-[120px]">Date</TableHead>
+                              <TableHead className="sticky right-0 bg-card shadow-[-4px_0_8px_rgba(0,0,0,0.1)] min-w-[170px]">Actions</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {isWorkshopLoading ? (
+                              <TableRow>
+                                <TableCell colSpan={10} className="text-center">
+                                  <Loader2 className="h-6 w-6 animate-spin mx-auto" />
+                                </TableCell>
+                              </TableRow>
+                            ) : workshopRegistrations.length === 0 ? (
+                              <TableRow>
+                                <TableCell colSpan={10} className="text-center text-muted-foreground">
+                                  No registrations yet
+                                </TableCell>
+                              </TableRow>
+                            ) : (
+                              workshopRegistrations.map((registration) => (
+                                <TableRow key={registration.registrationId}>
+                                  <TableCell className="min-w-[160px]">
+                                    {registration.firstName} {registration.lastName}
+                                  </TableCell>
+                                  <TableCell className="min-w-[140px]">{registration.phoneNumber}</TableCell>
+                                  <TableCell className="min-w-[120px]">{registration.yearsAtClc}</TableCell>
+                                  <TableCell className="min-w-[160px]">
+                                    {registration.encounterCollide ? "Yes" : "No"}
+                                  </TableCell>
+                                  <TableCell className="min-w-[140px]">{registration.dateOfBirth}</TableCell>
+                                  <TableCell className="min-w-[120px]">{registration.grade}</TableCell>
+                                  <TableCell className="min-w-[100px]">
+                                    {registration.audition ? "Yes" : "No"}
+                                  </TableCell>
+                                  <TableCell className="min-w-[120px]">
+                                    <span
+                                      className={`px-2 py-1 rounded-full text-xs ${
+                                        registration.present
+                                          ? "bg-green-100 text-green-800"
+                                          : "bg-gray-100 text-gray-800"
+                                      }`}
+                                    >
+                                      {registration.present ? "Present" : "Not Here"}
+                                    </span>
+                                  </TableCell>
+                                  <TableCell className="min-w-[120px]">
+                                    {registration.createdAt
+                                      ? new Date(registration.createdAt).toLocaleDateString()
+                                      : "N/A"}
+                                  </TableCell>
+                                  <TableCell className="sticky right-0 bg-card shadow-[-4px_0_8px_rgba(0,0,0,0.1)] min-w-[170px]">
                                     <Button
                                       size="sm"
-                                      onClick={() => handleApprove(order.orderId)}
-                                      className="bg-fire-purple hover:bg-fire-purple/90"
-                                      disabled={isLoading}
+                                      onClick={() =>
+                                        handleAttendanceToggle(registration.registrationId, !registration.present)
+                                      }
+                                      className={
+                                        registration.present
+                                          ? "bg-gray-200 text-gray-900 hover:bg-gray-300"
+                                          : "bg-fire-purple hover:bg-fire-purple/90"
+                                      }
+                                      disabled={isWorkshopLoading}
                                     >
-                                      Approve
+                                      {registration.present ? "Mark Not Here" : "Mark Present"}
                                     </Button>
-                                  )}
-                                  <Button
-                                    size="sm"
-                                    variant="destructive"
-                                    onClick={() => handleDelete(order.orderId)}
-                                    disabled={isLoading}
-                                  >
-                                    Delete
-                                  </Button>
-                                </div>
-                              </TableCell>
-                            </TableRow>
-                          ))
-                        )}
-                      </TableBody>
-                    </Table>
-                  </div>
-                </ScrollArea>
-              </CardContent>
-            </Card>
-            
-            {/* Debug Panel */}
-            <Card className="mt-8 border-dashed">
-              <Collapsible 
-                open={showDebug} 
-                onOpenChange={(open) => {
-                  setShowDebug(open);
-                  if (open && lastFetchStatus === null) {
-                    fetchOrders();
-                  }
-                }}
-              >
-                <CollapsibleTrigger asChild>
-                  <CardHeader className="cursor-pointer hover:bg-muted/50">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <CardTitle className="text-sm">Debug Details</CardTitle>
-                        <CardDescription className="text-xs">
-                          Token and API response diagnostics
-                        </CardDescription>
+                                  </TableCell>
+                                </TableRow>
+                              ))
+                            )}
+                          </TableBody>
+                        </Table>
                       </div>
-                      {showDebug ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                    </div>
-                  </CardHeader>
-                </CollapsibleTrigger>
-                <CollapsibleContent>
-                  <CardContent className="space-y-3 text-xs font-mono">
-                    <div>
-                      <span className="font-semibold">Token Type:</span>{" "}
-                      <span className={lastTokenType === "access" ? "text-amber-600" : "text-blue-600"}>
-                        {lastTokenType || "N/A"}
-                      </span>
-                    </div>
-                    <div>
-                      <span className="font-semibold">HTTP Status:</span>{" "}
-                      <span className={lastFetchStatus === 200 ? "text-green-600" : "text-red-600"}>
-                        {lastFetchStatus ?? "N/A"}
-                      </span>
-                    </div>
-                    <div>
-                      <span className="font-semibold">Token Issuer:</span>{" "}
-                      <span className="text-muted-foreground break-all">
-                        {lastTokenClaims?.iss || "N/A"}
-                      </span>
-                    </div>
-                    <div>
-                      <span className="font-semibold">Token Audience:</span>{" "}
-                      <span className="text-muted-foreground break-all">
-                        {lastTokenClaims?.aud || lastTokenClaims?.client_id || "N/A"}
-                      </span>
-                    </div>
-                    <div>
-                      <span className="font-semibold">Token Expiration:</span>{" "}
-                      <span className="text-muted-foreground">
-                        {lastTokenClaims?.exp ? new Date(lastTokenClaims.exp * 1000).toISOString() : "N/A"}
-                      </span>
-                    </div>
-                    <div>
-                      <span className="font-semibold">Response Keys:</span>{" "}
-                      <span className="text-muted-foreground">
-                        {lastResponseKeys?.join(", ") || "N/A"}
-                      </span>
-                    </div>
-                    <div>
-                      <span className="font-semibold">Normalized Items:</span>{" "}
-                      <span className="text-muted-foreground">
-                        {normalizedCount ?? "N/A"}
-                      </span>
-                    </div>
-                    <div>
-                      <span className="font-semibold">Response Body:</span>
-                      <pre className="mt-2 p-3 bg-muted rounded text-[10px] overflow-x-auto max-h-48">
-                        {lastFetchBody ? 
-                          (lastFetchBody.length > 1000 ? 
-                            lastFetchBody.substring(0, 1000) + "..." : 
-                            lastFetchBody
-                          ) : 
-                          "No response yet"
-                        }
-                      </pre>
-                    </div>
+                    </ScrollArea>
                   </CardContent>
-                </CollapsibleContent>
-              </Collapsible>
-            </Card>
+                </Card>
+              </TabsContent>
+            </Tabs>
+            
+            {isDev && (
+              <Card className="mt-8 border-dashed">
+                <Collapsible
+                  open={showDebug}
+                  onOpenChange={(open) => {
+                    setShowDebug(open);
+                    if (open && lastFetchStatus === null) {
+                      fetchOrders();
+                    }
+                  }}
+                >
+                  <CollapsibleTrigger asChild>
+                    <CardHeader className="cursor-pointer hover:bg-muted/50">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <CardTitle className="text-sm">Debug Details</CardTitle>
+                          <CardDescription className="text-xs">
+                            Token and API response diagnostics
+                          </CardDescription>
+                        </div>
+                        {showDebug ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                      </div>
+                    </CardHeader>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <CardContent className="space-y-3 text-xs font-mono">
+                      <div>
+                        <span className="font-semibold">Token Type:</span>{" "}
+                        <span className={lastTokenType === "access" ? "text-amber-600" : "text-blue-600"}>
+                          {lastTokenType || "N/A"}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="font-semibold">HTTP Status:</span>{" "}
+                        <span className={lastFetchStatus === 200 ? "text-green-600" : "text-red-600"}>
+                          {lastFetchStatus ?? "N/A"}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="font-semibold">Token Issuer:</span>{" "}
+                        <span className="text-muted-foreground break-all">
+                          {lastTokenClaims?.iss || "N/A"}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="font-semibold">Token Audience:</span>{" "}
+                        <span className="text-muted-foreground break-all">
+                          {lastTokenClaims?.aud || lastTokenClaims?.client_id || "N/A"}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="font-semibold">Token Expiration:</span>{" "}
+                        <span className="text-muted-foreground">
+                          {lastTokenClaims?.exp ? new Date(lastTokenClaims.exp * 1000).toISOString() : "N/A"}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="font-semibold">Response Keys:</span>{" "}
+                        <span className="text-muted-foreground">
+                          {lastResponseKeys?.join(", ") || "N/A"}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="font-semibold">Normalized Items:</span>{" "}
+                        <span className="text-muted-foreground">
+                          {normalizedCount ?? "N/A"}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="font-semibold">Response Body:</span>
+                        <pre className="mt-2 p-3 bg-muted rounded text-[10px] overflow-x-auto max-h-48">
+                          {lastFetchBody ?
+                            (lastFetchBody.length > 1000 ?
+                              lastFetchBody.substring(0, 1000) + "..." :
+                              lastFetchBody
+                            ) :
+                            "No response yet"
+                          }
+                        </pre>
+                      </div>
+                    </CardContent>
+                  </CollapsibleContent>
+                </Collapsible>
+              </Card>
+            )}
           </>
         )}
       </main>

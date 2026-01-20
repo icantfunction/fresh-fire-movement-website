@@ -1,75 +1,8 @@
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Instagram, ExternalLink, Info, Users, Loader2 } from "lucide-react";
+import { Instagram, ExternalLink, Info, Users } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { orderSchema, type OrderFormData } from "@/schemas/orderSchema";
-import { submitSpaghettiOrder } from "@/services/orderService";
-import { toast } from "@/hooks/use-toast";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
 
 const HeroSection = () => {
-  const [spaghettiFormOpen, setSpaghettiFormOpen] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const form = useForm<OrderFormData>({
-    resolver: zodResolver(orderSchema),
-    defaultValues: {
-      name: "",
-      phone: "",
-      email: "",
-      quantity: 1,
-    },
-  });
-
-  const handleSpaghettiOrder = async (data: OrderFormData) => {
-    setIsSubmitting(true);
-    
-    try {
-      const response = await submitSpaghettiOrder({
-        name: data.name,
-        phone: data.phone,
-        email: data.email || undefined,
-        quantity: data.quantity,
-      });
-
-      toast({
-        title: "Order received!",
-        description: `We'll confirm your order soon. Order ID: ${response.orderId}`,
-      });
-
-      form.reset();
-      setTimeout(() => setSpaghettiFormOpen(false), 2000);
-    } catch (error) {
-      if (error instanceof Error && error.message.includes("Failed to fetch")) {
-        toast({
-          title: "Network error",
-          description: "Unable to connect. Please check your internet and try again.",
-          variant: "destructive",
-        });
-      } else {
-        toast({
-          title: "Something went wrong",
-          description: "Please try again or contact us directly.",
-          variant: "destructive",
-        });
-      }
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden fire-gradient">
       

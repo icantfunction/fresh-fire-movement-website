@@ -10,21 +10,39 @@ const CountdownSection = () => {
     seconds: 0
   });
 
-  // Set target date - December 14th, 2025 at 9:00 AM
-  const targetDate = new Date('2025-12-14T09:00:00').getTime();
+  // Set target date - April 5th, 2026 at 9:00 AM
+  const targetDate = new Date('2026-04-05T09:00:00').getTime();
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      const now = new Date().getTime();
+    const updateTimeLeft = () => {
+      const now = Date.now();
       const difference = targetDate - now;
 
-      if (difference > 0) {
+      if (difference <= 0) {
         setTimeLeft({
-          days: Math.floor(difference / (1000 * 60 * 60 * 24)),
-          hours: Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
-          minutes: Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60)),
-          seconds: Math.floor((difference % (1000 * 60)) / 1000)
+          days: 0,
+          hours: 0,
+          minutes: 0,
+          seconds: 0
         });
+        return false;
+      }
+
+      setTimeLeft({
+        days: Math.floor(difference / (1000 * 60 * 60 * 24)),
+        hours: Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
+        minutes: Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60)),
+        seconds: Math.floor((difference % (1000 * 60)) / 1000)
+      });
+
+      return true;
+    };
+
+    updateTimeLeft();
+    const timer = setInterval(() => {
+      const shouldContinue = updateTimeLeft();
+      if (!shouldContinue) {
+        clearInterval(timer);
       }
     }, 1000);
 
@@ -69,7 +87,7 @@ const CountdownSection = () => {
             </div>
             <div className="flex items-center justify-center gap-2">
               <Calendar className="w-5 h-5 text-fire-gold" />
-              <span className="text-lg font-semibold">December 14th</span>
+              <span className="text-lg font-semibold">April 5th</span>
             </div>
             <div className="flex items-center justify-center gap-2">
               <Clock className="w-5 h-5 text-fire-gold" />

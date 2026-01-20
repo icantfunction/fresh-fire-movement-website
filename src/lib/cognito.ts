@@ -10,7 +10,10 @@ import {
 const REGION = import.meta.env.VITE_AWS_REGION || "us-east-1";
 const USER_POOL_ID = import.meta.env.VITE_COGNITO_USER_POOL_ID || "us-east-1_TkrYyBz2T";
 const CLIENT_ID = import.meta.env.VITE_COGNITO_CLIENT_ID || "5a0jpdmleoq56l76otr1udlue5";
-console.log("COGNITO=", { region: REGION, userPoolId: USER_POOL_ID, clientId: CLIENT_ID });
+const isDev = import.meta.env.DEV;
+if (isDev) {
+  console.log("COGNITO=", { region: REGION, userPoolId: USER_POOL_ID, clientId: CLIENT_ID });
+}
 
 // Use sessionStorage for token persistence
 const Storage = {
