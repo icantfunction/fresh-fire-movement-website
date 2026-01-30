@@ -53,7 +53,7 @@ const CountdownSection = () => {
     <section className="py-20 px-4 royal-gradient">
       <div className="max-w-4xl mx-auto text-center">
         <h2 className="text-4xl md:text-5xl font-bold mb-8 text-white">
-          Christmas Production
+          Easter Production
         </h2>
         
         <div className="bg-white/10 backdrop-blur-md rounded-2xl p-8 md:p-12 shadow-2xl border border-white/20 mb-8">

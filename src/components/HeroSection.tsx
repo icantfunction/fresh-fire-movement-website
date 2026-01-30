@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Instagram, ExternalLink, Info, Users } from "lucide-react";
+import { Instagram, ExternalLink, Info, Users, ChevronDown } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const HeroSection = () => {
@@ -33,6 +33,17 @@ const HeroSection = () => {
             >
               <Instagram className="w-5 h-5" />
               @ffdanceministry
+            </a>
+          </Button>
+
+          <Button
+            asChild
+            size="lg"
+            className="bg-fire-gold hover:bg-fire-gold/90 text-white transition-all duration-300 font-semibold px-8 py-3 shadow-2xl"
+          >
+            <a href="#workshop-signup" className="flex items-center gap-2">
+              <ChevronDown className="w-5 h-5" />
+              Workshop Signup
             </a>
           </Button>
           
