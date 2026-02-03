@@ -3,7 +3,16 @@ const { DynamoDBDocumentClient, ScanCommand, UpdateCommand } = require("@aws-sdk
 
 const client = new DynamoDBClient({});
 const dynamo = DynamoDBDocumentClient.from(client);
-const TABLE_NAME = process.env.TABLE_NAME;
+const DEFAULT_TABLE_NAME = process.env.TABLE_NAME;
+const WORKSHOP_TABLE_NAME = process.env.WORKSHOP_TABLE_NAME || DEFAULT_TABLE_NAME;
+const AUDITION_TABLE_NAME = process.env.AUDITION_TABLE_NAME || DEFAULT_TABLE_NAME;
+
+const resolveTableName = (path) => {
+  if (path.endsWith("/audition") || path.endsWith("/audition/attendance")) {
+    return AUDITION_TABLE_NAME;
+  }
+  return WORKSHOP_TABLE_NAME;
+};
 
 const jsonResponse = (statusCode, body) => ({
   statusCode,
@@ -17,9 +26,13 @@ exports.handler = async (event) => {
   try {
     const method = event.requestContext?.http?.method || event.httpMethod;
     const path = event.rawPath || event.path || "";
+    const tableName = resolveTableName(path);
+    if (!tableName) {
+      return jsonResponse(500, { ok: false, message: "Missing table configuration" });
+    }
 
     if (method === "GET") {
-      const result = await dynamo.send(new ScanCommand({ TableName: TABLE_NAME }));
+      const result = await dynamo.send(new ScanCommand({ TableName: tableName }));
       const items = result.Items || [];
       items.sort((a, b) => (b.createdAt || "").localeCompare(a.createdAt || ""));
       return jsonResponse(200, { ok: true, items });
@@ -39,7 +52,7 @@ exports.handler = async (event) => {
 
       await dynamo.send(
         new UpdateCommand({
-          TableName: TABLE_NAME,
+          TableName: tableName,
           Key: { registrationId: payload.registrationId },
           UpdateExpression: "SET present = :present, updatedAt = :updatedAt",
           ExpressionAttributeValues: {

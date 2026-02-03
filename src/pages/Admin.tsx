@@ -40,7 +40,7 @@ interface Order {
   createdAt: string;
 }
 
-interface WorkshopRegistration {
+interface Registration {
   registrationId: string;
   firstName: string;
   lastName: string;
@@ -65,9 +65,12 @@ const Admin = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isSigningIn, setIsSigningIn] = useState(false);
   const [totalOrders, setTotalOrders] = useState(0);
-  const [workshopRegistrations, setWorkshopRegistrations] = useState<WorkshopRegistration[]>([]);
+  const [workshopRegistrations, setWorkshopRegistrations] = useState<Registration[]>([]);
+  const [auditionRegistrations, setAuditionRegistrations] = useState<Registration[]>([]);
   const [isWorkshopLoading, setIsWorkshopLoading] = useState(false);
-  const [totalRegistrations, setTotalRegistrations] = useState(0);
+  const [isAuditionLoading, setIsAuditionLoading] = useState(false);
+  const [totalWorkshopRegistrations, setTotalWorkshopRegistrations] = useState(0);
+  const [totalAuditionRegistrations, setTotalAuditionRegistrations] = useState(0);
   
   // Debug state
   const [lastFetchStatus, setLastFetchStatus] = useState<number | null>(null);
@@ -174,6 +177,7 @@ const Admin = () => {
       log("[admin] Session present; fetching orders...");
       fetchOrders();
       fetchWorkshopRegistrations();
+      fetchAuditionRegistrations();
     }
   }, [activeSession]);
 
@@ -217,7 +221,9 @@ const Admin = () => {
     setOrders([]);
     setTotalOrders(0);
     setWorkshopRegistrations([]);
-    setTotalRegistrations(0);
+    setAuditionRegistrations([]);
+    setTotalWorkshopRegistrations(0);
+    setTotalAuditionRegistrations(0);
     setUsername("");
     setPassword("");
   };
@@ -375,7 +381,7 @@ const Admin = () => {
     }
   };
 
-  const normalizeWorkshopRegistrations = (payload: any): WorkshopRegistration[] => {
+  const normalizeRegistrations = (payload: any): Registration[] => {
     const raw = payload?.items ?? payload?.registrations ?? payload ?? [];
     const arr = Array.isArray(raw) ? raw : [];
     return arr.map((item: any) => ({
@@ -396,10 +402,7 @@ const Admin = () => {
   const fetchWorkshopRegistrations = async () => {
     try {
       setIsWorkshopLoading(true);
-      let res = await fetchWithAuth(AUDITION_API);
-      if (res.status === 404) {
-        res = await fetchWithAuth(WORKSHOP_API);
-      }
+      const res = await fetchWithAuth(WORKSHOP_API);
       const responseText = await res.text();
       let data: any = null;
       try {
@@ -409,12 +412,12 @@ const Admin = () => {
       }
 
       if (!res.ok) {
-        throw new Error(`Failed to fetch registrations: ${res.status}`);
+        throw new Error(`Failed to fetch workshop registrations: ${res.status}`);
       }
 
-      const items = normalizeWorkshopRegistrations(data);
+      const items = normalizeRegistrations(data);
       setWorkshopRegistrations(items);
-      setTotalRegistrations(items.length);
+      setTotalWorkshopRegistrations(items.length);
     } catch (e: any) {
       if (handleAuthFailure(e)) {
         return;
@@ -422,7 +425,7 @@ const Admin = () => {
       console.error("[admin] fetchWorkshopRegistrations error:", e?.message || e);
       toast({
         title: "Error",
-        description: e instanceof Error ? e.message : "Failed to fetch registrations",
+        description: e instanceof Error ? e.message : "Failed to fetch workshop registrations",
         variant: "destructive",
       });
     } finally {
@@ -430,10 +433,56 @@ const Admin = () => {
     }
   };
 
-  const handleAttendanceToggle = async (registrationId: string, present: boolean) => {
+  const fetchAuditionRegistrations = async () => {
     try {
-      setIsWorkshopLoading(true);
-      let res = await fetchWithAuth(AUDITION_ATTENDANCE_API, {
+      setIsAuditionLoading(true);
+      const res = await fetchWithAuth(AUDITION_API);
+      const responseText = await res.text();
+      let data: any = null;
+      try {
+        data = responseText ? JSON.parse(responseText) : null;
+      } catch {
+        data = null;
+      }
+
+      if (!res.ok) {
+        throw new Error(`Failed to fetch audition signups: ${res.status}`);
+      }
+
+      const items = normalizeRegistrations(data);
+      setAuditionRegistrations(items);
+      setTotalAuditionRegistrations(items.length);
+    } catch (e: any) {
+      if (handleAuthFailure(e)) {
+        return;
+      }
+      console.error("[admin] fetchAuditionRegistrations error:", e?.message || e);
+      toast({
+        title: "Error",
+        description: e instanceof Error ? e.message : "Failed to fetch audition signups",
+        variant: "destructive",
+      });
+    } finally {
+      setIsAuditionLoading(false);
+    }
+  };
+
+  const handleAttendanceToggle = async (
+    listType: "workshop" | "audition",
+    registrationId: string,
+    present: boolean
+  ) => {
+    try {
+      const isAudition = listType === "audition";
+      const attendanceApi = isAudition ? AUDITION_ATTENDANCE_API : WORKSHOP_ATTENDANCE_API;
+
+      if (isAudition) {
+        setIsAuditionLoading(true);
+      } else {
+        setIsWorkshopLoading(true);
+      }
+
+      const res = await fetchWithAuth(attendanceApi, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -441,27 +490,27 @@ const Admin = () => {
         body: JSON.stringify({ registrationId, present }),
       });
 
-      if (res.status === 404) {
-        res = await fetchWithAuth(WORKSHOP_ATTENDANCE_API, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ registrationId, present }),
-        });
-      }
-
       if (!res.ok) {
         throw new Error(`Failed to update attendance: ${res.status}`);
       }
 
-      setWorkshopRegistrations((prev) =>
-        prev.map((registration) =>
-          registration.registrationId === registrationId
-            ? { ...registration, present }
-            : registration
-        )
-      );
+      if (isAudition) {
+        setAuditionRegistrations((prev) =>
+          prev.map((registration) =>
+            registration.registrationId === registrationId
+              ? { ...registration, present }
+              : registration
+          )
+        );
+      } else {
+        setWorkshopRegistrations((prev) =>
+          prev.map((registration) =>
+            registration.registrationId === registrationId
+              ? { ...registration, present }
+              : registration
+          )
+        );
+      }
     } catch (e: any) {
       if (handleAuthFailure(e)) {
         return;
@@ -473,7 +522,11 @@ const Admin = () => {
         variant: "destructive",
       });
     } finally {
-      setIsWorkshopLoading(false);
+      if (listType === "audition") {
+        setIsAuditionLoading(false);
+      } else {
+        setIsWorkshopLoading(false);
+      }
     }
   };
 
@@ -747,6 +800,7 @@ const Admin = () => {
               <TabsList>
                 <TabsTrigger value="orders">Orders</TabsTrigger>
                 <TabsTrigger value="workshop">Workshop Registrations</TabsTrigger>
+                <TabsTrigger value="audition">Audition Signups</TabsTrigger>
               </TabsList>
 
               <TabsContent value="orders" className="space-y-6">
@@ -868,10 +922,10 @@ const Admin = () => {
                   <Card className="max-w-sm">
                     <CardHeader>
                       <CardTitle>Total Registrations</CardTitle>
-                      <CardDescription>Workshop Registration</CardDescription>
+                      <CardDescription>Workshop Registrations</CardDescription>
                     </CardHeader>
                     <CardContent>
-                      <p className="text-3xl font-bold">{totalRegistrations}</p>
+                      <p className="text-3xl font-bold">{totalWorkshopRegistrations}</p>
                     </CardContent>
                   </Card>
                   <Button
@@ -885,7 +939,7 @@ const Admin = () => {
                         Loading...
                       </>
                     ) : (
-                      "Refresh Registrations"
+                      "Refresh Workshop"
                     )}
                   </Button>
                 </div>
@@ -962,7 +1016,11 @@ const Admin = () => {
                                     <Button
                                       size="sm"
                                       onClick={() =>
-                                        handleAttendanceToggle(registration.registrationId, !registration.present)
+                                        handleAttendanceToggle(
+                                          "workshop",
+                                          registration.registrationId,
+                                          !registration.present
+                                        )
                                       }
                                       className={
                                         registration.present
@@ -970,6 +1028,132 @@ const Admin = () => {
                                           : "bg-fire-purple hover:bg-fire-purple/90"
                                       }
                                       disabled={isWorkshopLoading}
+                                    >
+                                      {registration.present ? "Mark Not Here" : "Mark Present"}
+                                    </Button>
+                                  </TableCell>
+                                </TableRow>
+                              ))
+                            )}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    </ScrollArea>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              <TabsContent value="audition" className="space-y-6">
+                <div className="flex gap-4">
+                  <Card className="max-w-sm">
+                    <CardHeader>
+                      <CardTitle>Total Signups</CardTitle>
+                      <CardDescription>Audition Signup Registrations</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-3xl font-bold">{totalAuditionRegistrations}</p>
+                    </CardContent>
+                  </Card>
+                  <Button
+                    onClick={fetchAuditionRegistrations}
+                    disabled={isAuditionLoading}
+                    variant="outline"
+                  >
+                    {isAuditionLoading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Loading...
+                      </>
+                    ) : (
+                      "Refresh Audition Signups"
+                    )}
+                  </Button>
+                </div>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Audition Signups</CardTitle>
+                    <CardDescription>Separated from workshop registrations</CardDescription>
+                  </CardHeader>
+                  <CardContent className="p-0">
+                    <ScrollArea className="h-[600px] w-full">
+                      <div className="min-w-max">
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead className="min-w-[160px]">Name</TableHead>
+                              <TableHead className="min-w-[140px]">Phone</TableHead>
+                              <TableHead className="min-w-[120px]">Years at CLC</TableHead>
+                              <TableHead className="min-w-[160px]">Encounter/Collide</TableHead>
+                              <TableHead className="min-w-[140px]">Date of Birth</TableHead>
+                              <TableHead className="min-w-[120px]">Grade</TableHead>
+                              <TableHead className="min-w-[100px]">Audition</TableHead>
+                              <TableHead className="min-w-[120px]">Status</TableHead>
+                              <TableHead className="min-w-[120px]">Date</TableHead>
+                              <TableHead className="sticky right-0 bg-card shadow-[-4px_0_8px_rgba(0,0,0,0.1)] min-w-[170px]">Actions</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {isAuditionLoading ? (
+                              <TableRow>
+                                <TableCell colSpan={10} className="text-center">
+                                  <Loader2 className="h-6 w-6 animate-spin mx-auto" />
+                                </TableCell>
+                              </TableRow>
+                            ) : auditionRegistrations.length === 0 ? (
+                              <TableRow>
+                                <TableCell colSpan={10} className="text-center text-muted-foreground">
+                                  No audition signups yet
+                                </TableCell>
+                              </TableRow>
+                            ) : (
+                              auditionRegistrations.map((registration) => (
+                                <TableRow key={registration.registrationId}>
+                                  <TableCell className="min-w-[160px]">
+                                    {registration.firstName} {registration.lastName}
+                                  </TableCell>
+                                  <TableCell className="min-w-[140px]">{registration.phoneNumber}</TableCell>
+                                  <TableCell className="min-w-[120px]">{registration.yearsAtClc}</TableCell>
+                                  <TableCell className="min-w-[160px]">
+                                    {registration.encounterCollide ? "Yes" : "No"}
+                                  </TableCell>
+                                  <TableCell className="min-w-[140px]">{registration.dateOfBirth}</TableCell>
+                                  <TableCell className="min-w-[120px]">{registration.grade}</TableCell>
+                                  <TableCell className="min-w-[100px]">
+                                    {registration.audition ? "Yes" : "No"}
+                                  </TableCell>
+                                  <TableCell className="min-w-[120px]">
+                                    <span
+                                      className={`px-2 py-1 rounded-full text-xs ${
+                                        registration.present
+                                          ? "bg-green-100 text-green-800"
+                                          : "bg-gray-100 text-gray-800"
+                                      }`}
+                                    >
+                                      {registration.present ? "Present" : "Not Here"}
+                                    </span>
+                                  </TableCell>
+                                  <TableCell className="min-w-[120px]">
+                                    {registration.createdAt
+                                      ? new Date(registration.createdAt).toLocaleDateString()
+                                      : "N/A"}
+                                  </TableCell>
+                                  <TableCell className="sticky right-0 bg-card shadow-[-4px_0_8px_rgba(0,0,0,0.1)] min-w-[170px]">
+                                    <Button
+                                      size="sm"
+                                      onClick={() =>
+                                        handleAttendanceToggle(
+                                          "audition",
+                                          registration.registrationId,
+                                          !registration.present
+                                        )
+                                      }
+                                      className={
+                                        registration.present
+                                          ? "bg-gray-200 text-gray-900 hover:bg-gray-300"
+                                          : "bg-fire-purple hover:bg-fire-purple/90"
+                                      }
+                                      disabled={isAuditionLoading}
                                     >
                                       {registration.present ? "Mark Not Here" : "Mark Present"}
                                     </Button>

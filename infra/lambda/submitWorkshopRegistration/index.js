@@ -4,7 +4,9 @@ const { DynamoDBDocumentClient, PutCommand } = require("@aws-sdk/lib-dynamodb");
 
 const client = new DynamoDBClient({});
 const dynamo = DynamoDBDocumentClient.from(client);
-const TABLE_NAME = process.env.TABLE_NAME;
+const DEFAULT_TABLE_NAME = process.env.TABLE_NAME;
+const WORKSHOP_TABLE_NAME = process.env.WORKSHOP_TABLE_NAME || DEFAULT_TABLE_NAME;
+const AUDITION_TABLE_NAME = process.env.AUDITION_TABLE_NAME || DEFAULT_TABLE_NAME;
 
 const jsonResponse = (statusCode, body) => ({
   statusCode,
@@ -16,6 +18,13 @@ const jsonResponse = (statusCode, body) => ({
 
 exports.handler = async (event) => {
   try {
+    const path = event.rawPath || event.path || "";
+    const isAuditionSignupPath = path.endsWith("/audition");
+    const targetTableName = isAuditionSignupPath ? AUDITION_TABLE_NAME : WORKSHOP_TABLE_NAME;
+    if (!targetTableName) {
+      return jsonResponse(500, { ok: false, message: "Missing table configuration" });
+    }
+
     const payload = event.body ? JSON.parse(event.body) : null;
     if (!payload) {
       return jsonResponse(400, { ok: false, message: "Missing request body" });
@@ -59,13 +68,14 @@ exports.handler = async (event) => {
       dateOfBirth: String(payload.dateOfBirth).trim(),
       grade: String(payload.grade).trim(),
       audition: payload.audition,
+      registrationType: isAuditionSignupPath ? "audition" : "workshop",
       present: false,
       createdAt,
     };
 
     await dynamo.send(
       new PutCommand({
-        TableName: TABLE_NAME,
+        TableName: targetTableName,
         Item: item,
         ConditionExpression: "attribute_not_exists(registrationId)",
       })
