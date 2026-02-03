@@ -1,0 +1,25 @@
+{
+  "CORSRules": [
+    {
+      "AllowedHeaders": [
+        "*"
+      ],
+      "AllowedMethods": [
+        "GET",
+        "PUT",
+        "HEAD"
+      ],
+      "AllowedOrigins": [
+        "https://freshfiredanceministry.com",
+        "https://www.freshfiredanceministry.com",
+        "http://localhost:8080",
+        "http://localhost:5173"
+      ],
+      "ExposeHeaders": [
+        "ETag"
+      ],
+      "MaxAgeSeconds": 3000
+    }
+  ]
+}
+

@@ -1,5 +1,7 @@
 
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 
 const GallerySection = () => {
   const galleryImages = [
@@ -31,8 +33,15 @@ const GallerySection = () => {
         
         <div className="text-center mt-12">
           <Card className="inline-block p-6 bg-white/80 backdrop-blur-sm border border-purple-200">
-            <p className="text-gray-600 mb-2">More photos coming soon!</p>
-            <p className="text-sm text-gray-500">Follow us on Instagram @ffdanceministry for the latest updates</p>
+            <p className="text-gray-600 mb-4">Explore approved moments or submit your own for review.</p>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <Button asChild className="bg-fire-purple hover:bg-fire-purple/90">
+                <Link to="/captured-in-movement/archive">View Archive</Link>
+              </Button>
+              <Button asChild variant="outline" className="border-fire-gold text-fire-gold hover:bg-fire-gold hover:text-white">
+                <Link to="/captured-in-movement/upload">Upload Content</Link>
+              </Button>
+            </div>
           </Card>
         </div>
       </div>

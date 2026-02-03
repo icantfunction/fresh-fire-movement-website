@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Navigation from "@/components/Navigation";
-import { Loader2, ChevronDown, ChevronUp } from "lucide-react";
+import { Loader2, ChevronDown, ChevronUp, ExternalLink } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { getCurrentSession, signIn, signOut, parseJwt, userPool } from "@/lib/cognito";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -28,6 +28,8 @@ const WORKSHOP_API = `${API_BASE}/workshop`;
 const AUDITION_API = `${API_BASE}/audition`;
 const WORKSHOP_ATTENDANCE_API = `${API_BASE}/workshop/attendance`;
 const AUDITION_ATTENDANCE_API = `${API_BASE}/audition/attendance`;
+const MEDIA_PENDING_API = `${API_BASE}/media/pending`;
+const MEDIA_REVIEW_API = `${API_BASE}/media/review`;
 
 interface Order {
   orderId: string;
@@ -54,6 +56,18 @@ interface Registration {
   createdAt: string;
 }
 
+interface PendingMediaSubmission {
+  submissionId: string;
+  title: string;
+  description?: string;
+  mediaType: "image" | "video";
+  submittedBy: string;
+  capturedAt: string;
+  createdAt: string;
+  previewUrl: string;
+  fileName: string;
+}
+
 const Admin = () => {
   const { toast } = useToast();
   const [username, setUsername] = useState("");
@@ -71,6 +85,8 @@ const Admin = () => {
   const [isAuditionLoading, setIsAuditionLoading] = useState(false);
   const [totalWorkshopRegistrations, setTotalWorkshopRegistrations] = useState(0);
   const [totalAuditionRegistrations, setTotalAuditionRegistrations] = useState(0);
+  const [pendingMedia, setPendingMedia] = useState<PendingMediaSubmission[]>([]);
+  const [isMediaLoading, setIsMediaLoading] = useState(false);
   
   // Debug state
   const [lastFetchStatus, setLastFetchStatus] = useState<number | null>(null);
@@ -178,6 +194,7 @@ const Admin = () => {
       fetchOrders();
       fetchWorkshopRegistrations();
       fetchAuditionRegistrations();
+      fetchPendingMediaSubmissions();
     }
   }, [activeSession]);
 
@@ -224,6 +241,7 @@ const Admin = () => {
     setAuditionRegistrations([]);
     setTotalWorkshopRegistrations(0);
     setTotalAuditionRegistrations(0);
+    setPendingMedia([]);
     setUsername("");
     setPassword("");
   };
@@ -464,6 +482,90 @@ const Admin = () => {
       });
     } finally {
       setIsAuditionLoading(false);
+    }
+  };
+
+  const normalizePendingMedia = (payload: any): PendingMediaSubmission[] => {
+    const raw = payload?.items ?? payload ?? [];
+    const arr = Array.isArray(raw) ? raw : [];
+    return arr.map((item: any) => ({
+      submissionId: item.submissionId ?? "",
+      title: item.title ?? "Untitled",
+      description: item.description ?? "",
+      mediaType: item.mediaType === "video" ? "video" : "image",
+      submittedBy: item.submittedBy ?? "Unknown",
+      capturedAt: item.capturedAt ?? item.createdAt ?? "",
+      createdAt: item.createdAt ?? "",
+      previewUrl: item.previewUrl ?? "",
+      fileName: item.fileName ?? "",
+    }));
+  };
+
+  const fetchPendingMediaSubmissions = async () => {
+    try {
+      setIsMediaLoading(true);
+      const res = await fetchWithAuth(MEDIA_PENDING_API);
+      const responseText = await res.text();
+      let data: any = null;
+      try {
+        data = responseText ? JSON.parse(responseText) : null;
+      } catch {
+        data = null;
+      }
+
+      if (!res.ok) {
+        throw new Error(`Failed to fetch pending media: ${res.status}`);
+      }
+
+      const items = normalizePendingMedia(data);
+      setPendingMedia(items);
+    } catch (e: any) {
+      if (handleAuthFailure(e)) {
+        return;
+      }
+      console.error("[admin] fetchPendingMediaSubmissions error:", e?.message || e);
+      toast({
+        title: "Error",
+        description: e instanceof Error ? e.message : "Failed to fetch pending media",
+        variant: "destructive",
+      });
+    } finally {
+      setIsMediaLoading(false);
+    }
+  };
+
+  const handleMediaReview = async (submissionId: string, action: "approve" | "reject") => {
+    try {
+      setIsMediaLoading(true);
+      const res = await fetchWithAuth(MEDIA_REVIEW_API, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ submissionId, action }),
+      });
+
+      if (!res.ok) {
+        throw new Error(`Failed to ${action} submission: ${res.status}`);
+      }
+
+      setPendingMedia((prev) => prev.filter((item) => item.submissionId !== submissionId));
+      toast({
+        title: action === "approve" ? "Submission approved" : "Submission rejected",
+        description: "The media queue has been updated.",
+      });
+    } catch (e: any) {
+      if (handleAuthFailure(e)) {
+        return;
+      }
+      console.error("[admin] handleMediaReview error:", e?.message || e);
+      toast({
+        title: "Error",
+        description: e instanceof Error ? e.message : "Failed to update media review",
+        variant: "destructive",
+      });
+    } finally {
+      setIsMediaLoading(false);
     }
   };
 
@@ -801,6 +903,7 @@ const Admin = () => {
                 <TabsTrigger value="orders">Orders</TabsTrigger>
                 <TabsTrigger value="workshop">Workshop Registrations</TabsTrigger>
                 <TabsTrigger value="audition">Audition Signups</TabsTrigger>
+                <TabsTrigger value="media">Media Approvals</TabsTrigger>
               </TabsList>
 
               <TabsContent value="orders" className="space-y-6">
@@ -1157,6 +1260,121 @@ const Admin = () => {
                                     >
                                       {registration.present ? "Mark Not Here" : "Mark Present"}
                                     </Button>
+                                  </TableCell>
+                                </TableRow>
+                              ))
+                            )}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    </ScrollArea>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              <TabsContent value="media" className="space-y-6">
+                <div className="flex gap-4">
+                  <Card className="max-w-sm">
+                    <CardHeader>
+                      <CardTitle>Pending Media</CardTitle>
+                      <CardDescription>Captured in Movement approvals</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-3xl font-bold">{pendingMedia.length}</p>
+                    </CardContent>
+                  </Card>
+                  <Button
+                    onClick={fetchPendingMediaSubmissions}
+                    disabled={isMediaLoading}
+                    variant="outline"
+                  >
+                    {isMediaLoading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Loading...
+                      </>
+                    ) : (
+                      "Refresh Media Queue"
+                    )}
+                  </Button>
+                </div>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Pending Uploads</CardTitle>
+                    <CardDescription>Approve before items appear in the archive.</CardDescription>
+                  </CardHeader>
+                  <CardContent className="p-0">
+                    <ScrollArea className="h-[600px] w-full">
+                      <div className="min-w-max">
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead className="min-w-[160px]">Title</TableHead>
+                              <TableHead className="min-w-[120px]">Type</TableHead>
+                              <TableHead className="min-w-[140px]">Submitted By</TableHead>
+                              <TableHead className="min-w-[140px]">Captured Date</TableHead>
+                              <TableHead className="min-w-[140px]">Submitted</TableHead>
+                              <TableHead className="min-w-[120px]">Preview</TableHead>
+                              <TableHead className="sticky right-0 bg-card shadow-[-4px_0_8px_rgba(0,0,0,0.1)] min-w-[190px]">Actions</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {isMediaLoading ? (
+                              <TableRow>
+                                <TableCell colSpan={7} className="text-center">
+                                  <Loader2 className="h-6 w-6 animate-spin mx-auto" />
+                                </TableCell>
+                              </TableRow>
+                            ) : pendingMedia.length === 0 ? (
+                              <TableRow>
+                                <TableCell colSpan={7} className="text-center text-muted-foreground">
+                                  No pending media uploads
+                                </TableCell>
+                              </TableRow>
+                            ) : (
+                              pendingMedia.map((submission) => (
+                                <TableRow key={submission.submissionId}>
+                                  <TableCell className="min-w-[160px]">{submission.title}</TableCell>
+                                  <TableCell className="min-w-[120px] capitalize">{submission.mediaType}</TableCell>
+                                  <TableCell className="min-w-[140px]">{submission.submittedBy}</TableCell>
+                                  <TableCell className="min-w-[140px]">
+                                    {submission.capturedAt
+                                      ? new Date(submission.capturedAt).toLocaleDateString()
+                                      : "N/A"}
+                                  </TableCell>
+                                  <TableCell className="min-w-[140px]">
+                                    {submission.createdAt
+                                      ? new Date(submission.createdAt).toLocaleDateString()
+                                      : "N/A"}
+                                  </TableCell>
+                                  <TableCell className="min-w-[120px]">
+                                    <Button asChild size="sm" variant="outline">
+                                      <a href={submission.previewUrl} target="_blank" rel="noopener noreferrer">
+                                        <ExternalLink className="mr-2 h-4 w-4" />
+                                        Open
+                                      </a>
+                                    </Button>
+                                  </TableCell>
+                                  <TableCell className="sticky right-0 bg-card shadow-[-4px_0_8px_rgba(0,0,0,0.1)] min-w-[190px]">
+                                    <div className="flex gap-2">
+                                      <Button
+                                        size="sm"
+                                        onClick={() => handleMediaReview(submission.submissionId, "approve")}
+                                        className="bg-green-600 hover:bg-green-700 text-white"
+                                        disabled={isMediaLoading}
+                                      >
+                                        Approve
+                                      </Button>
+                                      <Button
+                                        size="sm"
+                                        variant="destructive"
+                                        onClick={() => handleMediaReview(submission.submissionId, "reject")}
+                                        disabled={isMediaLoading}
+                                      >
+                                        Reject
+                                      </Button>
+                                    </div>
                                   </TableCell>
                                 </TableRow>
                               ))

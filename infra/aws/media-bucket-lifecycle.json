@@ -1,0 +1,31 @@
+{
+  "Rules": [
+    {
+      "ID": "ExpirePendingUploads",
+      "Status": "Enabled",
+      "Filter": {
+        "Prefix": "pending/"
+      },
+      "Expiration": {
+        "Days": 14
+      },
+      "AbortIncompleteMultipartUpload": {
+        "DaysAfterInitiation": 3
+      }
+    },
+    {
+      "ID": "OptimizeApprovedStorage",
+      "Status": "Enabled",
+      "Filter": {
+        "Prefix": "approved/"
+      },
+      "Transitions": [
+        {
+          "Days": 45,
+          "StorageClass": "INTELLIGENT_TIERING"
+        }
+      ]
+    }
+  ]
+}
+
