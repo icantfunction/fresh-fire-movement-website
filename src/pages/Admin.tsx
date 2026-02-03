@@ -25,7 +25,9 @@ const log = (...args: unknown[]) => {
 };
 log("[admin] API_BASE =", API_BASE);
 const WORKSHOP_API = `${API_BASE}/workshop`;
+const AUDITION_API = `${API_BASE}/audition`;
 const WORKSHOP_ATTENDANCE_API = `${API_BASE}/workshop/attendance`;
+const AUDITION_ATTENDANCE_API = `${API_BASE}/audition/attendance`;
 
 interface Order {
   orderId: string;
@@ -394,7 +396,10 @@ const Admin = () => {
   const fetchWorkshopRegistrations = async () => {
     try {
       setIsWorkshopLoading(true);
-      const res = await fetchWithAuth(WORKSHOP_API);
+      let res = await fetchWithAuth(AUDITION_API);
+      if (res.status === 404) {
+        res = await fetchWithAuth(WORKSHOP_API);
+      }
       const responseText = await res.text();
       let data: any = null;
       try {
@@ -428,13 +433,23 @@ const Admin = () => {
   const handleAttendanceToggle = async (registrationId: string, present: boolean) => {
     try {
       setIsWorkshopLoading(true);
-      const res = await fetchWithAuth(WORKSHOP_ATTENDANCE_API, {
+      let res = await fetchWithAuth(AUDITION_ATTENDANCE_API, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ registrationId, present }),
       });
+
+      if (res.status === 404) {
+        res = await fetchWithAuth(WORKSHOP_ATTENDANCE_API, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ registrationId, present }),
+        });
+      }
 
       if (!res.ok) {
         throw new Error(`Failed to update attendance: ${res.status}`);

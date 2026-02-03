@@ -41,9 +41,9 @@ const HeroSection = () => {
             size="lg"
             className="bg-fire-gold hover:bg-fire-gold/90 text-white transition-all duration-300 font-semibold px-8 py-3 shadow-2xl"
           >
-            <a href="#workshop-signup" className="flex items-center gap-2">
+            <a href="#audition-signup" className="flex items-center gap-2">
               <ChevronDown className="w-5 h-5" />
-              Workshop Signup
+              Audition Signup
             </a>
           </Button>
           

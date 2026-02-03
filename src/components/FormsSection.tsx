@@ -192,7 +192,7 @@ const FormsSection = () => {
   };
 
   return (
-    <section id="workshop-signup" className="py-20 px-4 scroll-mt-24">
+    <section id="audition-signup" className="py-20 px-4 scroll-mt-24">
       <div className="max-w-4xl mx-auto">
         <h2 className="text-4xl md:text-5xl font-bold mb-12 text-center text-fire-gradient">
           Connect with Fresh Fire
@@ -202,7 +202,7 @@ const FormsSection = () => {
           <Card className="p-8 bg-white/80 backdrop-blur-sm shadow-xl border border-purple-200">
             <div className="text-center mb-8">
               <h3 className="text-2xl font-bold text-fire-purple mb-2">
-                Workshop Registration
+                Audition Signup
               </h3>
               <p className="text-gray-600">
                 February 1st, 2026 at 2:00 PM
@@ -339,7 +339,7 @@ const FormsSection = () => {
                       Submitting...
                     </>
                   ) : (
-                    "Submit Registration"
+                    "Submit Audition Signup"
                   )}
                 </Button>
               </form>

@@ -25,7 +25,10 @@ exports.handler = async (event) => {
       return jsonResponse(200, { ok: true, items });
     }
 
-    if (method === "POST" && path.endsWith("/workshop/attendance")) {
+    const isWorkshopAttendancePath = path.endsWith("/workshop/attendance");
+    const isAuditionAttendancePath = path.endsWith("/audition/attendance");
+
+    if (method === "POST" && (isWorkshopAttendancePath || isAuditionAttendancePath)) {
       const payload = event.body ? JSON.parse(event.body) : null;
       if (!payload || !payload.registrationId) {
         return jsonResponse(400, { ok: false, message: "Missing registrationId" });
