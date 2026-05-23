@@ -1,7 +1,8 @@
 const AboutSection = () => {
   return (
-    <section className="relative py-24 px-4 overflow-hidden bg-gradient-to-br from-[#0f0820] via-fire-deep to-[#1a0b2e]">
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(245,158,11,0.06),transparent_60%)] pointer-events-none" />
+    <section className="relative py-24 px-4 overflow-hidden bg-gradient-to-b from-fire-deep via-[#2d1659] to-fire-deep">
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(124,58,237,0.32),transparent_65%)] pointer-events-none" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(245,158,11,0.05),transparent_50%)] pointer-events-none" />
 
       <div className="relative max-w-4xl mx-auto text-center">
         <div className="inline-flex items-center gap-3 mb-6">

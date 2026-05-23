@@ -192,8 +192,9 @@ const FormsSection = () => {
   };
 
   return (
-    <section id="audition-signup" className="relative py-24 px-4 scroll-mt-24 overflow-hidden bg-gradient-to-br from-[#0f0820] via-fire-deep to-[#1a0b2e]">
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(245,158,11,0.06),transparent_60%)] pointer-events-none" />
+    <section id="audition-signup" className="relative py-24 px-4 scroll-mt-24 overflow-hidden bg-gradient-to-bl from-fire-deep via-[#1a0b2e] to-[#0f0820]">
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(124,58,237,0.3),transparent_55%)] pointer-events-none" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,rgba(245,158,11,0.1),transparent_60%)] pointer-events-none" />
 
       <div className="relative max-w-4xl mx-auto">
         <div className="text-center mb-12">

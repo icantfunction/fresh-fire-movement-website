@@ -67,9 +67,12 @@ const CountdownSection = () => {
           <span className="h-px w-12 bg-fire-gold/60" />
         </div>
 
-        <h2 className="text-6xl md:text-8xl font-black tracking-tight text-white mb-12">
+        <h2 className="text-6xl md:text-8xl font-black tracking-tight text-white mb-3">
           DISPATCH
         </h2>
+        <p className="text-fire-gold font-semibold tracking-[0.25em] uppercase text-xs md:text-sm mb-12">
+          Luke 10:1&ndash;13, 20
+        </p>
 
         <div className="grid grid-cols-4 gap-2 md:gap-4 mb-12 max-w-3xl mx-auto">
           {units.map((unit) => (
