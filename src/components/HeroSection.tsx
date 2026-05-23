@@ -19,15 +19,36 @@ const HeroSection = () => {
           A Ministry of Movement, Surrender, and Fire
         </p>
         
-        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-          <Button 
+        <div className="flex flex-wrap gap-3 justify-center items-center max-w-3xl mx-auto">
+          <Button asChild variant="gold" size="lg">
+            <a href="#audition-signup" className="flex items-center gap-2">
+              <ChevronDown className="w-5 h-5" />
+              Audition Signup
+            </a>
+          </Button>
+
+          <Button asChild variant="fire" size="lg">
+            <Link to="/about" className="flex items-center gap-2">
+              <Info className="w-5 h-5" />
+              About Us
+            </Link>
+          </Button>
+
+          <Button asChild variant="fire" size="lg">
+            <Link to="/meet-the-team" className="flex items-center gap-2">
+              <Users className="w-5 h-5" />
+              Meet the Team
+            </Link>
+          </Button>
+
+          <Button
             asChild
             size="lg"
-            className="bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white transition-all duration-300 font-semibold px-8 py-3 shadow-2xl"
+            className="bg-white text-fire-deep border-2 border-white shadow-md hover:bg-white/90 hover:shadow-xl hover:-translate-y-0.5"
           >
-            <a 
-              href="https://instagram.com/ffdanceministry" 
-              target="_blank" 
+            <a
+              href="https://instagram.com/ffdanceministry"
+              target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-2"
             >
@@ -39,57 +60,18 @@ const HeroSection = () => {
           <Button
             asChild
             size="lg"
-            className="bg-fire-gold hover:bg-fire-gold/90 text-white transition-all duration-300 font-semibold px-8 py-3 shadow-2xl"
-          >
-            <a href="#audition-signup" className="flex items-center gap-2">
-              <ChevronDown className="w-5 h-5" />
-              Audition Signup
-            </a>
-          </Button>
-          
-          <Button 
-            asChild
             variant="outline"
-            size="lg"
-            className="border-2 border-white/70 bg-white/90 text-gray-800 hover:bg-white hover:border-white transition-all duration-300 font-semibold px-8 py-3 shadow-xl"
+            className="border-2 border-white bg-transparent text-white hover:bg-white hover:text-fire-deep"
           >
-            <a 
-              href="https://clcftl.org" 
-              target="_blank" 
+            <a
+              href="https://clcftl.org"
+              target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-2"
             >
               <ExternalLink className="w-5 h-5" />
               clcftl.org
             </a>
-          </Button>
-
-          <Button 
-            asChild
-            size="lg"
-            className="bg-gradient-to-r from-yellow-500 to-orange-600 hover:from-yellow-600 hover:to-orange-700 text-white transition-all duration-300 font-semibold px-8 py-3 shadow-2xl"
-          >
-            <Link 
-              to="/about"
-              className="flex items-center gap-2"
-            >
-              <Info className="w-5 h-5" />
-              About Us
-            </Link>
-          </Button>
-
-          <Button 
-            asChild
-            size="lg"
-            className="bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white transition-all duration-300 font-semibold px-8 py-3 shadow-2xl"
-          >
-            <Link 
-              to="/meet-the-team"
-              className="flex items-center gap-2"
-            >
-              <Users className="w-5 h-5" />
-              Meet the Team
-            </Link>
           </Button>
         </div>
       </div>
