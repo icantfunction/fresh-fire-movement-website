@@ -55,7 +55,7 @@ const HeroSection = () => {
           <Button asChild variant="gold" size="lg">
             <a href="#audition-signup" className="flex items-center gap-2">
               <ChevronDown className="w-5 h-5" />
-              Audition Signup
+              Join Our Fire
             </a>
           </Button>
 
