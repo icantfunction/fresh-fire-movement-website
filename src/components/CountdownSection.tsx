@@ -104,7 +104,7 @@ const CountdownSection = () => {
           <span className="hidden md:inline-block h-1 w-1 rounded-full bg-white/30" />
           <div className="flex items-center gap-2">
             <MapPin className="w-4 h-4 text-fire-gold" />
-            <span className="font-semibold tracking-wide">FLC Auditorium</span>
+            <span className="font-semibold tracking-wide">Main Sanctuary</span>
           </div>
         </div>
 
