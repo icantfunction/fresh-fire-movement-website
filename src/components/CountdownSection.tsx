@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Calendar, Clock, MapPin } from 'lucide-react';
 
@@ -10,8 +9,7 @@ const CountdownSection = () => {
     seconds: 0
   });
 
-  // Set target date - April 5th, 2026 at 9:00 AM
-  const targetDate = new Date('2026-04-05T09:00:00').getTime();
+  const targetDate = new Date('2026-08-07T19:00:00').getTime();
 
   useEffect(() => {
     const updateTimeLeft = () => {
@@ -49,52 +47,67 @@ const CountdownSection = () => {
     return () => clearInterval(timer);
   }, [targetDate]);
 
+  const units = [
+    { label: 'Days', value: timeLeft.days },
+    { label: 'Hours', value: timeLeft.hours },
+    { label: 'Minutes', value: timeLeft.minutes },
+    { label: 'Seconds', value: timeLeft.seconds }
+  ];
+
   return (
-    <section className="py-20 px-4 royal-gradient">
-      <div className="max-w-4xl mx-auto text-center">
-        <h2 className="text-4xl md:text-5xl font-bold mb-8 text-white">
-          Easter Production
+    <section className="relative py-24 px-4 overflow-hidden bg-gradient-to-br from-[#0f0820] via-fire-deep to-[#1a0b2e]">
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(245,158,11,0.08),transparent_60%)] pointer-events-none" />
+
+      <div className="relative max-w-5xl mx-auto text-center">
+        <div className="inline-flex items-center gap-3 mb-6">
+          <span className="h-px w-12 bg-fire-gold/60" />
+          <span className="text-xs md:text-sm font-semibold tracking-[0.3em] text-fire-gold uppercase">
+            Coming Soon
+          </span>
+          <span className="h-px w-12 bg-fire-gold/60" />
+        </div>
+
+        <h2 className="text-6xl md:text-8xl font-black tracking-tight text-white mb-12">
+          DISPATCH
         </h2>
-        
-        <div className="bg-white/10 backdrop-blur-md rounded-2xl p-8 md:p-12 shadow-2xl border border-white/20 mb-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-            {[
-              { label: 'Days', value: timeLeft.days },
-              { label: 'Hours', value: timeLeft.hours },
-              { label: 'Minutes', value: timeLeft.minutes },
-              { label: 'Seconds', value: timeLeft.seconds }
-            ].map((item, index) => (
-              <div key={index}>
-                <div className="bg-white/20 rounded-xl p-4 md:p-6">
-                  <div className="text-3xl md:text-4xl font-bold text-white mb-2">
-                    {item.value.toString().padStart(2, '0')}
-                  </div>
-                  <div className="text-sm md:text-base text-gray-200 uppercase tracking-wider">
-                    {item.label}
-                  </div>
-                </div>
+
+        <div className="grid grid-cols-4 gap-2 md:gap-4 mb-12 max-w-3xl mx-auto">
+          {units.map((unit) => (
+            <div
+              key={unit.label}
+              className="relative bg-white/[0.04] border border-white/10 rounded-lg p-4 md:p-8 backdrop-blur-sm"
+            >
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 h-px w-12 bg-fire-gold" />
+              <div className="text-4xl md:text-7xl font-bold text-white tabular-nums tracking-tight leading-none">
+                {unit.value.toString().padStart(2, '0')}
               </div>
-            ))}
+              <div className="mt-2 md:mt-4 text-[10px] md:text-xs font-semibold uppercase tracking-[0.2em] text-white/60">
+                {unit.label}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="flex flex-col md:flex-row items-center justify-center gap-3 md:gap-6 text-white/90">
+          <div className="flex items-center gap-2">
+            <Calendar className="w-4 h-4 text-fire-gold" />
+            <span className="font-semibold tracking-wide">August 7, 2026</span>
           </div>
-          
-          <div className="space-y-4 text-white">
-            <div className="flex items-center justify-center gap-2">
-              <MapPin className="w-5 h-5 text-fire-gold" />
-              <span className="text-lg">FLC Auditorium, Christian Life Center</span>
-            </div>
-            <div className="text-base text-gray-200">
-              2699 W Commercial Blvd, Fort Lauderdale, FL
-            </div>
-            <div className="flex items-center justify-center gap-2">
-              <Calendar className="w-5 h-5 text-fire-gold" />
-              <span className="text-lg font-semibold">April 5th</span>
-            </div>
-            <div className="flex items-center justify-center gap-2">
-              <Clock className="w-5 h-5 text-fire-gold" />
-              <span className="text-lg font-semibold">9:00 AM</span>
-            </div>
+          <span className="hidden md:inline-block h-1 w-1 rounded-full bg-white/30" />
+          <div className="flex items-center gap-2">
+            <Clock className="w-4 h-4 text-fire-gold" />
+            <span className="font-semibold tracking-wide">7:00 PM</span>
+          </div>
+          <span className="hidden md:inline-block h-1 w-1 rounded-full bg-white/30" />
+          <div className="flex items-center gap-2">
+            <MapPin className="w-4 h-4 text-fire-gold" />
+            <span className="font-semibold tracking-wide">FLC Auditorium</span>
           </div>
         </div>
+
+        <p className="mt-3 text-sm text-white/50 tracking-wide">
+          Christian Life Center &middot; 2699 W Commercial Blvd, Fort Lauderdale, FL
+        </p>
       </div>
     </section>
   );
