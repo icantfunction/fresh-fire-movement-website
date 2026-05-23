@@ -9,6 +9,7 @@ import MeetTheTeam from "./pages/MeetTheTeam";
 import Admin from "./pages/Admin";
 import MediaArchive from "./pages/MediaArchive";
 import MediaUpload from "./pages/MediaUpload";
+import Gallery from "./pages/Gallery";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -26,6 +27,7 @@ const App = () => (
           <Route path="/admin" element={<Admin />} />
           <Route path="/captured-in-movement/archive" element={<MediaArchive />} />
           <Route path="/captured-in-movement/upload" element={<MediaUpload />} />
+          <Route path="/gallery" element={<Gallery />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

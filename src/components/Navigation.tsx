@@ -56,6 +56,11 @@ const Navigation = () => {
                 About Us
               </Button>
             </Link>
+            <Link to="/gallery">
+              <Button variant="ghost" className="text-muted-foreground hover:text-fire-purple">
+                Gallery
+              </Button>
+            </Link>
 
             {isLoading ? (
               <Loader2 className="h-4 w-4 animate-spin text-fire-purple" />
