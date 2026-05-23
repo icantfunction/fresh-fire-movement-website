@@ -1,9 +1,9 @@
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
-import { galleryPhotos, heroPhotos, flickrUrl } from "@/data/photos";
+import { allPhotosChronological, flickrUrl } from "@/data/photos";
 
 const Gallery = () => {
-  const allPhotos = [...heroPhotos, ...galleryPhotos];
+  const allPhotos = allPhotosChronological;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0f0820] via-fire-deep to-[#1a0b2e]">
