@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Instagram, ExternalLink, Info, Users, ChevronDown } from "lucide-react";
+import { Instagram, ExternalLink, Info, Users, ChevronDown, Flame } from "lucide-react";
 import { Link } from "react-router-dom";
 import { heroPhotos, flickrUrl } from "@/data/photos";
 
@@ -51,7 +51,42 @@ const HeroSection = () => {
           Dance Ministry
         </h1>
 
-        <div className="flex flex-wrap gap-3 justify-center items-center max-w-3xl mx-auto">
+        {/* Mobile: compact icon row */}
+        <div className="flex md:hidden gap-3 justify-center items-center">
+          <Button asChild variant="gold" size="icon" className="h-14 w-14 [&_svg]:size-6">
+            <a href="#audition-signup" aria-label="Join Our Fire" title="Join Our Fire">
+              <Flame />
+            </a>
+          </Button>
+          <Button asChild variant="fire" size="icon" className="h-14 w-14 [&_svg]:size-6">
+            <Link to="/about" aria-label="About Us" title="About Us">
+              <Info />
+            </Link>
+          </Button>
+          <Button asChild variant="fire" size="icon" className="h-14 w-14 [&_svg]:size-6">
+            <Link to="/meet-the-team" aria-label="Meet the Team" title="Meet the Team">
+              <Users />
+            </Link>
+          </Button>
+          <Button
+            asChild
+            size="icon"
+            className="h-14 w-14 [&_svg]:size-6 bg-white text-fire-deep shadow-md hover:bg-white/90 hover:shadow-xl hover:-translate-y-0.5"
+          >
+            <a
+              href="https://instagram.com/ffdanceministry"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="@ffdanceministry on Instagram"
+              title="@ffdanceministry on Instagram"
+            >
+              <Instagram />
+            </a>
+          </Button>
+        </div>
+
+        {/* Desktop: labeled buttons */}
+        <div className="hidden md:flex flex-wrap gap-3 justify-center items-center max-w-3xl mx-auto">
           <Button asChild variant="gold" size="lg">
             <a href="#audition-signup" className="flex items-center gap-2">
               <ChevronDown className="w-5 h-5" />
