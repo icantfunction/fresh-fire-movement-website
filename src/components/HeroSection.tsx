@@ -4,21 +4,26 @@ import { Link } from "react-router-dom";
 
 const HeroSection = () => {
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden fire-gradient">
-      
-      {/* Main Content */}
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-[#0f0820] via-fire-deep to-[#1a0b2e]">
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(245,158,11,0.16),transparent_55%)] pointer-events-none" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,rgba(124,58,237,0.25),transparent_60%)] pointer-events-none" />
+
       <div className="relative z-30 text-center px-4 max-w-4xl mx-auto">
-        <h1 className="text-6xl md:text-8xl font-bold text-white mb-6 leading-tight drop-shadow-2xl">
-          Fresh Fire
-          <span className="block bg-gradient-to-r from-yellow-300 via-orange-400 to-red-500 bg-clip-text text-transparent">
-            Dance Ministry
+        <div className="inline-flex items-center gap-3 mb-8">
+          <span className="h-px w-12 bg-fire-gold/60" />
+          <span className="text-xs md:text-sm font-semibold tracking-[0.3em] text-fire-gold uppercase">
+            A Ministry of Movement, Surrender &amp; Fire
           </span>
+          <span className="h-px w-12 bg-fire-gold/60" />
+        </div>
+
+        <h1 className="text-7xl md:text-9xl font-black tracking-tight text-white leading-[0.95]">
+          Fresh Fire
         </h1>
-        
-        <p className="text-xl md:text-2xl text-orange-100 mb-8 font-light drop-shadow-lg">
-          A Ministry of Movement, Surrender, and Fire
-        </p>
-        
+        <h1 className="text-5xl md:text-7xl font-black tracking-tight bg-gradient-to-r from-yellow-300 via-orange-400 to-red-500 bg-clip-text text-transparent mb-12 leading-[0.95]">
+          Dance Ministry
+        </h1>
+
         <div className="flex flex-wrap gap-3 justify-center items-center max-w-3xl mx-auto">
           <Button asChild variant="gold" size="lg">
             <a href="#audition-signup" className="flex items-center gap-2">

@@ -192,20 +192,32 @@ const FormsSection = () => {
   };
 
   return (
-    <section id="audition-signup" className="py-20 px-4 scroll-mt-24">
-      <div className="max-w-4xl mx-auto">
-        <h2 className="text-4xl md:text-5xl font-bold mb-12 text-center text-fire-gradient">
-          Connect with Fresh Fire
-        </h2>
+    <section id="audition-signup" className="relative py-24 px-4 scroll-mt-24 overflow-hidden bg-gradient-to-br from-[#0f0820] via-fire-deep to-[#1a0b2e]">
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(245,158,11,0.06),transparent_60%)] pointer-events-none" />
+
+      <div className="relative max-w-4xl mx-auto">
+        <div className="text-center mb-12">
+          <div className="inline-flex items-center gap-3 mb-6">
+            <span className="h-px w-12 bg-fire-gold/60" />
+            <span className="text-xs md:text-sm font-semibold tracking-[0.3em] text-fire-gold uppercase">
+              Get Involved
+            </span>
+            <span className="h-px w-12 bg-fire-gold/60" />
+          </div>
+          <h2 className="text-4xl md:text-6xl font-black tracking-tight text-white">
+            Connect with Fresh Fire
+          </h2>
+        </div>
 
         <div className="space-y-10">
-          <Card className="p-8 bg-white/80 backdrop-blur-sm shadow-xl border border-purple-200">
+          <Card className="relative p-8 bg-white shadow-[0_20px_60px_rgba(15,8,32,0.5)] border border-white/20">
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 h-px w-12 bg-fire-gold" />
             <div className="text-center mb-8">
-              <h3 className="text-2xl font-bold text-fire-purple mb-2">
+              <h3 className="text-2xl md:text-3xl font-black tracking-tight text-fire-deep mb-2">
                 Audition Signup
               </h3>
-              <p className="text-gray-600">
-                February 1st, 2026 at 2:00 PM
+              <p className="text-fire-gold font-semibold tracking-[0.2em] uppercase text-xs">
+                February 1, 2026 &middot; 2:00 PM
               </p>
             </div>
 
@@ -330,7 +342,8 @@ const FormsSection = () => {
 
                 <Button
                   type="submit"
-                  className="w-full bg-fire-purple hover:bg-fire-purple/90"
+                  variant="fire"
+                  className="w-full"
                   disabled={isSubmitting}
                 >
                   {isSubmitting ? (
@@ -346,16 +359,21 @@ const FormsSection = () => {
             </Form>
           </Card>
 
-          <Card className="p-8 bg-white/80 backdrop-blur-sm shadow-xl border border-purple-200">
+          <Card className="relative p-8 bg-white shadow-[0_20px_60px_rgba(15,8,32,0.5)] border border-white/20">
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 h-px w-12 bg-fire-gold" />
             <div className="text-center">
-              <h3 className="text-2xl font-bold text-fire-gold mb-4">Join Our Fire</h3>
+              <h3 className="text-2xl md:text-3xl font-black tracking-tight text-fire-deep mb-3">
+                Join Our Fire
+              </h3>
               <p className="text-gray-600 mb-8">
                 Ready to become part of the Fresh Fire Dance Ministry family?
               </p>
 
               <Button
                 onClick={handleJoinGroup}
-                className="w-full max-w-md mx-auto bg-fire-gold hover:bg-fire-gold/90 text-white transition-all duration-300 font-semibold text-lg py-4"
+                variant="gold"
+                size="lg"
+                className="w-full max-w-md mx-auto"
               >
                 Join Our WhatsApp Group
               </Button>
