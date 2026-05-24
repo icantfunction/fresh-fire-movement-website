@@ -5,12 +5,30 @@ import { Button } from "@/components/ui/button";
 import Footer from "@/components/Footer";
 import lynette1 from "@/assets/lynette-photo-1.jpg";
 import lynette2 from "@/assets/lynette-photo-2.jpg";
+import lynette3 from "@/assets/lynette-photo-3.jpg";
 import team1 from "@/assets/team/team-1.jpg";
 import team2 from "@/assets/team/team-2.jpg";
 import team3 from "@/assets/team/team-3.jpg";
+import liana from "@/assets/leaders/liana.jpg";
+import shanice from "@/assets/leaders/shanice.jpg";
+import jadeja from "@/assets/leaders/jadeja.jpg";
+import whitney from "@/assets/leaders/whitney.jpg";
+import susana from "@/assets/leaders/susana.jpg";
+import janeka from "@/assets/leaders/janeka.jpg";
+import danielle from "@/assets/leaders/danielle.jpg";
 
-const lynetteImages = [lynette1, lynette2];
+const lynetteImages = [lynette1, lynette2, lynette3];
 const teamImages = [team1, team2, team3];
+
+const leaders = [
+  { name: "Liana", title: "Fresh Fire Assistant Director", photo: liana },
+  { name: "Shanice", title: "Dance Development Director", photo: shanice },
+  { name: "Jadeja", title: "Fresh Fire Junior Director", photo: jadeja },
+  { name: "Whitney", title: "Choreography Director", photo: whitney },
+  { name: "Susana", title: "Garment Coordinator", photo: susana },
+  { name: "Janeka", title: "Prayer Advisor", photo: janeka },
+  { name: "Danielle", title: "Fresh Spirit Director", photo: danielle },
+];
 
 const MeetTheTeam = () => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -130,6 +148,49 @@ const MeetTheTeam = () => {
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="relative py-20 px-4 overflow-hidden border-t border-white/10">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(245,158,11,0.06),transparent_60%)] pointer-events-none" />
+
+        <div className="relative max-w-6xl mx-auto">
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center gap-3 mb-6">
+              <span className="h-px w-12 bg-fire-gold/60" />
+              <span className="text-xs md:text-sm font-semibold tracking-[0.3em] text-fire-gold uppercase">
+                Also Leading
+              </span>
+              <span className="h-px w-12 bg-fire-gold/60" />
+            </div>
+
+            <h2 className="text-3xl md:text-5xl font-black tracking-tight text-white">
+              Directors &amp; Coordinators
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
+            {leaders.map((leader) => (
+              <div key={leader.name} className="group">
+                <div className="relative overflow-hidden rounded-lg border border-white/10 aspect-[2/3] mb-4 bg-fire-deep/40">
+                  <img
+                    src={leader.photo}
+                    alt={`${leader.name}, ${leader.title}`}
+                    loading="lazy"
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-fire-deep/80 via-fire-deep/10 to-transparent opacity-60 group-hover:opacity-30 transition-opacity duration-500" />
+                  <div className="absolute inset-0 ring-1 ring-fire-gold/0 group-hover:ring-fire-gold/40 transition-all duration-500" />
+                </div>
+                <h3 className="text-xl md:text-2xl font-black tracking-tight text-white">
+                  {leader.name}
+                </h3>
+                <p className="text-fire-gold font-semibold tracking-[0.18em] uppercase text-[10px] md:text-xs mt-1">
+                  {leader.title}
+                </p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
