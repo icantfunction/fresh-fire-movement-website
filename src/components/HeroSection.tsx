@@ -10,7 +10,7 @@ const HeroSection = () => {
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentIndex((prev) => (prev + 1) % heroPhotos.length);
-    }, 6000);
+    }, 150);
     return () => clearInterval(interval);
   }, []);
 
@@ -26,7 +26,7 @@ const HeroSection = () => {
             loading={i === 0 ? "eager" : "lazy"}
             fetchPriority={i === 0 ? "high" : "low"}
             decoding="async"
-            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-[1500ms] ease-in-out ${
+            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-100 ease-in-out ${
               i === currentIndex ? "opacity-100" : "opacity-0"
             }`}
           />
@@ -53,19 +53,31 @@ const HeroSection = () => {
           Dance Ministry
         </h1>
 
-        {/* Mobile: compact icon row */}
+        {/* Mobile: liquid-glass icon row */}
         <div className="flex md:hidden gap-3 justify-center items-center">
-          <Button asChild variant="gold" size="icon" className="h-14 w-14 [&_svg]:size-6">
+          <Button
+            asChild
+            size="icon"
+            className="h-14 w-14 rounded-full [&_svg]:size-6 bg-fire-gold/20 backdrop-blur-md border border-fire-gold/40 text-fire-gold shadow-lg hover:bg-fire-gold/30 hover:border-fire-gold/60 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300"
+          >
             <a href="#audition-signup" aria-label="Join Our Fire" title="Join Our Fire">
               <Flame />
             </a>
           </Button>
-          <Button asChild variant="fire" size="icon" className="h-14 w-14 [&_svg]:size-6">
+          <Button
+            asChild
+            size="icon"
+            className="h-14 w-14 rounded-full [&_svg]:size-6 bg-white/10 backdrop-blur-md border border-white/25 text-white shadow-lg hover:bg-white/20 hover:border-white/40 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300"
+          >
             <Link to="/about" aria-label="About Us" title="About Us">
               <Info />
             </Link>
           </Button>
-          <Button asChild variant="fire" size="icon" className="h-14 w-14 [&_svg]:size-6">
+          <Button
+            asChild
+            size="icon"
+            className="h-14 w-14 rounded-full [&_svg]:size-6 bg-white/10 backdrop-blur-md border border-white/25 text-white shadow-lg hover:bg-white/20 hover:border-white/40 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300"
+          >
             <Link to="/meet-the-team" aria-label="Meet the Team" title="Meet the Team">
               <Users />
             </Link>
@@ -73,7 +85,7 @@ const HeroSection = () => {
           <Button
             asChild
             size="icon"
-            className="h-14 w-14 [&_svg]:size-6 bg-white text-fire-deep shadow-md hover:bg-white/90 hover:shadow-xl hover:-translate-y-0.5"
+            className="h-14 w-14 rounded-full [&_svg]:size-6 bg-white/10 backdrop-blur-md border border-white/25 text-white shadow-lg hover:bg-white/20 hover:border-white/40 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300"
           >
             <a
               href="https://instagram.com/ffdanceministry"
@@ -87,23 +99,35 @@ const HeroSection = () => {
           </Button>
         </div>
 
-        {/* Desktop: labeled buttons */}
+        {/* Desktop: liquid-glass labeled buttons */}
         <div className="hidden md:flex flex-wrap gap-3 justify-center items-center max-w-3xl mx-auto">
-          <Button asChild variant="gold" size="lg">
+          <Button
+            asChild
+            size="lg"
+            className="rounded-full bg-fire-gold/20 backdrop-blur-md border border-fire-gold/40 text-fire-gold shadow-lg hover:bg-fire-gold/30 hover:border-fire-gold/60 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300"
+          >
             <a href="#audition-signup" className="flex items-center gap-2">
               <ChevronDown className="w-5 h-5" />
               Join Our Fire
             </a>
           </Button>
 
-          <Button asChild variant="fire" size="lg">
+          <Button
+            asChild
+            size="lg"
+            className="rounded-full bg-white/10 backdrop-blur-md border border-white/25 text-white shadow-lg hover:bg-white/20 hover:border-white/40 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300"
+          >
             <Link to="/about" className="flex items-center gap-2">
               <Info className="w-5 h-5" />
               About Us
             </Link>
           </Button>
 
-          <Button asChild variant="fire" size="lg">
+          <Button
+            asChild
+            size="lg"
+            className="rounded-full bg-white/10 backdrop-blur-md border border-white/25 text-white shadow-lg hover:bg-white/20 hover:border-white/40 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300"
+          >
             <Link to="/meet-the-team" className="flex items-center gap-2">
               <Users className="w-5 h-5" />
               Meet the Team
@@ -113,7 +137,7 @@ const HeroSection = () => {
           <Button
             asChild
             size="lg"
-            className="bg-white text-fire-deep border-2 border-white shadow-md hover:bg-white/90 hover:shadow-xl hover:-translate-y-0.5"
+            className="rounded-full bg-white/10 backdrop-blur-md border border-white/25 text-white shadow-lg hover:bg-white/20 hover:border-white/40 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300"
           >
             <a
               href="https://instagram.com/ffdanceministry"
@@ -129,8 +153,7 @@ const HeroSection = () => {
           <Button
             asChild
             size="lg"
-            variant="outline"
-            className="border-2 border-white bg-transparent text-white hover:bg-white hover:text-fire-deep"
+            className="rounded-full bg-white/5 backdrop-blur-md border border-white/30 text-white shadow-lg hover:bg-white/15 hover:border-white/50 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300"
           >
             <a
               href="https://clcftl.org"
