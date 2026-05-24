@@ -1,8 +1,84 @@
+import { useState } from "react";
+import { Eye, Download, Loader2 } from "lucide-react";
 import Footer from "@/components/Footer";
-import { allPhotosChronological, flickrUrl } from "@/data/photos";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { toast } from "@/hooks/use-toast";
+import { allPhotosChronological, flickrUrl, type FlickrSize } from "@/data/photos";
+
+// Quality ladder: try original first, fall back through descending sizes.
+const DOWNLOAD_SIZE_LADDER: FlickrSize[] = ["o", "k", "h", "b", "c"];
+
+async function downloadPhotoAtHighestQuality(id: string): Promise<void> {
+  const filename = `fresh-fire-${id}.jpg`;
+
+  for (const size of DOWNLOAD_SIZE_LADDER) {
+    try {
+      const url = flickrUrl(id, size);
+      const response = await fetch(url);
+      if (!response.ok) continue;
+
+      const blob = await response.blob();
+      const objectUrl = URL.createObjectURL(blob);
+
+      const anchor = document.createElement("a");
+      anchor.href = objectUrl;
+      anchor.download = filename;
+      document.body.appendChild(anchor);
+      anchor.click();
+      document.body.removeChild(anchor);
+      URL.revokeObjectURL(objectUrl);
+      return;
+    } catch {
+      continue;
+    }
+  }
+
+  throw new Error("No downloadable size available for this photo.");
+}
 
 const Gallery = () => {
   const allPhotos = allPhotosChronological;
+  const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
+  const [isDownloading, setIsDownloading] = useState(false);
+
+  const closeDialog = () => {
+    if (isDownloading) return;
+    setSelectedPhoto(null);
+  };
+
+  const handleView = (id: string) => {
+    window.open(flickrUrl(id, "h"), "_blank", "noopener,noreferrer");
+    setSelectedPhoto(null);
+  };
+
+  const handleDownload = async (id: string) => {
+    setIsDownloading(true);
+    try {
+      await downloadPhotoAtHighestQuality(id);
+      toast({
+        title: "Photo saved",
+        description: "Check your device's downloads folder.",
+      });
+      setSelectedPhoto(null);
+    } catch {
+      toast({
+        title: "Download failed",
+        description: "Opening the photo in a new tab instead — you can save from there.",
+        variant: "destructive",
+      });
+      window.open(flickrUrl(id, "b"), "_blank", "noopener,noreferrer");
+      setSelectedPhoto(null);
+    } finally {
+      setIsDownloading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0f0820] via-fire-deep to-[#1a0b2e]">
@@ -25,6 +101,10 @@ const Gallery = () => {
           <p className="text-white/70 max-w-2xl mx-auto text-base md:text-lg tracking-wide">
             Every moment of movement, surrender, and worship &mdash; captured in {allPhotos.length} frames from the Fresh Fire Dance Ministry.
           </p>
+
+          <p className="text-white/50 max-w-2xl mx-auto text-xs md:text-sm tracking-wide mt-4 uppercase font-semibold tracking-[0.2em]">
+            Tap any photo to view or save it
+          </p>
         </div>
       </section>
 
@@ -32,12 +112,12 @@ const Gallery = () => {
         <div className="relative max-w-7xl mx-auto">
           <div className="columns-2 sm:columns-3 md:columns-4 lg:columns-5 gap-3 md:gap-4 [column-fill:_balance]">
             {allPhotos.map((id, i) => (
-              <a
+              <button
                 key={id}
-                href={flickrUrl(id, "b")}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="relative block mb-3 md:mb-4 break-inside-avoid overflow-hidden rounded-lg border border-white/10 group cursor-zoom-in"
+                type="button"
+                onClick={() => setSelectedPhoto(id)}
+                aria-label={`Open photo ${i + 1}`}
+                className="relative block mb-3 md:mb-4 break-inside-avoid overflow-hidden rounded-lg border border-white/10 group cursor-pointer w-full text-left"
               >
                 <img
                   src={flickrUrl(id, "z")}
@@ -47,7 +127,7 @@ const Gallery = () => {
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-fire-deep/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 <div className="absolute inset-0 ring-1 ring-fire-gold/0 group-hover:ring-fire-gold/50 transition-all duration-300" />
-              </a>
+              </button>
             ))}
           </div>
         </div>
@@ -79,6 +159,63 @@ const Gallery = () => {
       </section>
 
       <Footer />
+
+      <Dialog open={selectedPhoto !== null} onOpenChange={(open) => !open && closeDialog()}>
+        <DialogContent className="max-w-2xl bg-[#0f0820] border-white/10 text-white sm:rounded-lg">
+          <DialogHeader>
+            <DialogTitle className="text-white tracking-tight font-black text-2xl">
+              View or Save
+            </DialogTitle>
+            <DialogDescription className="text-white/60">
+              View opens the photo full-screen in a new tab. Download saves it directly to your device at the highest quality available.
+            </DialogDescription>
+          </DialogHeader>
+
+          {selectedPhoto && (
+            <>
+              <div className="rounded-lg overflow-hidden border border-white/10 bg-black/40">
+                <img
+                  src={flickrUrl(selectedPhoto, "c")}
+                  alt="Selected"
+                  className="w-full object-contain max-h-[55vh]"
+                />
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-3 pt-2">
+                <Button
+                  onClick={() => handleView(selectedPhoto)}
+                  variant="fire"
+                  size="lg"
+                  className="flex-1"
+                  disabled={isDownloading}
+                >
+                  <Eye className="mr-2 h-5 w-5" />
+                  View
+                </Button>
+                <Button
+                  onClick={() => handleDownload(selectedPhoto)}
+                  variant="gold"
+                  size="lg"
+                  className="flex-1"
+                  disabled={isDownloading}
+                >
+                  {isDownloading ? (
+                    <>
+                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                      Downloading...
+                    </>
+                  ) : (
+                    <>
+                      <Download className="mr-2 h-5 w-5" />
+                      Download
+                    </>
+                  )}
+                </Button>
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

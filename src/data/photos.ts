@@ -1,4 +1,4 @@
-export type FlickrSize = "n" | "z" | "c" | "b" | "h";
+export type FlickrSize = "n" | "z" | "c" | "b" | "h" | "k" | "o";
 
 const FLICKR_BASE = "https://live.staticflickr.com/65535";
 
