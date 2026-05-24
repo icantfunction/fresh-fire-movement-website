@@ -10,7 +10,7 @@ const HeroSection = () => {
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentIndex((prev) => (prev + 1) % heroPhotos.length);
-    }, 150);
+    }, 1500);
     return () => clearInterval(interval);
   }, []);
 
@@ -26,7 +26,7 @@ const HeroSection = () => {
             loading={i === 0 ? "eager" : "lazy"}
             fetchPriority={i === 0 ? "high" : "low"}
             decoding="async"
-            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-100 ease-in-out ${
+            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ease-in-out ${
               i === currentIndex ? "opacity-100" : "opacity-0"
             }`}
           />
