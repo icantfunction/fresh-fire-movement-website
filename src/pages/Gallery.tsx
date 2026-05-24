@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Eye, Download, Loader2 } from "lucide-react";
 import Footer from "@/components/Footer";
+import { SmoothImage } from "@/components/SmoothImage";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -117,13 +118,14 @@ const Gallery = () => {
                 type="button"
                 onClick={() => setSelectedPhoto(id)}
                 aria-label={`Open photo ${i + 1}`}
-                className="relative block mb-3 md:mb-4 break-inside-avoid overflow-hidden rounded-lg border border-white/10 group cursor-pointer w-full text-left"
+                className="relative block mb-3 md:mb-4 break-inside-avoid overflow-hidden rounded-lg border border-white/10 group cursor-pointer w-full text-left bg-fire-deep/30"
               >
-                <img
+                <SmoothImage
                   src={flickrUrl(id, "z")}
                   alt={`Fresh Fire Dance Ministry photo ${i + 1}`}
                   loading={i < 12 ? "eager" : "lazy"}
-                  className="w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  fetchPriority={i < 4 ? "high" : "auto"}
+                  className="w-full object-cover group-hover:scale-105 [transition:transform_500ms_ease-out,opacity_700ms_ease-out]"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-fire-deep/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 <div className="absolute inset-0 ring-1 ring-fire-gold/0 group-hover:ring-fire-gold/50 transition-all duration-300" />
@@ -174,7 +176,7 @@ const Gallery = () => {
           {selectedPhoto && (
             <>
               <div className="rounded-lg overflow-hidden border border-white/10 bg-black/40">
-                <img
+                <SmoothImage
                   src={flickrUrl(selectedPhoto, "c")}
                   alt="Selected"
                   className="w-full object-contain max-h-[55vh]"

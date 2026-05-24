@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import { SmoothImage } from "@/components/SmoothImage";
 import { galleryPhotos, flickrUrl } from "@/data/photos";
 
 const PREVIEW_COUNT = 8;
@@ -32,13 +33,13 @@ const GallerySection = () => {
             <Link
               key={id}
               to="/gallery"
-              className="relative overflow-hidden rounded-lg border border-white/10 group cursor-pointer block"
+              className="relative overflow-hidden rounded-lg border border-white/10 group cursor-pointer block bg-fire-deep/30"
             >
-              <img
+              <SmoothImage
                 src={flickrUrl(id, "z")}
                 alt="Fresh Fire Dance Ministry"
                 loading="lazy"
-                className="aspect-square w-full object-cover transition-transform duration-500 group-hover:scale-110"
+                className="aspect-square w-full object-cover group-hover:scale-110 [transition:transform_500ms_ease-out,opacity_700ms_ease-out]"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-fire-deep/80 via-fire-deep/20 to-transparent opacity-60 group-hover:opacity-30 transition-opacity duration-300" />
               <div className="absolute inset-0 ring-1 ring-fire-gold/0 group-hover:ring-fire-gold/40 transition-all duration-300" />

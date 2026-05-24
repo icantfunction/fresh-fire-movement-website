@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Footer from "@/components/Footer";
+import { SmoothImage } from "@/components/SmoothImage";
 import lynette1 from "@/assets/lynette-photo-1.jpg";
 import lynette2 from "@/assets/lynette-photo-2.jpg";
 import lynette3 from "@/assets/lynette-photo-3.jpg";
@@ -174,11 +175,11 @@ const MeetTheTeam = () => {
             {leaders.map((leader) => (
               <div key={leader.name} className="group">
                 <div className="relative overflow-hidden rounded-lg border border-white/10 aspect-[2/3] mb-4 bg-fire-deep/40">
-                  <img
+                  <SmoothImage
                     src={leader.photo}
                     alt={`${leader.name}, ${leader.title}`}
                     loading="lazy"
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                    className="w-full h-full object-cover group-hover:scale-105 [transition:transform_700ms_ease-out,opacity_700ms_ease-out]"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-fire-deep/80 via-fire-deep/10 to-transparent opacity-60 group-hover:opacity-30 transition-opacity duration-500" />
                   <div className="absolute inset-0 ring-1 ring-fire-gold/0 group-hover:ring-fire-gold/40 transition-all duration-500" />
@@ -217,13 +218,13 @@ const MeetTheTeam = () => {
             {teamImages.map((image, i) => (
               <div
                 key={i}
-                className="relative overflow-hidden rounded-lg border border-white/10 group aspect-[3/2]"
+                className="relative overflow-hidden rounded-lg border border-white/10 group aspect-[3/2] bg-fire-deep/40"
               >
-                <img
+                <SmoothImage
                   src={image}
                   alt={`Fresh Fire Dance Ministry team photo ${i + 1}`}
                   loading={i === 0 ? "eager" : "lazy"}
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  className="w-full h-full object-cover group-hover:scale-105 [transition:transform_700ms_ease-out,opacity_700ms_ease-out]"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-fire-deep/70 via-transparent to-transparent opacity-50 group-hover:opacity-20 transition-opacity duration-500" />
                 <div className="absolute inset-0 ring-1 ring-fire-gold/0 group-hover:ring-fire-gold/40 transition-all duration-500" />

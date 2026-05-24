@@ -24,6 +24,8 @@ const HeroSection = () => {
             alt=""
             aria-hidden="true"
             loading={i === 0 ? "eager" : "lazy"}
+            fetchPriority={i === 0 ? "high" : "low"}
+            decoding="async"
             className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-[1500ms] ease-in-out ${
               i === currentIndex ? "opacity-100" : "opacity-0"
             }`}
