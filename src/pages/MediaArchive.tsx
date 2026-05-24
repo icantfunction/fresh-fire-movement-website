@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { Loader2, CalendarDays, Video, Image as ImageIcon } from "lucide-react";
-import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { fetchMediaArchive } from "@/services/mediaService";
@@ -29,8 +28,7 @@ const MediaArchive = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-orange-50 via-white to-yellow-50">
-      <Navigation />
-      <main className="pt-24 px-4 pb-12">
+      <main className="pt-12 px-4 pb-12">
         <div className="max-w-7xl mx-auto">
           <div className="mb-8 text-center">
             <h1 className="text-4xl md:text-5xl font-bold text-fire-gradient mb-3">

@@ -1,4 +1,3 @@
-import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { allPhotosChronological, flickrUrl } from "@/data/photos";
 
@@ -7,9 +6,7 @@ const Gallery = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0f0820] via-fire-deep to-[#1a0b2e]">
-      <Navigation />
-
-      <section className="relative pt-32 pb-16 px-4 overflow-hidden">
+      <section className="relative pt-16 pb-16 px-4 overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(245,158,11,0.08),transparent_55%)] pointer-events-none" />
 
         <div className="relative max-w-6xl mx-auto text-center">

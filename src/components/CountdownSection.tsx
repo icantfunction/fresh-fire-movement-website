@@ -68,7 +68,7 @@ const CountdownSection = () => {
         </div>
 
         <h2 className="text-6xl md:text-8xl font-black tracking-tight text-white mb-3">
-          DISPATCH
+          DISPATCHED
         </h2>
         <p className="text-fire-gold font-semibold tracking-[0.25em] uppercase text-xs md:text-sm mb-12">
           Luke 10:1&ndash;13, 20

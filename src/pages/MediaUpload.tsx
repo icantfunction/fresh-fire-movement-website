@@ -1,6 +1,5 @@
 import { useState, type FormEvent } from "react";
 import { Loader2, UploadCloud } from "lucide-react";
-import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -116,8 +115,7 @@ const MediaUpload = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-orange-50 via-white to-yellow-50">
-      <Navigation />
-      <main className="pt-24 px-4 pb-12">
+      <main className="pt-12 px-4 pb-12">
         <div className="max-w-3xl mx-auto">
           <Card>
             <CardHeader>

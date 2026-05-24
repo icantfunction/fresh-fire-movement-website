@@ -4,7 +4,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import Navigation from "@/components/Navigation";
 import { Loader2, ChevronDown, ChevronUp, ExternalLink } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { getCurrentSession, signIn, signOut, parseJwt, userPool } from "@/lib/cognito";
@@ -817,8 +816,7 @@ const Admin = () => {
 
   return (
     <div className="min-h-screen">
-      <Navigation />
-      <main className="container mx-auto px-4 py-8 mt-16">
+      <main className="container mx-auto px-4 py-8">
         {!who ? (
           <Card className="max-w-md mx-auto">
             <CardHeader>
