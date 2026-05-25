@@ -12,37 +12,24 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
-import { allPhotosChronological, flickrUrl, type FlickrSize } from "@/data/photos";
+import { allPhotosChronological, photoUrl } from "@/data/photos";
 
-// Quality ladder: try original first, fall back through descending sizes.
-const DOWNLOAD_SIZE_LADDER: FlickrSize[] = ["o", "k", "h", "b", "c"];
-
-async function downloadPhotoAtHighestQuality(id: string): Promise<void> {
-  const filename = `fresh-fire-${id}.jpg`;
-
-  for (const size of DOWNLOAD_SIZE_LADDER) {
-    try {
-      const url = flickrUrl(id, size);
-      const response = await fetch(url);
-      if (!response.ok) continue;
-
-      const blob = await response.blob();
-      const objectUrl = URL.createObjectURL(blob);
-
-      const anchor = document.createElement("a");
-      anchor.href = objectUrl;
-      anchor.download = filename;
-      document.body.appendChild(anchor);
-      anchor.click();
-      document.body.removeChild(anchor);
-      URL.revokeObjectURL(objectUrl);
-      return;
-    } catch {
-      continue;
-    }
+async function downloadPhoto(id: string): Promise<void> {
+  const url = photoUrl(id);
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error("Failed to fetch photo.");
   }
+  const blob = await response.blob();
+  const objectUrl = URL.createObjectURL(blob);
 
-  throw new Error("No downloadable size available for this photo.");
+  const anchor = document.createElement("a");
+  anchor.href = objectUrl;
+  anchor.download = `fresh-fire-${id}.jpg`;
+  document.body.appendChild(anchor);
+  anchor.click();
+  document.body.removeChild(anchor);
+  URL.revokeObjectURL(objectUrl);
 }
 
 const Gallery = () => {
@@ -63,14 +50,14 @@ const Gallery = () => {
   };
 
   const handleView = (id: string) => {
-    window.open(flickrUrl(id, "h"), "_blank", "noopener,noreferrer");
+    window.open(photoUrl(id), "_blank", "noopener,noreferrer");
     setSelectedPhoto(null);
   };
 
   const handleDownload = async (id: string) => {
     setIsDownloading(true);
     try {
-      await downloadPhotoAtHighestQuality(id);
+      await downloadPhoto(id);
       toast({
         title: "Photo saved",
         description: "Check your device's downloads folder.",
@@ -82,7 +69,7 @@ const Gallery = () => {
         description: "Opening the photo in a new tab instead — you can save from there.",
         variant: "destructive",
       });
-      window.open(flickrUrl(id, "b"), "_blank", "noopener,noreferrer");
+      window.open(photoUrl(id), "_blank", "noopener,noreferrer");
       setSelectedPhoto(null);
     } finally {
       setIsDownloading(false);
@@ -129,7 +116,7 @@ const Gallery = () => {
                 className="relative block mb-3 md:mb-4 break-inside-avoid overflow-hidden rounded-lg border border-white/10 group cursor-pointer w-full text-left bg-fire-deep/30"
               >
                 <SmoothImage
-                  src={flickrUrl(id, "z")}
+                  src={photoUrl(id)}
                   alt={`Fresh Fire Dance Ministry photo ${i + 1}`}
                   loading={i < 12 ? "eager" : "lazy"}
                   fetchPriority={i < 4 ? "high" : "auto"}
@@ -185,7 +172,7 @@ const Gallery = () => {
             <>
               <div className="rounded-lg overflow-hidden border border-white/10 bg-black/40">
                 <SmoothImage
-                  src={flickrUrl(selectedPhoto, "c")}
+                  src={photoUrl(selectedPhoto)}
                   alt="Selected"
                   className="w-full object-contain max-h-[55vh]"
                 />

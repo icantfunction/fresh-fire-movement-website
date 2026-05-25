@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { SmoothImage } from "@/components/SmoothImage";
-import { galleryPhotos, flickrUrl } from "@/data/photos";
+import { galleryPhotos, photoUrl } from "@/data/photos";
 
 const PREVIEW_COUNT = 8;
 
@@ -36,7 +36,7 @@ const GallerySection = () => {
               className="relative overflow-hidden rounded-lg border border-white/10 group cursor-pointer block bg-fire-deep/30"
             >
               <SmoothImage
-                src={flickrUrl(id, "z")}
+                src={photoUrl(id)}
                 alt="Fresh Fire Dance Ministry"
                 loading="lazy"
                 className="aspect-square w-full object-cover group-hover:scale-110 [transition:transform_500ms_ease-out,opacity_700ms_ease-out]"

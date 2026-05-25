@@ -1,9 +1,7 @@
-export type FlickrSize = "n" | "z" | "c" | "b" | "h" | "k" | "o";
-
-const FLICKR_BASE = "https://live.staticflickr.com/65535";
-
-export function flickrUrl(idAndSecret: string, size: FlickrSize = "c"): string {
-  return `${FLICKR_BASE}/${idAndSecret}_${size}.jpg`;
+// All photos are bundled locally under /public/photos/ as 1600px JPEGs.
+// One file per Flickr id-and-secret, used for both display and download.
+export function photoUrl(idAndSecret: string): string {
+  return `/photos/${idAndSecret}.jpg`;
 }
 
 // Hero rotation photos in download order (earliest download first).

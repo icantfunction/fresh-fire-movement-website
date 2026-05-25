@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Instagram, ExternalLink, Info, Users, ChevronDown, Flame } from "lucide-react";
 import { Link } from "react-router-dom";
-import { heroPhotos, flickrUrl } from "@/data/photos";
+import { heroPhotos, photoUrl } from "@/data/photos";
 
 const HeroSection = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -20,7 +20,7 @@ const HeroSection = () => {
         {heroPhotos.map((id, i) => (
           <img
             key={id}
-            src={flickrUrl(id, "b")}
+            src={photoUrl(id)}
             alt=""
             aria-hidden="true"
             loading={i === 0 ? "eager" : "lazy"}
