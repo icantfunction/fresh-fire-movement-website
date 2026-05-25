@@ -53,7 +53,7 @@ const Gallery = () => {
   usePageMeta({
     title: "Gallery | Fresh Fire Dance Ministry Photos, Fort Lauderdale FL",
     description:
-      "Full photo gallery of Fresh Fire Dance Ministry — performances, rehearsals, and worship moments captured at Christian Life Center, Fort Lauderdale, FL.",
+      "Full photo gallery of Fresh Fire Dance Ministry — rehearsals, services, and worship moments captured at Christian Life Center, Fort Lauderdale, FL.",
     canonical: "https://freshfiredanceministry.com/gallery",
   });
 
@@ -162,7 +162,7 @@ const Gallery = () => {
           <div className="relative bg-white/[0.04] border border-white/10 rounded-lg backdrop-blur-sm p-8 md:p-12">
             <div className="absolute top-0 left-1/2 -translate-x-1/2 h-px w-12 bg-fire-gold" />
             <p className="text-white/70 text-base md:text-lg leading-relaxed">
-              Performance and worship-set videos from Fresh Fire Dance Ministry are on the way. Check back soon to watch the ministry in motion.
+              Worship sets and ministry videos from Fresh Fire Dance Ministry are on the way. Check back soon to watch the ministry in motion.
             </p>
           </div>
         </div>
