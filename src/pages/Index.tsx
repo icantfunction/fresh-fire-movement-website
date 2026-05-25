@@ -1,5 +1,6 @@
 
 import { ExternalLink } from "lucide-react";
+import { usePageMeta } from "@/hooks/usePageMeta";
 import HeroSection from "@/components/HeroSection";
 import AboutSection from "@/components/AboutSection";
 import CountdownSection from "@/components/CountdownSection";
@@ -10,6 +11,14 @@ import FormsSection from "@/components/FormsSection";
 import Footer from "@/components/Footer";
 
 const Index = () => {
+  usePageMeta({
+    title:
+      "Fresh Fire Dance Ministry | Liturgical Dance in Fort Lauderdale, FL",
+    description:
+      "Fresh Fire Dance Ministry of Christian Life Center — a faith-based liturgical and praise dance ministry serving Fort Lauderdale, Coral Springs, Sunrise, West Boca, and South Florida. Worship through movement, surrender, and fire.",
+    canonical: "https://freshfiredanceministry.com/",
+  });
+
   return (
     <div className="min-h-screen">
       <HeroSection />

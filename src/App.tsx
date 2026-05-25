@@ -10,6 +10,7 @@ import Admin from "./pages/Admin";
 import MediaArchive from "./pages/MediaArchive";
 import MediaUpload from "./pages/MediaUpload";
 import Gallery from "./pages/Gallery";
+import LocationPage from "./pages/LocationPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,6 +29,7 @@ const App = () => (
           <Route path="/captured-in-movement/archive" element={<MediaArchive />} />
           <Route path="/captured-in-movement/upload" element={<MediaUpload />} />
           <Route path="/gallery" element={<Gallery />} />
+          <Route path="/ministries/:slug" element={<LocationPage />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

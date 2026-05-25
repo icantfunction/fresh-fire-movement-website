@@ -1,7 +1,14 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { usePageMeta } from "@/hooks/usePageMeta";
 
 const AboutUs = () => {
+  usePageMeta({
+    title: "About Fresh Fire Dance Ministry | Mission, Vision & By-Laws",
+    description:
+      "Mission, vision, scriptural foundation, and by-laws of Fresh Fire Dance Ministry — a liturgical and praise dance ministry of Christian Life Center, Fort Lauderdale, FL.",
+    canonical: "https://freshfiredanceministry.com/about",
+  });
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-secondary/20">
       <div className="max-w-6xl mx-auto px-4 py-20">

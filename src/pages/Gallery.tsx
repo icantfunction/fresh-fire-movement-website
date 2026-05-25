@@ -3,6 +3,7 @@ import { Eye, Download, Loader2 } from "lucide-react";
 import Footer from "@/components/Footer";
 import { SmoothImage } from "@/components/SmoothImage";
 import { Button } from "@/components/ui/button";
+import { usePageMeta } from "@/hooks/usePageMeta";
 import {
   Dialog,
   DialogContent,
@@ -48,6 +49,13 @@ const Gallery = () => {
   const allPhotos = allPhotosChronological;
   const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
   const [isDownloading, setIsDownloading] = useState(false);
+
+  usePageMeta({
+    title: "Gallery | Fresh Fire Dance Ministry Photos, Fort Lauderdale FL",
+    description:
+      "Full photo gallery of Fresh Fire Dance Ministry — performances, rehearsals, and worship moments captured at Christian Life Center, Fort Lauderdale, FL.",
+    canonical: "https://freshfiredanceministry.com/gallery",
+  });
 
   const closeDialog = () => {
     if (isDownloading) return;

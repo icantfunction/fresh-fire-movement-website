@@ -4,6 +4,7 @@ import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Footer from "@/components/Footer";
 import { SmoothImage } from "@/components/SmoothImage";
+import { usePageMeta } from "@/hooks/usePageMeta";
 import lynette1 from "@/assets/lynette-photo-1.jpg";
 import lynette2 from "@/assets/lynette-photo-2.jpg";
 import lynette3 from "@/assets/lynette-photo-3.jpg";
@@ -33,6 +34,14 @@ const leaders = [
 
 const MeetTheTeam = () => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  usePageMeta({
+    title:
+      "Meet the Team | Fresh Fire Dance Ministry Leaders, Fort Lauderdale FL",
+    description:
+      "Meet Mrs. Lynette Nelson, Executive Director, and the directors and coordinators behind Fresh Fire Dance Ministry — a liturgical dance ministry of Christian Life Center in Fort Lauderdale, FL.",
+    canonical: "https://freshfiredanceministry.com/meet-the-team",
+  });
 
   useEffect(() => {
     const interval = setInterval(() => {
