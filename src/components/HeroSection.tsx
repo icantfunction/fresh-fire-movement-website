@@ -3,9 +3,12 @@ import { Button } from "@/components/ui/button";
 import { Instagram, ExternalLink, Info, Users, ChevronDown, Flame } from "lucide-react";
 import { Link } from "react-router-dom";
 import { heroPhotos, photoUrl } from "@/data/photos";
+import Snowfall from "@/components/Snowfall";
+import { resolveWinterPhase } from "@/lib/season";
 
 const HeroSection = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [phase] = useState(() => resolveWinterPhase());
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -36,6 +39,10 @@ const HeroSection = () => {
       <div className="absolute inset-0 bg-gradient-to-b from-[#0f0820]/85 via-fire-deep/65 to-[#0f0820]/95 pointer-events-none" />
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(245,158,11,0.18),transparent_55%)] pointer-events-none" />
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,rgba(124,58,237,0.25),transparent_60%)] pointer-events-none" />
+
+      {/* Snow stays on the hero only — it would be a distraction over the gallery and
+          plainly wrong on the admin dashboard. */}
+      {phase >= 2 && <Snowfall count={50} />}
 
       <div className="relative z-30 text-center px-4 max-w-4xl mx-auto">
         <div className="inline-flex items-center gap-3 mb-8">

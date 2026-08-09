@@ -23,3 +23,6 @@ infra/lambda/**/node_modules
 *.njsproj
 *.sln
 *.sw?
+
+# Screenshot output from scripts/shoot-winter-phases.mjs
+winter-shots

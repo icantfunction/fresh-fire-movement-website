@@ -112,11 +112,23 @@ export default {
 					}
 				},
 				'fire-glow': {
-					'0%, 100%': { 
-						boxShadow: '0 0 20px rgba(124, 58, 237, 0.4)' 
+					'0%, 100%': {
+						boxShadow: '0 0 20px rgba(124, 58, 237, 0.4)'
 					},
-					'50%': { 
-						boxShadow: '0 0 40px rgba(192, 38, 211, 0.6)' 
+					'50%': {
+						boxShadow: '0 0 40px rgba(192, 38, 211, 0.6)'
+					}
+				},
+				// Opacity/scale rather than box-shadow, so it can pulse an SVG without
+				// painting a rectangle behind it.
+				'star-twinkle': {
+					'0%, 100%': {
+						opacity: '0.75',
+						transform: 'scale(0.94)'
+					},
+					'50%': {
+						opacity: '1',
+						transform: 'scale(1.06)'
 					}
 				}
 			},
@@ -125,7 +137,8 @@ export default {
 				'accordion-up': 'accordion-up 0.2s ease-out',
 				'gentle-float': 'gentle-float 3s ease-in-out infinite',
 				'dance-sway': 'dance-sway 4s ease-in-out infinite',
-				'fire-glow': 'fire-glow 2s ease-in-out infinite'
+				'fire-glow': 'fire-glow 2s ease-in-out infinite',
+				'star-twinkle': 'star-twinkle 4s ease-in-out infinite'
 			}
 		}
 	},
