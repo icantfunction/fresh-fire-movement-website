@@ -9,7 +9,7 @@ const CountdownSection = () => {
     seconds: 0
   });
 
-  const targetDate = new Date('2026-08-07T19:00:00').getTime();
+  const targetDate = new Date('2026-12-20T09:00:00').getTime();
 
   useEffect(() => {
     const updateTimeLeft = () => {
@@ -67,12 +67,9 @@ const CountdownSection = () => {
           <span className="h-px w-12 bg-fire-gold/60" />
         </div>
 
-        <h2 className="text-6xl md:text-8xl font-black tracking-tight text-white mb-3">
-          DISPATCHED
+        <h2 className="text-5xl md:text-8xl font-black tracking-tight text-white mb-12">
+          CHRISTMAS PRODUCTION
         </h2>
-        <p className="text-fire-gold font-semibold tracking-[0.25em] uppercase text-xs md:text-sm mb-12">
-          Luke 10:1&ndash;13, 20
-        </p>
 
         <div className="grid grid-cols-4 gap-2 md:gap-4 mb-12 max-w-3xl mx-auto">
           {units.map((unit) => (
@@ -94,12 +91,12 @@ const CountdownSection = () => {
         <div className="flex flex-col md:flex-row items-center justify-center gap-3 md:gap-6 text-white/90">
           <div className="flex items-center gap-2">
             <Calendar className="w-4 h-4 text-fire-gold" />
-            <span className="font-semibold tracking-wide">August 7, 2026</span>
+            <span className="font-semibold tracking-wide">December 20, 2026</span>
           </div>
           <span className="hidden md:inline-block h-1 w-1 rounded-full bg-white/30" />
           <div className="flex items-center gap-2">
             <Clock className="w-4 h-4 text-fire-gold" />
-            <span className="font-semibold tracking-wide">7:00 PM</span>
+            <span className="font-semibold tracking-wide">9:00 AM</span>
           </div>
           <span className="hidden md:inline-block h-1 w-1 rounded-full bg-white/30" />
           <div className="flex items-center gap-2">
