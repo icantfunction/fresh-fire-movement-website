@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2 } from "lucide-react";
+import { ExternalLink, Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -29,13 +29,23 @@ import { workshopRegistrationSchema, type WorkshopFormData } from "@/schemas/wor
 import { submitWorkshopRegistration } from "@/services/workshopService";
 
 // This form is audition-only, so the date lives here once and feeds both the card heading
-// and the requirements checklist. Workshop is September 6 and is registered separately.
+// and the requirements checklist.
 const AUDITION = {
-  date: "September 13, 2026",
-  time: "2:00 PM",
+  date: "September 20, 2026",
+  time: "2:00 PM Sharp",
   /** Used inside the requirements checklist sentence. */
   startSentence:
-    "Auditions will begin promptly at 2:00 PM on September 13, 2026 in the main sanctuary.",
+    "Auditions begin at 2:00 PM SHARP on September 20, 2026 in the main sanctuary. Arrive early — late arrivals may not be seen.",
+};
+
+// Workshop registration is handled off-site by the church's Pushpay giving page, so this
+// card is a link out rather than a form — nothing about it touches our API.
+const WORKSHOP = {
+  date: "September 13, 2026",
+  time: "2:00 PM Sharp",
+  minimum: "$10",
+  registerUrl:
+    "https://pushpay.com/g/clcftl?fnd=wES1hrvpPMplmZ1Tt2EQtA&fndv=Lock&lang=en&src=qrcode",
 };
 
 const FormsSection = () => {
@@ -365,6 +375,38 @@ const FormsSection = () => {
                 </Button>
               </form>
             </Form>
+          </Card>
+
+          <Card className="relative p-6 md:p-8 bg-white shadow-[0_20px_60px_rgba(15,8,32,0.5)] border border-white/20">
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 h-px w-12 bg-fire-gold" />
+            <div className="text-center">
+              <h3 className="text-2xl md:text-3xl font-black tracking-tight text-fire-deep mb-2">
+                Workshop Registration
+              </h3>
+              <p className="text-fire-gold font-semibold tracking-[0.2em] uppercase text-xs">
+                {WORKSHOP.date} &middot; {WORKSHOP.time}
+              </p>
+
+              <p className="mt-4 text-gray-600">
+                Register through Christian Life Center's giving page.
+                {" "}
+                <span className="font-semibold text-fire-deep">
+                  {WORKSHOP.minimum} minimum donation
+                </span>{" "}
+                to attend.
+              </p>
+
+              <Button asChild variant="fire" size="lg" className="mt-6 w-full max-w-md mx-auto">
+                <a href={WORKSHOP.registerUrl} target="_blank" rel="noopener noreferrer">
+                  Register for the Workshop
+                  <ExternalLink className="ml-2 h-4 w-4" />
+                </a>
+              </Button>
+
+              <p className="mt-3 text-xs text-gray-500">
+                Opens Pushpay in a new tab
+              </p>
+            </div>
           </Card>
 
           <Card className="relative p-6 md:p-8 bg-white shadow-[0_20px_60px_rgba(15,8,32,0.5)] border border-white/20">

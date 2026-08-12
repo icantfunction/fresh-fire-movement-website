@@ -7,6 +7,9 @@ export function photoUrl(idAndSecret: string): string {
 
 // Hero rotation photos in reverse download order (most recent first).
 export const heroPhotos: string[] = [
+  "dispatched-45",
+  "dispatched-37",
+  "dispatched-71",
   "54709595432_047bf4f33f",
   "54710656484_3c082386e7",
   "54709592352_33e3e9eefe",
@@ -50,7 +53,6 @@ export const galleryPhotos: string[] = [
   "dispatched-74",
   "dispatched-73",
   "dispatched-72",
-  "dispatched-71",
   "dispatched-70",
   "dispatched-69",
   "dispatched-68",
@@ -76,7 +78,6 @@ export const galleryPhotos: string[] = [
   "dispatched-48",
   "dispatched-47",
   "dispatched-46",
-  "dispatched-45",
   "dispatched-44",
   "dispatched-43",
   "dispatched-42",
@@ -84,7 +85,6 @@ export const galleryPhotos: string[] = [
   "dispatched-40",
   "dispatched-39",
   "dispatched-38",
-  "dispatched-37",
   "dispatched-36",
   "dispatched-35",
   "dispatched-34",
