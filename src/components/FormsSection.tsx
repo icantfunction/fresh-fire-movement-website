@@ -29,12 +29,13 @@ import { workshopRegistrationSchema, type WorkshopFormData } from "@/schemas/wor
 import { submitWorkshopRegistration } from "@/services/workshopService";
 
 // This form is audition-only, so the date lives here once and feeds both the card heading
-// and the requirements checklist. Workshop registration is handled separately.
+// and the requirements checklist. Workshop is September 6 and is registered separately.
 const AUDITION = {
-  date: "September 6, 2026",
+  date: "September 13, 2026",
+  time: "2:00 PM",
   /** Used inside the requirements checklist sentence. */
   startSentence:
-    "Auditions are held September 6, 2026 in the main sanctuary. Arrive early — auditions begin promptly at the announced start time.",
+    "Auditions will begin promptly at 2:00 PM on September 13, 2026 in the main sanctuary.",
 };
 
 const FormsSection = () => {
@@ -213,7 +214,7 @@ const FormsSection = () => {
                 Audition Signup
               </h3>
               <p className="text-fire-gold font-semibold tracking-[0.2em] uppercase text-xs">
-                {AUDITION.date}
+                {AUDITION.date} &middot; {AUDITION.time}
               </p>
               <p className="mt-4 text-sm text-gray-600">
                 You'll review and agree to the audition requirements before your signup is
