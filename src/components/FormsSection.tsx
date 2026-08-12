@@ -6,7 +6,7 @@ import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -28,22 +28,18 @@ import { toast } from "@/hooks/use-toast";
 import { workshopRegistrationSchema, type WorkshopFormData } from "@/schemas/workshopSchema";
 import { submitWorkshopRegistration } from "@/services/workshopService";
 
-// One signup covers both dates: everyone registers, and the "do you plan to audition?"
-// answer decides whether the audition agreement is required. Dates live here so the card
-// heading and the requirements checklist can never drift apart.
+// This form is audition-only, so the date lives here once and feeds both the card heading
+// and the requirements checklist. Workshop registration is handled separately.
 const AUDITION = {
-  auditionDate: "September 6, 2026",
-  workshopDate: "September 13, 2026",
+  date: "September 6, 2026",
   /** Used inside the requirements checklist sentence. */
   startSentence:
     "Auditions are held September 6, 2026 in the main sanctuary. Arrive early — auditions begin promptly at the announced start time.",
 };
 
 const FormsSection = () => {
-  const [auditionDialogOpen, setAuditionDialogOpen] = useState(false);
   const [pendingData, setPendingData] = useState<WorkshopFormData | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [suppressPendingReset, setSuppressPendingReset] = useState(false);
   const [auditionChecklistOpen, setAuditionChecklistOpen] = useState(false);
   const [auditionConfirmations, setAuditionConfirmations] = useState({
     choreographed: false,
@@ -121,9 +117,12 @@ const FormsSection = () => {
     .every(([, value]) => value === true);
   const canProceedWithSubmission = allRequiredChecked && auditionConfirmations.finalConfirmation;
 
+  // Everyone using this form is auditioning, so a valid submit goes straight to the
+  // requirements agreement rather than asking whether they intend to audition.
   const handleOpenAuditionDialog = (data: WorkshopFormData) => {
     setPendingData(data);
-    setAuditionDialogOpen(true);
+    resetAuditionChecklist();
+    setAuditionChecklistOpen(true);
   };
 
   const submitRegistration = async (audition: boolean) => {
@@ -157,8 +156,6 @@ const FormsSection = () => {
         grade: "",
       });
       setPendingData(null);
-      setAuditionDialogOpen(false);
-      setSuppressPendingReset(false);
       resetAuditionChecklist();
     } catch (error) {
       if (error instanceof Error && error.message.includes("Failed to fetch")) {
@@ -179,22 +176,9 @@ const FormsSection = () => {
     }
   };
 
-  const handleAuditionChoice = (audition: boolean) => {
-    if (audition) {
-      setSuppressPendingReset(true);
-      setAuditionDialogOpen(false);
-      resetAuditionChecklist();
-      setAuditionChecklistOpen(true);
-      return;
-    }
-
-    submitRegistration(false);
-  };
-
   const handleChecklistCancel = () => {
     resetAuditionChecklist();
     setPendingData(null);
-    setSuppressPendingReset(false);
   };
 
   const handleChecklistSubmit = () => {
@@ -225,16 +209,15 @@ const FormsSection = () => {
           <Card className="relative p-6 md:p-8 bg-white shadow-[0_20px_60px_rgba(15,8,32,0.5)] border border-white/20">
             <div className="absolute top-0 left-1/2 -translate-x-1/2 h-px w-12 bg-fire-gold" />
             <div className="text-center mb-8">
-              <h3 className="text-2xl md:text-3xl font-black tracking-tight text-fire-deep mb-3">
-                Audition &amp; Workshop Signup
+              <h3 className="text-2xl md:text-3xl font-black tracking-tight text-fire-deep mb-2">
+                Audition Signup
               </h3>
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-4 text-fire-gold font-semibold tracking-[0.15em] uppercase text-[11px]">
-                <span>Auditions &middot; {AUDITION.auditionDate}</span>
-                <span className="hidden sm:inline-block h-1 w-1 rounded-full bg-fire-gold/50" />
-                <span>Workshop &middot; {AUDITION.workshopDate}</span>
-              </div>
+              <p className="text-fire-gold font-semibold tracking-[0.2em] uppercase text-xs">
+                {AUDITION.date}
+              </p>
               <p className="mt-4 text-sm text-gray-600">
-                Sign up once. We'll ask whether you plan to audition.
+                You'll review and agree to the audition requirements before your signup is
+                submitted.
               </p>
             </div>
 
@@ -405,53 +388,6 @@ const FormsSection = () => {
           </Card>
         </div>
       </div>
-
-      <Dialog
-        open={auditionDialogOpen}
-        onOpenChange={(open) => {
-          if (!isSubmitting) {
-            setAuditionDialogOpen(open);
-            if (!open) {
-              if (suppressPendingReset) {
-                setSuppressPendingReset(false);
-                return;
-              }
-              setPendingData(null);
-            }
-          }
-        }}
-      >
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Audition Question</DialogTitle>
-            <DialogDescription>
-              Do you plan to audition?
-            </DialogDescription>
-          </DialogHeader>
-          <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
-            <Button
-              onClick={() => handleAuditionChoice(true)}
-              className="bg-fire-purple hover:bg-fire-purple/90"
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : null}
-              Yes
-            </Button>
-            <Button
-              onClick={() => handleAuditionChoice(false)}
-              variant="outline"
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : null}
-              No
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
 
       <Dialog
         open={auditionChecklistOpen}
