@@ -28,6 +28,17 @@ import { toast } from "@/hooks/use-toast";
 import { workshopRegistrationSchema, type WorkshopFormData } from "@/schemas/workshopSchema";
 import { submitWorkshopRegistration } from "@/services/workshopService";
 
+// One signup covers both dates: everyone registers, and the "do you plan to audition?"
+// answer decides whether the audition agreement is required. Dates live here so the card
+// heading and the requirements checklist can never drift apart.
+const AUDITION = {
+  auditionDate: "September 6, 2026",
+  workshopDate: "September 13, 2026",
+  /** Used inside the requirements checklist sentence. */
+  startSentence:
+    "Auditions are held September 6, 2026 in the main sanctuary. Arrive early — auditions begin promptly at the announced start time.",
+};
+
 const FormsSection = () => {
   const [auditionDialogOpen, setAuditionDialogOpen] = useState(false);
   const [pendingData, setPendingData] = useState<WorkshopFormData | null>(null);
@@ -210,27 +221,189 @@ const FormsSection = () => {
           </h2>
         </div>
 
-        {/* Audition signup form is intentionally hidden — restore the audition Card from git history when the next audition cycle is announced. */}
-        <Card className="relative p-8 bg-white shadow-[0_20px_60px_rgba(15,8,32,0.5)] border border-white/20">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 h-px w-12 bg-fire-gold" />
-          <div className="text-center">
-            <h3 className="text-2xl md:text-3xl font-black tracking-tight text-fire-deep mb-3">
-              Join Our Fire
-            </h3>
-            <p className="text-gray-600 mb-8">
-              Ready to become part of the Fresh Fire Dance Ministry family?
-            </p>
+        <div className="space-y-10">
+          <Card className="relative p-6 md:p-8 bg-white shadow-[0_20px_60px_rgba(15,8,32,0.5)] border border-white/20">
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 h-px w-12 bg-fire-gold" />
+            <div className="text-center mb-8">
+              <h3 className="text-2xl md:text-3xl font-black tracking-tight text-fire-deep mb-3">
+                Audition &amp; Workshop Signup
+              </h3>
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-4 text-fire-gold font-semibold tracking-[0.15em] uppercase text-[11px]">
+                <span>Auditions &middot; {AUDITION.auditionDate}</span>
+                <span className="hidden sm:inline-block h-1 w-1 rounded-full bg-fire-gold/50" />
+                <span>Workshop &middot; {AUDITION.workshopDate}</span>
+              </div>
+              <p className="mt-4 text-sm text-gray-600">
+                Sign up once. We'll ask whether you plan to audition.
+              </p>
+            </div>
 
-            <Button
-              onClick={handleJoinGroup}
-              variant="gold"
-              size="lg"
-              className="w-full max-w-md mx-auto"
-            >
-              Join Our WhatsApp Group
-            </Button>
-          </div>
-        </Card>
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(handleOpenAuditionDialog)} className="space-y-6">
+                <div className="grid gap-4 md:grid-cols-2">
+                  <FormField
+                    control={form.control}
+                    name="firstName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>First Name</FormLabel>
+                        <FormControl>
+                          <Input placeholder="First name" autoComplete="given-name" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="lastName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Last Name</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Last name" autoComplete="family-name" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <FormField
+                  control={form.control}
+                  name="phoneNumber"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Phone Number</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="(555) 555-5555"
+                          type="tel"
+                          inputMode="tel"
+                          autoComplete="tel"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <div className="grid gap-4 md:grid-cols-2">
+                  <FormField
+                    control={form.control}
+                    name="yearsAtClc"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Years at CLC</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            inputMode="numeric"
+                            min={0}
+                            step={1}
+                            {...field}
+                            onChange={(event) => field.onChange(event.target.value)}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="encounterCollide"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Encounter/Collide (Y/N)</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="yes">Yes</SelectItem>
+                            <SelectItem value="no">No</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div className="grid gap-4 md:grid-cols-2">
+                  <FormField
+                    control={form.control}
+                    name="dateOfBirth"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Date of Birth</FormLabel>
+                        <FormControl>
+                          <Input type="date" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="grade"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Grade</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Grade" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <Button
+                  type="submit"
+                  variant="fire"
+                  className="w-full"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Submitting...
+                    </>
+                  ) : (
+                    "Submit Audition Signup"
+                  )}
+                </Button>
+              </form>
+            </Form>
+          </Card>
+
+          <Card className="relative p-6 md:p-8 bg-white shadow-[0_20px_60px_rgba(15,8,32,0.5)] border border-white/20">
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 h-px w-12 bg-fire-gold" />
+            <div className="text-center">
+              <h3 className="text-2xl md:text-3xl font-black tracking-tight text-fire-deep mb-3">
+                Join Our Fire
+              </h3>
+              <p className="text-gray-600 mb-8">
+                Ready to become part of the Fresh Fire Dance Ministry family?
+              </p>
+
+              <Button
+                onClick={handleJoinGroup}
+                variant="gold"
+                size="lg"
+                className="w-full max-w-md mx-auto"
+              >
+                Join Our WhatsApp Group
+              </Button>
+            </div>
+          </Card>
+        </div>
       </div>
 
       <Dialog
@@ -352,7 +525,7 @@ const FormsSection = () => {
                   }
                 />
                 <Label htmlFor="audition-timing" className="text-sm leading-relaxed">
-                  Auditions will begin promptly at 2:00 PM in the main sanctuary.
+                  {AUDITION.startSentence}
                 </Label>
               </div>
 
