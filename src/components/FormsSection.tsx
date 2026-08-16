@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, type FormEvent } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ExternalLink, Loader2 } from "lucide-react";
+import { ExternalLink, Loader2, Mail } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -9,6 +9,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -48,6 +49,47 @@ const WORKSHOP = {
     "https://pushpay.com/g/clcftl?fnd=wES1hrvpPMplmZ1Tt2EQtA&fndv=Lock&lang=en&src=qrcode",
 };
 
+const MINISTRY_EMAIL = "ffdanceministry@gmail.com";
+const MAX_MAILTO_URI_LENGTH = 1800;
+const MAX_DANCE_PIECES = 50;
+const MINISTRY_REQUEST_FIELDS = {
+  contactName: "contactName",
+  contactEmail: "contactEmail",
+  contactPhone: "contactPhone",
+  eventDate: "eventDate",
+  location: "location",
+  church: "church",
+  theme: "theme",
+  scripture: "scripture",
+  serviceFormat: "serviceFormat",
+  dancePieces: "dancePieces",
+  ministryPreference: "ministryPreference",
+  roomRestrictions: "roomRestrictions",
+  additionalInformation: "additionalInformation",
+} as const;
+type MinistryRequestField = (typeof MINISTRY_REQUEST_FIELDS)[keyof typeof MINISTRY_REQUEST_FIELDS];
+
+const REQUIRED_MINISTRY_REQUEST_FIELDS: MinistryRequestField[] = [
+  MINISTRY_REQUEST_FIELDS.contactName,
+  MINISTRY_REQUEST_FIELDS.contactEmail,
+  MINISTRY_REQUEST_FIELDS.eventDate,
+  MINISTRY_REQUEST_FIELDS.location,
+  MINISTRY_REQUEST_FIELDS.church,
+  MINISTRY_REQUEST_FIELDS.theme,
+  MINISTRY_REQUEST_FIELDS.scripture,
+  MINISTRY_REQUEST_FIELDS.serviceFormat,
+  MINISTRY_REQUEST_FIELDS.dancePieces,
+  MINISTRY_REQUEST_FIELDS.ministryPreference,
+  MINISTRY_REQUEST_FIELDS.roomRestrictions,
+];
+
+const getLocalDateInputValue = (date: Date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+
 const FormsSection = () => {
   const [pendingData, setPendingData] = useState<WorkshopFormData | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -66,6 +108,7 @@ const FormsSection = () => {
     finalConfirmation: false,
   });
   const [showFinalConfirmation, setShowFinalConfirmation] = useState(false);
+  const [ministryRequestDraft, setMinistryRequestDraft] = useState<string | null>(null);
 
   const form = useForm<WorkshopFormData>({
     resolver: zodResolver(workshopRegistrationSchema),
@@ -85,6 +128,115 @@ const FormsSection = () => {
     const newWindow = window.open(url, "_blank", "noopener,noreferrer");
     if (newWindow) {
       newWindow.opener = null;
+    }
+  };
+
+  const handleMinistryRequestSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    const requestForm = event.currentTarget;
+    const data = new FormData(requestForm);
+    const value = (name: MinistryRequestField) => String(data.get(name) || "").trim();
+    const firstBlankRequiredField = REQUIRED_MINISTRY_REQUEST_FIELDS.find(
+      (name) => !value(name)
+    );
+
+    if (firstBlankRequiredField) {
+      const field = requestForm.elements.namedItem(firstBlankRequiredField);
+      if (field instanceof HTMLElement) field.focus();
+      toast({
+        title: "Please complete every required field",
+        description: "Required answers cannot contain only spaces.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const contactName = value(MINISTRY_REQUEST_FIELDS.contactName);
+    const church = value(MINISTRY_REQUEST_FIELDS.church);
+    const eventDate = value(MINISTRY_REQUEST_FIELDS.eventDate);
+    const minimumMinistryRequestDate = getLocalDateInputValue(new Date());
+    if (eventDate < minimumMinistryRequestDate) {
+      const field = requestForm.elements.namedItem(MINISTRY_REQUEST_FIELDS.eventDate);
+      if (field instanceof HTMLElement) field.focus();
+      toast({
+        title: "Choose an upcoming date",
+        description: "Ministry requests must be for today or a future date.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const dancePieces = Number(value(MINISTRY_REQUEST_FIELDS.dancePieces));
+    if (!Number.isInteger(dancePieces) || dancePieces < 1 || dancePieces > MAX_DANCE_PIECES) {
+      const field = requestForm.elements.namedItem(MINISTRY_REQUEST_FIELDS.dancePieces);
+      if (field instanceof HTMLElement) field.focus();
+      toast({
+        title: "Check the number of dance pieces",
+        description: `Enter a whole number from 1 to ${MAX_DANCE_PIECES}.`,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const subject = `Ministry Request: ${church} — ${eventDate}`;
+    const body = [
+      "Thank you for the opportunity to minister at your upcoming service!",
+      "",
+      "CONTACT INFORMATION",
+      `Name: ${contactName}`,
+      `Email: ${value(MINISTRY_REQUEST_FIELDS.contactEmail)}`,
+      `Phone: ${value(MINISTRY_REQUEST_FIELDS.contactPhone) || "Not provided"}`,
+      "",
+      "SERVICE DETAILS",
+      `Date: ${eventDate}`,
+      `Location: ${value(MINISTRY_REQUEST_FIELDS.location)}`,
+      `Affiliated church: ${church}`,
+      `Theme: ${value(MINISTRY_REQUEST_FIELDS.theme)}`,
+      `Scripture: ${value(MINISTRY_REQUEST_FIELDS.scripture)}`,
+      `General format of the service: ${value(MINISTRY_REQUEST_FIELDS.serviceFormat)}`,
+      `Number of dance pieces requested: ${dancePieces}`,
+      `Ministry preference: ${value(MINISTRY_REQUEST_FIELDS.ministryPreference)}`,
+      `Room size or setup restrictions: ${value(MINISTRY_REQUEST_FIELDS.roomRestrictions) || "None provided"}`,
+      "",
+      `Additional information: ${value(MINISTRY_REQUEST_FIELDS.additionalInformation) || "None provided"}`,
+    ].join("\r\n");
+
+    setMinistryRequestDraft(`Subject: ${subject}\r\n\r\n${body}`);
+
+    const mailtoUrl = `mailto:${MINISTRY_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    if (mailtoUrl.length > MAX_MAILTO_URI_LENGTH) {
+      toast({
+        title: "Request ready to copy",
+        description: `The request is too long for a reliable email link. Copy the details below and email them to ${MINISTRY_EMAIL}.`,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    window.location.href = mailtoUrl;
+
+    toast({
+      title: "Email draft prepared",
+      description: `If no draft appears, copy the request details below and email them to ${MINISTRY_EMAIL}.`,
+    });
+  };
+
+  const handleCopyMinistryRequest = async () => {
+    if (!ministryRequestDraft) return;
+
+    try {
+      await navigator.clipboard.writeText(ministryRequestDraft);
+      toast({
+        title: "Request details copied",
+        description: `Paste them into an email addressed to ${MINISTRY_EMAIL}.`,
+      });
+    } catch {
+      toast({
+        title: "Copy failed",
+        description: `Select the generated request below and email it to ${MINISTRY_EMAIL}.`,
+        variant: "destructive",
+      });
     }
   };
 
@@ -217,6 +369,38 @@ const FormsSection = () => {
         </div>
 
         <div className="space-y-10">
+          <Card className="relative p-6 md:p-8 bg-white shadow-[0_20px_60px_rgba(15,8,32,0.5)] border border-white/20">
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 h-px w-12 bg-fire-gold" />
+            <div className="text-center">
+              <h3 className="text-2xl md:text-3xl font-black tracking-tight text-fire-deep mb-2">
+                Workshop Registration
+              </h3>
+              <p className="text-fire-gold font-semibold tracking-[0.2em] uppercase text-xs">
+                {WORKSHOP.date} &middot; {WORKSHOP.time}
+              </p>
+
+              <p className="mt-4 text-gray-600">
+                Register through Christian Life Center's giving page.
+                {" "}
+                <span className="font-semibold text-fire-deep">
+                  {WORKSHOP.minimum} minimum donation
+                </span>{" "}
+                to attend.
+              </p>
+
+              <Button asChild variant="fire" size="lg" className="mt-6 w-full max-w-md mx-auto">
+                <a href={WORKSHOP.registerUrl} target="_blank" rel="noopener noreferrer">
+                  Register for the Workshop
+                  <ExternalLink className="ml-2 h-4 w-4" />
+                </a>
+              </Button>
+
+              <p className="mt-3 text-xs text-gray-500">
+                Opens Pushpay in a new tab
+              </p>
+            </div>
+          </Card>
+
           <Card className="relative p-6 md:p-8 bg-white shadow-[0_20px_60px_rgba(15,8,32,0.5)] border border-white/20">
             <div className="absolute top-0 left-1/2 -translate-x-1/2 h-px w-12 bg-fire-gold" />
             <div className="text-center mb-8">
@@ -380,38 +564,6 @@ const FormsSection = () => {
           <Card className="relative p-6 md:p-8 bg-white shadow-[0_20px_60px_rgba(15,8,32,0.5)] border border-white/20">
             <div className="absolute top-0 left-1/2 -translate-x-1/2 h-px w-12 bg-fire-gold" />
             <div className="text-center">
-              <h3 className="text-2xl md:text-3xl font-black tracking-tight text-fire-deep mb-2">
-                Workshop Registration
-              </h3>
-              <p className="text-fire-gold font-semibold tracking-[0.2em] uppercase text-xs">
-                {WORKSHOP.date} &middot; {WORKSHOP.time}
-              </p>
-
-              <p className="mt-4 text-gray-600">
-                Register through Christian Life Center's giving page.
-                {" "}
-                <span className="font-semibold text-fire-deep">
-                  {WORKSHOP.minimum} minimum donation
-                </span>{" "}
-                to attend.
-              </p>
-
-              <Button asChild variant="fire" size="lg" className="mt-6 w-full max-w-md mx-auto">
-                <a href={WORKSHOP.registerUrl} target="_blank" rel="noopener noreferrer">
-                  Register for the Workshop
-                  <ExternalLink className="ml-2 h-4 w-4" />
-                </a>
-              </Button>
-
-              <p className="mt-3 text-xs text-gray-500">
-                Opens Pushpay in a new tab
-              </p>
-            </div>
-          </Card>
-
-          <Card className="relative p-6 md:p-8 bg-white shadow-[0_20px_60px_rgba(15,8,32,0.5)] border border-white/20">
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 h-px w-12 bg-fire-gold" />
-            <div className="text-center">
               <h3 className="text-2xl md:text-3xl font-black tracking-tight text-fire-deep mb-3">
                 Join Our Fire
               </h3>
@@ -428,6 +580,235 @@ const FormsSection = () => {
                 Join Our WhatsApp Group
               </Button>
             </div>
+          </Card>
+
+          <Card className="relative p-6 md:p-8 bg-white shadow-[0_20px_60px_rgba(15,8,32,0.5)] border border-white/20">
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 h-px w-12 bg-fire-gold" />
+            <div className="text-center mb-8">
+              <h3 className="text-2xl md:text-3xl font-black tracking-tight text-fire-deep mb-3">
+                Invite Fresh Fire to Minister
+              </h3>
+              <p className="text-gray-700 font-medium">
+                Thank you for the opportunity to minister at your upcoming service!
+              </p>
+              <p className="mt-3 text-sm text-gray-600 max-w-2xl mx-auto">
+                In order for us to prepare, kindly share the following details. With this initial
+                information, we'll prayerfully review your request and respond with our availability.
+              </p>
+            </div>
+
+            <form
+              onSubmit={handleMinistryRequestSubmit}
+              onChange={() => setMinistryRequestDraft(null)}
+              className="space-y-6"
+            >
+              <fieldset className="space-y-4">
+                <legend className="text-lg font-bold text-fire-deep mb-4">
+                  Your Contact Information
+                </legend>
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="ministry-contact-name">Name</Label>
+                    <Input
+                      id="ministry-contact-name"
+                      name={MINISTRY_REQUEST_FIELDS.contactName}
+                      autoComplete="name"
+                      placeholder="Your full name"
+                      maxLength={100}
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="ministry-contact-email">Email</Label>
+                    <Input
+                      id="ministry-contact-email"
+                      name={MINISTRY_REQUEST_FIELDS.contactEmail}
+                      type="email"
+                      autoComplete="email"
+                      placeholder="you@example.com"
+                      maxLength={254}
+                      required
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="ministry-contact-phone">Phone Number (optional)</Label>
+                  <Input
+                    id="ministry-contact-phone"
+                    name={MINISTRY_REQUEST_FIELDS.contactPhone}
+                    type="tel"
+                    inputMode="tel"
+                    autoComplete="tel"
+                    placeholder="(555) 555-5555"
+                    maxLength={32}
+                  />
+                </div>
+              </fieldset>
+
+              <fieldset className="space-y-4 border-t border-gray-200 pt-6">
+                <legend className="text-lg font-bold text-fire-deep mb-4">
+                  Service Details
+                </legend>
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="ministry-event-date">Date</Label>
+                    <Input
+                      id="ministry-event-date"
+                      name={MINISTRY_REQUEST_FIELDS.eventDate}
+                      type="date"
+                      min={getLocalDateInputValue(new Date())}
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="ministry-location">Location</Label>
+                    <Input
+                      id="ministry-location"
+                      name={MINISTRY_REQUEST_FIELDS.location}
+                      placeholder="Venue name and address"
+                      maxLength={200}
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="ministry-church">Affiliated Church</Label>
+                  <Input
+                    id="ministry-church"
+                    name={MINISTRY_REQUEST_FIELDS.church}
+                    placeholder="Church or ministry name"
+                    maxLength={150}
+                    required
+                  />
+                </div>
+
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="ministry-theme">Theme</Label>
+                    <Input
+                      id="ministry-theme"
+                      name={MINISTRY_REQUEST_FIELDS.theme}
+                      placeholder="Service or event theme"
+                      maxLength={160}
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="ministry-scripture">Scripture</Label>
+                    <Input
+                      id="ministry-scripture"
+                      name={MINISTRY_REQUEST_FIELDS.scripture}
+                      placeholder="Book, chapter, and verse"
+                      maxLength={160}
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="ministry-service-format">General Format of the Service</Label>
+                  <Textarea
+                    id="ministry-service-format"
+                    name={MINISTRY_REQUEST_FIELDS.serviceFormat}
+                    placeholder="Describe the order of service and where the dance ministry would participate."
+                    className="min-h-28 text-base md:text-sm"
+                    maxLength={1200}
+                    required
+                  />
+                </div>
+
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="ministry-dance-pieces">Number of Dance Pieces Requested</Label>
+                    <Input
+                      id="ministry-dance-pieces"
+                      name={MINISTRY_REQUEST_FIELDS.dancePieces}
+                      type="number"
+                      inputMode="numeric"
+                      min={1}
+                      max={MAX_DANCE_PIECES}
+                      step={1}
+                      placeholder="1"
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="ministry-preference">Ministry Preference</Label>
+                    <select
+                      id="ministry-preference"
+                      name={MINISTRY_REQUEST_FIELDS.ministryPreference}
+                      defaultValue=""
+                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 md:text-sm"
+                      required
+                    >
+                      <option value="" disabled>
+                        Select a preference
+                      </option>
+                      <option value="Adult ministry">Adult ministry</option>
+                      <option value="Youth ministry">Youth ministry</option>
+                      <option value="Collaborative piece">Collaborative piece</option>
+                      <option value="No preference">No preference</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="ministry-room-restrictions">
+                    Room Size or Setup Restrictions
+                  </Label>
+                  <Textarea
+                    id="ministry-room-restrictions"
+                    name={MINISTRY_REQUEST_FIELDS.roomRestrictions}
+                    placeholder="Describe the available floor or stage, entrances, ceiling height, or enter None."
+                    className="min-h-24 text-base md:text-sm"
+                    maxLength={800}
+                    required
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="ministry-additional-information">
+                    Additional Information (optional)
+                  </Label>
+                  <Textarea
+                    id="ministry-additional-information"
+                    name={MINISTRY_REQUEST_FIELDS.additionalInformation}
+                    placeholder="Share any other details that would help us prayerfully review your request."
+                    className="min-h-24 text-base md:text-sm"
+                    maxLength={1200}
+                  />
+                </div>
+              </fieldset>
+
+              <Button type="submit" variant="fire" size="lg" className="w-full">
+                <Mail className="mr-2 h-4 w-4" />
+                Email Ministry Request
+              </Button>
+              {ministryRequestDraft && (
+                <div className="space-y-3">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="lg"
+                    className="w-full"
+                    onClick={handleCopyMinistryRequest}
+                  >
+                    Copy Request Details
+                  </Button>
+                  <Textarea
+                    aria-label="Generated ministry request"
+                    readOnly
+                    value={ministryRequestDraft}
+                    className="min-h-48 text-base md:text-sm"
+                  />
+                </div>
+              )}
+              <p className="text-center text-xs text-gray-500">
+                This opens your email app with your answers addressed to {MINISTRY_EMAIL}.
+                Your information is not stored on this website.
+              </p>
+            </form>
           </Card>
         </div>
       </div>
