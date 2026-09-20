@@ -11,6 +11,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { CognitoUserSession } from "amazon-cognito-identity-js";
+import { AttendanceList, type Registration } from "@/components/AttendanceList";
 
 const API_BASE =
   import.meta.env.VITE_API_BASE ||
@@ -41,20 +42,6 @@ interface Order {
   createdAt: string;
 }
 
-interface Registration {
-  registrationId: string;
-  firstName: string;
-  lastName: string;
-  phoneNumber: string;
-  yearsAtClc: number;
-  encounterCollide: boolean;
-  dateOfBirth: string;
-  grade: string;
-  audition: boolean;
-  present: boolean;
-  createdAt: string;
-}
-
 interface PendingMediaSubmission {
   submissionId: string;
   title: string;
@@ -82,6 +69,8 @@ const Admin = () => {
   const [auditionRegistrations, setAuditionRegistrations] = useState<Registration[]>([]);
   const [isWorkshopLoading, setIsWorkshopLoading] = useState(false);
   const [isAuditionLoading, setIsAuditionLoading] = useState(false);
+  const [attendanceSaving, setAttendanceSaving] = useState<{ listType: "workshop" | "audition"; registrationId: string } | null>(null);
+  const attendanceSavingRef = useRef(false);
   const [totalWorkshopRegistrations, setTotalWorkshopRegistrations] = useState(0);
   const [totalAuditionRegistrations, setTotalAuditionRegistrations] = useState(0);
   const [pendingMedia, setPendingMedia] = useState<PendingMediaSubmission[]>([]);
@@ -573,15 +562,12 @@ const Admin = () => {
     registrationId: string,
     present: boolean
   ) => {
+    if (attendanceSavingRef.current) return;
+    attendanceSavingRef.current = true;
+    setAttendanceSaving({ listType, registrationId });
     try {
       const isAudition = listType === "audition";
       const attendanceApi = isAudition ? AUDITION_ATTENDANCE_API : WORKSHOP_ATTENDANCE_API;
-
-      if (isAudition) {
-        setIsAuditionLoading(true);
-      } else {
-        setIsWorkshopLoading(true);
-      }
 
       const res = await fetchWithAuth(attendanceApi, {
         method: "POST",
@@ -612,6 +598,7 @@ const Admin = () => {
           )
         );
       }
+      toast({ title: present ? "Marked here" : "Marked not here", description: "Attendance saved." });
     } catch (e: any) {
       if (handleAuthFailure(e)) {
         return;
@@ -623,11 +610,8 @@ const Admin = () => {
         variant: "destructive",
       });
     } finally {
-      if (listType === "audition") {
-        setIsAuditionLoading(false);
-      } else {
-        setIsWorkshopLoading(false);
-      }
+      attendanceSavingRef.current = false;
+      setAttendanceSaving(null);
     }
   };
 
@@ -869,10 +853,10 @@ const Admin = () => {
           </Card>
         ) : (
           <>
-            <div className="flex justify-between items-center mb-8">
-              <div>
-                <h1 className="text-4xl font-bold">Admin Dashboard</h1>
-                <p className="text-muted-foreground mt-2">
+            <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="min-w-0">
+                <h1 className="text-3xl font-bold sm:text-4xl">Admin Dashboard</h1>
+                <p className="mt-2 break-words text-muted-foreground">
                   Logged in as: <span className="font-medium text-fire-purple">{who}</span>
                 </p>
               </div>
@@ -896,16 +880,16 @@ const Admin = () => {
               </div>
             </div>
             
-            <Tabs defaultValue="orders" className="space-y-6">
-              <TabsList>
-                <TabsTrigger value="orders">Orders</TabsTrigger>
-                <TabsTrigger value="workshop">Workshop Registrations</TabsTrigger>
-                <TabsTrigger value="audition">Audition Signups</TabsTrigger>
-                <TabsTrigger value="media">Media Approvals</TabsTrigger>
+            <Tabs defaultValue="orders" className="min-w-0 space-y-6">
+              <TabsList className="grid h-auto w-full grid-cols-2 gap-1 sm:grid-cols-4">
+                <TabsTrigger className="min-h-11 whitespace-normal" value="orders">Orders</TabsTrigger>
+                <TabsTrigger className="min-h-11 whitespace-normal" value="workshop">Workshop Registrations</TabsTrigger>
+                <TabsTrigger className="min-h-11 whitespace-normal" value="audition">Audition Signups</TabsTrigger>
+                <TabsTrigger className="min-h-11 whitespace-normal" value="media">Media Approvals</TabsTrigger>
               </TabsList>
 
               <TabsContent value="orders" className="space-y-6">
-                <div className="flex gap-4">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
                   <Card className="max-w-sm">
                     <CardHeader>
                       <CardTitle>Total Orders</CardTitle>
@@ -1019,7 +1003,7 @@ const Admin = () => {
               </TabsContent>
 
               <TabsContent value="workshop" className="space-y-6">
-                <div className="flex gap-4">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
                   <Card className="max-w-sm">
                     <CardHeader>
                       <CardTitle>Total Registrations</CardTitle>
@@ -1031,7 +1015,7 @@ const Admin = () => {
                   </Card>
                   <Button
                     onClick={fetchWorkshopRegistrations}
-                    disabled={isWorkshopLoading}
+                    disabled={isWorkshopLoading || attendanceSaving !== null}
                     variant="outline"
                   >
                     {isWorkshopLoading ? (
@@ -1051,101 +1035,20 @@ const Admin = () => {
                     <CardDescription>February 1st, 2026 at 2:00 PM</CardDescription>
                   </CardHeader>
                   <CardContent className="p-0">
-                    <ScrollArea className="h-[600px] w-full">
-                      <div className="min-w-max">
-                        <Table>
-                          <TableHeader>
-                            <TableRow>
-                              <TableHead className="min-w-[160px]">Name</TableHead>
-                              <TableHead className="min-w-[140px]">Phone</TableHead>
-                              <TableHead className="min-w-[120px]">Years at CLC</TableHead>
-                              <TableHead className="min-w-[160px]">Encounter/Collide</TableHead>
-                              <TableHead className="min-w-[140px]">Date of Birth</TableHead>
-                              <TableHead className="min-w-[120px]">Grade</TableHead>
-                              <TableHead className="min-w-[100px]">Audition</TableHead>
-                              <TableHead className="min-w-[120px]">Status</TableHead>
-                              <TableHead className="min-w-[120px]">Date</TableHead>
-                              <TableHead className="sticky right-0 bg-card shadow-[-4px_0_8px_rgba(0,0,0,0.1)] min-w-[170px]">Actions</TableHead>
-                            </TableRow>
-                          </TableHeader>
-                          <TableBody>
-                            {isWorkshopLoading ? (
-                              <TableRow>
-                                <TableCell colSpan={10} className="text-center">
-                                  <Loader2 className="h-6 w-6 animate-spin mx-auto" />
-                                </TableCell>
-                              </TableRow>
-                            ) : workshopRegistrations.length === 0 ? (
-                              <TableRow>
-                                <TableCell colSpan={10} className="text-center text-muted-foreground">
-                                  No registrations yet
-                                </TableCell>
-                              </TableRow>
-                            ) : (
-                              workshopRegistrations.map((registration) => (
-                                <TableRow key={registration.registrationId}>
-                                  <TableCell className="min-w-[160px]">
-                                    {registration.firstName} {registration.lastName}
-                                  </TableCell>
-                                  <TableCell className="min-w-[140px]">{registration.phoneNumber}</TableCell>
-                                  <TableCell className="min-w-[120px]">{registration.yearsAtClc}</TableCell>
-                                  <TableCell className="min-w-[160px]">
-                                    {registration.encounterCollide ? "Yes" : "No"}
-                                  </TableCell>
-                                  <TableCell className="min-w-[140px]">{registration.dateOfBirth}</TableCell>
-                                  <TableCell className="min-w-[120px]">{registration.grade}</TableCell>
-                                  <TableCell className="min-w-[100px]">
-                                    {registration.audition ? "Yes" : "No"}
-                                  </TableCell>
-                                  <TableCell className="min-w-[120px]">
-                                    <span
-                                      className={`px-2 py-1 rounded-full text-xs ${
-                                        registration.present
-                                          ? "bg-green-100 text-green-800"
-                                          : "bg-gray-100 text-gray-800"
-                                      }`}
-                                    >
-                                      {registration.present ? "Present" : "Not Here"}
-                                    </span>
-                                  </TableCell>
-                                  <TableCell className="min-w-[120px]">
-                                    {registration.createdAt
-                                      ? new Date(registration.createdAt).toLocaleDateString()
-                                      : "N/A"}
-                                  </TableCell>
-                                  <TableCell className="sticky right-0 bg-card shadow-[-4px_0_8px_rgba(0,0,0,0.1)] min-w-[170px]">
-                                    <Button
-                                      size="sm"
-                                      onClick={() =>
-                                        handleAttendanceToggle(
-                                          "workshop",
-                                          registration.registrationId,
-                                          !registration.present
-                                        )
-                                      }
-                                      className={
-                                        registration.present
-                                          ? "bg-gray-200 text-gray-900 hover:bg-gray-300"
-                                          : "bg-fire-purple hover:bg-fire-purple/90"
-                                      }
-                                      disabled={isWorkshopLoading}
-                                    >
-                                      {registration.present ? "Mark Not Here" : "Mark Present"}
-                                    </Button>
-                                  </TableCell>
-                                </TableRow>
-                              ))
-                            )}
-                          </TableBody>
-                        </Table>
-                      </div>
-                    </ScrollArea>
+                    <AttendanceList
+                      registrations={workshopRegistrations}
+                      isLoading={isWorkshopLoading}
+                      savingId={attendanceSaving?.listType === "workshop" ? attendanceSaving.registrationId : null}
+                      isSaving={attendanceSaving !== null}
+                      emptyMessage="No registrations yet"
+                      onToggle={(registrationId, present) => handleAttendanceToggle("workshop", registrationId, present)}
+                    />
                   </CardContent>
                 </Card>
               </TabsContent>
 
               <TabsContent value="audition" className="space-y-6">
-                <div className="flex gap-4">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
                   <Card className="max-w-sm">
                     <CardHeader>
                       <CardTitle>Total Signups</CardTitle>
@@ -1157,7 +1060,7 @@ const Admin = () => {
                   </Card>
                   <Button
                     onClick={fetchAuditionRegistrations}
-                    disabled={isAuditionLoading}
+                    disabled={isAuditionLoading || attendanceSaving !== null}
                     variant="outline"
                   >
                     {isAuditionLoading ? (
@@ -1174,104 +1077,23 @@ const Admin = () => {
                 <Card>
                   <CardHeader>
                     <CardTitle>Audition Signups</CardTitle>
-                    <CardDescription>Separated from workshop registrations</CardDescription>
+                    <CardDescription>Tap Mark here to check someone in, or Mark not here to undo it.</CardDescription>
                   </CardHeader>
                   <CardContent className="p-0">
-                    <ScrollArea className="h-[600px] w-full">
-                      <div className="min-w-max">
-                        <Table>
-                          <TableHeader>
-                            <TableRow>
-                              <TableHead className="min-w-[160px]">Name</TableHead>
-                              <TableHead className="min-w-[140px]">Phone</TableHead>
-                              <TableHead className="min-w-[120px]">Years at CLC</TableHead>
-                              <TableHead className="min-w-[160px]">Encounter/Collide</TableHead>
-                              <TableHead className="min-w-[140px]">Date of Birth</TableHead>
-                              <TableHead className="min-w-[120px]">Grade</TableHead>
-                              <TableHead className="min-w-[100px]">Audition</TableHead>
-                              <TableHead className="min-w-[120px]">Status</TableHead>
-                              <TableHead className="min-w-[120px]">Date</TableHead>
-                              <TableHead className="sticky right-0 bg-card shadow-[-4px_0_8px_rgba(0,0,0,0.1)] min-w-[170px]">Actions</TableHead>
-                            </TableRow>
-                          </TableHeader>
-                          <TableBody>
-                            {isAuditionLoading ? (
-                              <TableRow>
-                                <TableCell colSpan={10} className="text-center">
-                                  <Loader2 className="h-6 w-6 animate-spin mx-auto" />
-                                </TableCell>
-                              </TableRow>
-                            ) : auditionRegistrations.length === 0 ? (
-                              <TableRow>
-                                <TableCell colSpan={10} className="text-center text-muted-foreground">
-                                  No audition signups yet
-                                </TableCell>
-                              </TableRow>
-                            ) : (
-                              auditionRegistrations.map((registration) => (
-                                <TableRow key={registration.registrationId}>
-                                  <TableCell className="min-w-[160px]">
-                                    {registration.firstName} {registration.lastName}
-                                  </TableCell>
-                                  <TableCell className="min-w-[140px]">{registration.phoneNumber}</TableCell>
-                                  <TableCell className="min-w-[120px]">{registration.yearsAtClc}</TableCell>
-                                  <TableCell className="min-w-[160px]">
-                                    {registration.encounterCollide ? "Yes" : "No"}
-                                  </TableCell>
-                                  <TableCell className="min-w-[140px]">{registration.dateOfBirth}</TableCell>
-                                  <TableCell className="min-w-[120px]">{registration.grade}</TableCell>
-                                  <TableCell className="min-w-[100px]">
-                                    {registration.audition ? "Yes" : "No"}
-                                  </TableCell>
-                                  <TableCell className="min-w-[120px]">
-                                    <span
-                                      className={`px-2 py-1 rounded-full text-xs ${
-                                        registration.present
-                                          ? "bg-green-100 text-green-800"
-                                          : "bg-gray-100 text-gray-800"
-                                      }`}
-                                    >
-                                      {registration.present ? "Present" : "Not Here"}
-                                    </span>
-                                  </TableCell>
-                                  <TableCell className="min-w-[120px]">
-                                    {registration.createdAt
-                                      ? new Date(registration.createdAt).toLocaleDateString()
-                                      : "N/A"}
-                                  </TableCell>
-                                  <TableCell className="sticky right-0 bg-card shadow-[-4px_0_8px_rgba(0,0,0,0.1)] min-w-[170px]">
-                                    <Button
-                                      size="sm"
-                                      onClick={() =>
-                                        handleAttendanceToggle(
-                                          "audition",
-                                          registration.registrationId,
-                                          !registration.present
-                                        )
-                                      }
-                                      className={
-                                        registration.present
-                                          ? "bg-gray-200 text-gray-900 hover:bg-gray-300"
-                                          : "bg-fire-purple hover:bg-fire-purple/90"
-                                      }
-                                      disabled={isAuditionLoading}
-                                    >
-                                      {registration.present ? "Mark Not Here" : "Mark Present"}
-                                    </Button>
-                                  </TableCell>
-                                </TableRow>
-                              ))
-                            )}
-                          </TableBody>
-                        </Table>
-                      </div>
-                    </ScrollArea>
+                    <AttendanceList
+                      registrations={auditionRegistrations}
+                      isLoading={isAuditionLoading}
+                      savingId={attendanceSaving?.listType === "audition" ? attendanceSaving.registrationId : null}
+                      isSaving={attendanceSaving !== null}
+                      emptyMessage="No audition signups yet"
+                      onToggle={(registrationId, present) => handleAttendanceToggle("audition", registrationId, present)}
+                    />
                   </CardContent>
                 </Card>
               </TabsContent>
 
               <TabsContent value="media" className="space-y-6">
-                <div className="flex gap-4">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
                   <Card className="max-w-sm">
                     <CardHeader>
                       <CardTitle>Pending Media</CardTitle>
