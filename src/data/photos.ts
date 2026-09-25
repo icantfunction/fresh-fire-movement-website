@@ -1,9 +1,76 @@
-// All photos are bundled locally under /public/photos/ as 1600px JPEGs.
+// All photos are bundled locally under /public/photos/ as JPEGs.
 // Flickr imports are keyed by id-and-secret; the DISPATCHED highlights use
 // dispatched-NN slugs. Either way the key is just the filename stem.
 export function photoUrl(idAndSecret: string): string {
   return `/photos/${idAndSecret}.jpg`;
 }
+
+// Final Images by Jolouisphotography, Fresh Fire collection (September 2026).
+// Keep the collection together at the top of the gallery, in reverse Pixieset order.
+const jolouis2026Photos = [
+  "jolouis-2026-img_1221-edit",
+  "jolouis-2026-img_1192-edit",
+  "jolouis-2026-img_1185-edit",
+  "jolouis-2026-img_1179-edit",
+  "jolouis-2026-img_1178-edit",
+  "jolouis-2026-img_1162-edit",
+  "jolouis-2026-img_1156-edit",
+  "jolouis-2026-img_1138",
+  "jolouis-2026-img_1121-edit",
+  "jolouis-2026-img_1118-edit",
+  "jolouis-2026-img_1118-edit-1",
+  "jolouis-2026-img_1116-edit",
+  "jolouis-2026-img_1112-edit",
+  "jolouis-2026-img_1107-edit",
+  "jolouis-2026-img_1106-edit",
+  "jolouis-2026-img_1105-edit",
+  "jolouis-2026-img_1081-edit",
+  "jolouis-2026-img_1070",
+  "jolouis-2026-img_1067",
+  "jolouis-2026-img_1066-edit",
+  "jolouis-2026-img_1059-edit",
+  "jolouis-2026-img_1042-edit",
+  "jolouis-2026-img_1036-edit",
+  "jolouis-2026-img_1033",
+  "jolouis-2026-img_1030-edit",
+  "jolouis-2026-img_1027-edit",
+  "jolouis-2026-img_1022",
+  "jolouis-2026-img_1015",
+  "jolouis-2026-img_1015-2",
+  "jolouis-2026-img_1012",
+  "jolouis-2026-img_1000-edit",
+  "jolouis-2026-img_0996",
+  "jolouis-2026-img_0995",
+  "jolouis-2026-img_0994",
+  "jolouis-2026-img_0987-edit",
+  "jolouis-2026-img_0981",
+  "jolouis-2026-img_0967-edit",
+  "jolouis-2026-ak1a7784",
+  "jolouis-2026-ak1a7768",
+  "jolouis-2026-ak1a7748-edit",
+  "jolouis-2026-ak1a7738-edit",
+  "jolouis-2026-ak1a7725",
+  "jolouis-2026-ak1a7720",
+  "jolouis-2026-ak1a7693",
+  "jolouis-2026-ak1a7680-edit",
+  "jolouis-2026-ak1a7660",
+  "jolouis-2026-ak1a7651",
+  "jolouis-2026-ak1a7647",
+  "jolouis-2026-ak1a7633-edit",
+  "jolouis-2026-ak1a7632-edit",
+  "jolouis-2026-ak1a7626-edit",
+  "jolouis-2026-ak1a7611",
+  "jolouis-2026-ak1a7600-edit",
+  "jolouis-2026-ak1a7595-edit",
+  "jolouis-2026-ak1a7588-edit",
+  "jolouis-2026-ak1a7583-edit",
+  "jolouis-2026-ak1a7579",
+  "jolouis-2026-ak1a7578",
+  "jolouis-2026-ak1a7560",
+  "jolouis-2026-ak1a7548",
+  "jolouis-2026-ak1a7541",
+  "jolouis-2026-ak1a7532",
+];
 
 // Hero rotation photos in reverse download order (most recent first).
 export const heroPhotos: string[] = [
@@ -28,6 +95,7 @@ export const heroPhotos: string[] = [
 
 // Non-hero ministry photos in reverse download order (most recent first).
 export const galleryPhotos: string[] = [
+  ...jolouis2026Photos,
   "dispatched-96",
   "dispatched-95",
   "dispatched-94",
@@ -229,6 +297,7 @@ export const galleryPhotos: string[] = [
 // Every photo (heroes + gallery) interleaved by download time, most recent first.
 // Used by the /gallery page so the wall shows newest downloads at the top.
 export const allPhotosChronological: string[] = [
+  ...jolouis2026Photos,
   "dispatched-96",
   "dispatched-95",
   "dispatched-94",

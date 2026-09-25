@@ -84,7 +84,7 @@ const LocationPage = () => {
 
             <div className="mt-10 flex flex-col sm:flex-row gap-3">
               <Button asChild variant="gold" className="flex-1">
-                <Link to="/#audition-signup">Join Our Fire</Link>
+                <Link to="/#connect">Join Our Fire</Link>
               </Button>
               <Button asChild variant="fire" className="flex-1">
                 <Link to="/meet-the-team">Meet the Team</Link>

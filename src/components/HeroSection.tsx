@@ -67,7 +67,7 @@ const HeroSection = () => {
             size="icon"
             className="h-14 w-14 rounded-full [&_svg]:size-6 bg-fire-gold/20 backdrop-blur-md border border-fire-gold/40 text-fire-gold shadow-lg hover:bg-fire-gold/30 hover:border-fire-gold/60 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300"
           >
-            <a href="#audition-signup" aria-label="Join Our Fire" title="Join Our Fire">
+            <a href="#connect" aria-label="Join Our Fire" title="Join Our Fire">
               <Flame />
             </a>
           </Button>
@@ -113,7 +113,7 @@ const HeroSection = () => {
             size="lg"
             className="rounded-full bg-fire-gold/20 backdrop-blur-md border border-fire-gold/40 text-fire-gold shadow-lg hover:bg-fire-gold/30 hover:border-fire-gold/60 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300"
           >
-            <a href="#audition-signup" className="flex items-center gap-2">
+            <a href="#connect" className="flex items-center gap-2">
               <ChevronDown className="w-5 h-5" />
               Join Our Fire
             </a>

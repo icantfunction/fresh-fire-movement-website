@@ -31,6 +31,8 @@ import { submitWorkshopRegistration } from "@/services/workshopService";
 
 // This form is audition-only, so the date lives here once and feeds both the card heading
 // and the requirements checklist.
+const SHOW_REGISTRATION_FORMS = false;
+
 const AUDITION = {
   date: "September 20, 2026",
   time: "2:00 PM Sharp",
@@ -350,7 +352,7 @@ const FormsSection = () => {
   };
 
   return (
-    <section id="audition-signup" className="relative py-24 px-4 scroll-mt-24 overflow-hidden bg-gradient-to-bl from-fire-deep via-[#1a0b2e] to-[#0f0820]">
+    <section id="connect" className="relative py-24 px-4 scroll-mt-24 overflow-hidden bg-gradient-to-bl from-fire-deep via-[#1a0b2e] to-[#0f0820]">
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(124,58,237,0.3),transparent_55%)] pointer-events-none" />
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,rgba(245,158,11,0.1),transparent_60%)] pointer-events-none" />
 
@@ -369,6 +371,7 @@ const FormsSection = () => {
         </div>
 
         <div className="space-y-10">
+          {SHOW_REGISTRATION_FORMS && <>
           <Card className="relative p-6 md:p-8 bg-white shadow-[0_20px_60px_rgba(15,8,32,0.5)] border border-white/20">
             <div className="absolute top-0 left-1/2 -translate-x-1/2 h-px w-12 bg-fire-gold" />
             <div className="text-center">
@@ -560,6 +563,7 @@ const FormsSection = () => {
               </form>
             </Form>
           </Card>
+          </>}
 
           <Card className="relative p-6 md:p-8 bg-white shadow-[0_20px_60px_rgba(15,8,32,0.5)] border border-white/20">
             <div className="absolute top-0 left-1/2 -translate-x-1/2 h-px w-12 bg-fire-gold" />
@@ -814,7 +818,7 @@ const FormsSection = () => {
       </div>
 
       <Dialog
-        open={auditionChecklistOpen}
+        open={SHOW_REGISTRATION_FORMS && auditionChecklistOpen}
         onOpenChange={(open) => {
           if (isSubmitting) return;
           if (open) {
