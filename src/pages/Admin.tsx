@@ -12,6 +12,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { CognitoUserSession } from "amazon-cognito-identity-js";
 import { AttendanceList, type Registration } from "@/components/AttendanceList";
+import { AUDITION, WORKSHOP } from "@/data/registrations";
 
 const API_BASE =
   import.meta.env.VITE_API_BASE ||
@@ -71,8 +72,6 @@ const Admin = () => {
   const [isAuditionLoading, setIsAuditionLoading] = useState(false);
   const [attendanceSaving, setAttendanceSaving] = useState<{ listType: "workshop" | "audition"; registrationId: string } | null>(null);
   const attendanceSavingRef = useRef(false);
-  const [totalWorkshopRegistrations, setTotalWorkshopRegistrations] = useState(0);
-  const [totalAuditionRegistrations, setTotalAuditionRegistrations] = useState(0);
   const [pendingMedia, setPendingMedia] = useState<PendingMediaSubmission[]>([]);
   const [isMediaLoading, setIsMediaLoading] = useState(false);
   
@@ -227,8 +226,6 @@ const Admin = () => {
     setTotalOrders(0);
     setWorkshopRegistrations([]);
     setAuditionRegistrations([]);
-    setTotalWorkshopRegistrations(0);
-    setTotalAuditionRegistrations(0);
     setPendingMedia([]);
     setUsername("");
     setPassword("");
@@ -392,6 +389,7 @@ const Admin = () => {
     const arr = Array.isArray(raw) ? raw : [];
     return arr.map((item: any) => ({
       registrationId: item.registrationId ?? item.id ?? "",
+      registrationStatus: item.registrationStatus === "ARCHIVED" ? "ARCHIVED" : "ACTIVE",
       firstName: item.firstName ?? "",
       lastName: item.lastName ?? "",
       phoneNumber: item.phoneNumber ?? item.phone ?? "",
@@ -423,7 +421,6 @@ const Admin = () => {
 
       const items = normalizeRegistrations(data);
       setWorkshopRegistrations(items);
-      setTotalWorkshopRegistrations(items.length);
     } catch (e: any) {
       if (handleAuthFailure(e)) {
         return;
@@ -457,7 +454,6 @@ const Admin = () => {
 
       const items = normalizeRegistrations(data);
       setAuditionRegistrations(items);
-      setTotalAuditionRegistrations(items.length);
     } catch (e: any) {
       if (handleAuthFailure(e)) {
         return;
@@ -1002,95 +998,41 @@ const Admin = () => {
                 </Card>
               </TabsContent>
 
-              <TabsContent value="workshop" className="space-y-6">
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
-                  <Card className="max-w-sm">
-                    <CardHeader>
-                      <CardTitle>Total Registrations</CardTitle>
-                      <CardDescription>Workshop Registrations</CardDescription>
+              {([
+                {
+                  type: "workshop", title: "Workshop Registrations", event: WORKSHOP,
+                  rows: workshopRegistrations, loading: isWorkshopLoading, refresh: fetchWorkshopRegistrations,
+                },
+                {
+                  type: "audition", title: "Audition Signups", event: AUDITION,
+                  rows: auditionRegistrations, loading: isAuditionLoading, refresh: fetchAuditionRegistrations,
+                },
+              ] as const).map(({ type, title, event, rows, loading, refresh }) => (
+                <TabsContent key={type} value={type}>
+                  <Card>
+                    <CardHeader className="gap-3 sm:flex-row sm:items-center sm:justify-between">
+                      <div className="space-y-1">
+                        <CardTitle>{title}</CardTitle>
+                        <CardDescription>{event.date} at {event.time}</CardDescription>
+                      </div>
+                      <Button onClick={refresh} disabled={loading || attendanceSaving !== null} variant="outline">
+                        {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        Refresh {type === "workshop" ? "Workshop" : "Audition Signups"}
+                      </Button>
                     </CardHeader>
-                    <CardContent>
-                      <p className="text-3xl font-bold">{totalWorkshopRegistrations}</p>
+                    <CardContent className="p-0">
+                      <AttendanceList
+                        registrations={rows}
+                        isLoading={loading}
+                        savingId={attendanceSaving?.listType === type ? attendanceSaving.registrationId : null}
+                        isSaving={attendanceSaving !== null}
+                        emptyMessage={type === "workshop" ? "No current workshop registrations." : "No current audition signups."}
+                        onToggle={(registrationId, present) => handleAttendanceToggle(type, registrationId, present)}
+                      />
                     </CardContent>
                   </Card>
-                  <Button
-                    onClick={fetchWorkshopRegistrations}
-                    disabled={isWorkshopLoading || attendanceSaving !== null}
-                    variant="outline"
-                  >
-                    {isWorkshopLoading ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Loading...
-                      </>
-                    ) : (
-                      "Refresh Workshop"
-                    )}
-                  </Button>
-                </div>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Workshop Registrations</CardTitle>
-                    <CardDescription>February 1st, 2026 at 2:00 PM</CardDescription>
-                  </CardHeader>
-                  <CardContent className="p-0">
-                    <AttendanceList
-                      registrations={workshopRegistrations}
-                      isLoading={isWorkshopLoading}
-                      savingId={attendanceSaving?.listType === "workshop" ? attendanceSaving.registrationId : null}
-                      isSaving={attendanceSaving !== null}
-                      emptyMessage="No registrations yet"
-                      onToggle={(registrationId, present) => handleAttendanceToggle("workshop", registrationId, present)}
-                    />
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              <TabsContent value="audition" className="space-y-6">
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
-                  <Card className="max-w-sm">
-                    <CardHeader>
-                      <CardTitle>Total Signups</CardTitle>
-                      <CardDescription>Audition Signup Registrations</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-3xl font-bold">{totalAuditionRegistrations}</p>
-                    </CardContent>
-                  </Card>
-                  <Button
-                    onClick={fetchAuditionRegistrations}
-                    disabled={isAuditionLoading || attendanceSaving !== null}
-                    variant="outline"
-                  >
-                    {isAuditionLoading ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Loading...
-                      </>
-                    ) : (
-                      "Refresh Audition Signups"
-                    )}
-                  </Button>
-                </div>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Audition Signups</CardTitle>
-                    <CardDescription>Tap Mark here to check someone in, or Mark not here to undo it.</CardDescription>
-                  </CardHeader>
-                  <CardContent className="p-0">
-                    <AttendanceList
-                      registrations={auditionRegistrations}
-                      isLoading={isAuditionLoading}
-                      savingId={attendanceSaving?.listType === "audition" ? attendanceSaving.registrationId : null}
-                      isSaving={attendanceSaving !== null}
-                      emptyMessage="No audition signups yet"
-                      onToggle={(registrationId, present) => handleAttendanceToggle("audition", registrationId, present)}
-                    />
-                  </CardContent>
-                </Card>
-              </TabsContent>
+                </TabsContent>
+              ))}
 
               <TabsContent value="media" className="space-y-6">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-start">

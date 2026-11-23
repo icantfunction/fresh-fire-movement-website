@@ -1,8 +1,11 @@
+import { useState } from "react";
 import { Check, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export interface Registration {
   registrationId: string;
+  registrationStatus: "ACTIVE" | "ARCHIVED";
   firstName: string;
   lastName: string;
   phoneNumber: string;
@@ -27,11 +30,9 @@ interface AttendanceListProps {
 export function AttendanceList({
   registrations,
   isLoading,
-  savingId,
-  isSaving,
-  emptyMessage,
-  onToggle,
+  ...rowProps
 }: AttendanceListProps) {
+  const [view, setView] = useState("current");
   if (isLoading) {
     return (
       <div role="status" className="flex items-center justify-center gap-2 p-8 text-muted-foreground">
@@ -41,12 +42,41 @@ export function AttendanceList({
     );
   }
 
+  const current = registrations.filter((row) => row.registrationStatus === "ACTIVE");
+  const archived = registrations.filter((row) => row.registrationStatus === "ARCHIVED");
+
+  return (
+    <Tabs value={view} onValueChange={setView}>
+      <TabsList aria-label="Registration status" className="mx-4 mb-2 sm:mx-6">
+        <TabsTrigger value="current">Current ({current.length})</TabsTrigger>
+        <TabsTrigger value="archived">ARCHIVED ({archived.length})</TabsTrigger>
+      </TabsList>
+      <TabsContent value="current">
+        <AttendanceRows registrations={current} {...rowProps} />
+      </TabsContent>
+      <TabsContent value="archived">
+        <p className="px-4 py-2 text-sm text-muted-foreground sm:px-6">
+          Registrations submitted before November 22, 2026 (Eastern time). Attendance is read-only.
+        </p>
+        <AttendanceRows registrations={archived} {...rowProps} emptyMessage="No archived registrations." />
+      </TabsContent>
+    </Tabs>
+  );
+}
+
+function AttendanceRows({
+  registrations,
+  savingId,
+  isSaving,
+  emptyMessage,
+  onToggle,
+}: Omit<AttendanceListProps, "isLoading">) {
   if (registrations.length === 0) {
     return <p className="p-6 text-center text-muted-foreground">{emptyMessage}</p>;
   }
 
   return (
-    <ul aria-label="Attendance check-in" className="divide-y">
+    <ul aria-label="Registration roster" className="divide-y">
       {registrations.map((registration) => {
         const name = `${registration.firstName} ${registration.lastName}`.trim();
         const saving = savingId === registration.registrationId;
@@ -65,23 +95,27 @@ export function AttendanceList({
                   }`}
                 >
                   {registration.present && <Check className="h-4 w-4" aria-hidden="true" />}
-                  {registration.present ? "Here" : "Not here"}
+                  {registration.present ? "Present" : "Not checked in"}
                 </span>
-                <Button
-                  type="button"
-                  aria-label={`${registration.present ? "Mark not here" : "Mark here"}: ${name}`}
-                  aria-busy={saving}
-                  disabled={isSaving}
-                  onClick={() => onToggle(registration.registrationId, !registration.present)}
-                  className={`min-h-11 min-w-36 flex-1 sm:flex-none ${
-                    registration.present
-                      ? "bg-gray-200 text-gray-900 hover:bg-gray-300"
-                      : "bg-fire-purple hover:bg-fire-purple/90"
-                  }`}
-                >
-                  {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />}
-                  {saving ? "Saving..." : registration.present ? "Mark not here" : "Mark here"}
-                </Button>
+                {registration.registrationStatus === "ARCHIVED" ? (
+                  <span className="text-xs font-semibold tracking-wide text-muted-foreground">ARCHIVED</span>
+                ) : (
+                  <Button
+                    type="button"
+                    aria-label={`${registration.present ? "Mark not here" : "Mark here"}: ${name}`}
+                    aria-busy={saving}
+                    disabled={isSaving}
+                    onClick={() => onToggle(registration.registrationId, !registration.present)}
+                    className={`min-h-11 min-w-36 flex-1 sm:flex-none ${
+                      registration.present
+                        ? "bg-gray-200 text-gray-900 hover:bg-gray-300"
+                        : "bg-fire-purple hover:bg-fire-purple/90"
+                    }`}
+                  >
+                    {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />}
+                    {saving ? "Saving..." : registration.present ? "Mark not here" : "Mark here"}
+                  </Button>
+                )}
               </div>
             </div>
             <details className="mt-2 text-sm">
@@ -95,7 +129,7 @@ export function AttendanceList({
                   ["Date of birth", registration.dateOfBirth || "N/A"],
                   ["Grade", registration.grade || "N/A"],
                   ["Audition", registration.audition ? "Yes" : "No"],
-                  ["Signup date", registration.createdAt ? new Date(registration.createdAt).toLocaleDateString() : "N/A"],
+                  ["Signup date", registration.createdAt ? new Date(registration.createdAt).toLocaleDateString("en-US", { timeZone: "America/New_York" }) : "N/A"],
                 ].map(([label, value]) => (
                   <div key={label} className="min-w-0">
                     <dt className="text-muted-foreground">{label}</dt>

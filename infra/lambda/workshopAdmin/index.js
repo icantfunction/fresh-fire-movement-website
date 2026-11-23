@@ -32,8 +32,15 @@ exports.handler = async (event) => {
     }
 
     if (method === "GET") {
-      const result = await dynamo.send(new ScanCommand({ TableName: tableName }));
-      const items = result.Items || [];
+      const items = [];
+      let lastKey;
+      do {
+        const page = await dynamo.send(
+          new ScanCommand({ TableName: tableName, ExclusiveStartKey: lastKey })
+        );
+        items.push(...(page.Items || []));
+        lastKey = page.LastEvaluatedKey;
+      } while (lastKey);
       items.sort((a, b) => (b.createdAt || "").localeCompare(a.createdAt || ""));
       return jsonResponse(200, { ok: true, items });
     }
@@ -58,8 +65,10 @@ exports.handler = async (event) => {
           ExpressionAttributeValues: {
             ":present": present,
             ":updatedAt": updatedAt,
+            ":archived": "ARCHIVED",
           },
-          ConditionExpression: "attribute_exists(registrationId)",
+          ConditionExpression:
+            "attribute_exists(registrationId) AND (attribute_not_exists(registrationStatus) OR registrationStatus <> :archived)",
         })
       );
 
@@ -68,6 +77,9 @@ exports.handler = async (event) => {
 
     return jsonResponse(404, { ok: false, message: "Not found" });
   } catch (error) {
+    if (error.name === "ConditionalCheckFailedException") {
+      return jsonResponse(409, { ok: false, message: "Only current registrations can be checked in." });
+    }
     console.error("workshopAdmin error", error);
     return jsonResponse(500, { ok: false, message: "Server error" });
   }

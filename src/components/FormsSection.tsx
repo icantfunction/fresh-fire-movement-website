@@ -26,29 +26,25 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { toast } from "@/hooks/use-toast";
+import { AUDITION, WORKSHOP } from "@/data/registrations";
 import { workshopRegistrationSchema, type WorkshopFormData } from "@/schemas/workshopSchema";
 import { submitWorkshopRegistration } from "@/services/workshopService";
 
-// This form is audition-only, so the date lives here once and feeds both the card heading
-// and the requirements checklist.
-const SHOW_REGISTRATION_FORMS = false;
+const SHOW_REGISTRATION_FORMS = true;
 
-const AUDITION = {
-  date: "September 20, 2026",
-  time: "2:00 PM Sharp",
-  /** Used inside the requirements checklist sentence. */
-  startSentence:
-    "Auditions begin at 2:00 PM SHARP on September 20, 2026 in the main sanctuary. Arrive early — late arrivals may not be seen.",
-};
-
-// Workshop registration is handled off-site by the church's Pushpay giving page, so this
-// card is a link out rather than a form — nothing about it touches our API.
-const WORKSHOP = {
-  date: "September 13, 2026",
-  time: "2:00 PM Sharp",
-  minimum: "$10",
-  registerUrl:
-    "https://pushpay.com/g/clcftl?fnd=wES1hrvpPMplmZ1Tt2EQtA&fndv=Lock&lang=en&src=qrcode",
+const initialAuditionConfirmations = {
+  workshop: false,
+  choreographed: false,
+  interview: false,
+  solo: false,
+  timing: false,
+  attire: false,
+  covering: false,
+  membership: false,
+  encounter: false,
+  believer: false,
+  readAll: false,
+  finalConfirmation: false,
 };
 
 const MINISTRY_EMAIL = "ffdanceministry@gmail.com";
@@ -96,19 +92,7 @@ const FormsSection = () => {
   const [pendingData, setPendingData] = useState<WorkshopFormData | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [auditionChecklistOpen, setAuditionChecklistOpen] = useState(false);
-  const [auditionConfirmations, setAuditionConfirmations] = useState({
-    choreographed: false,
-    interview: false,
-    solo: false,
-    timing: false,
-    attire: false,
-    covering: false,
-    membership: false,
-    encounter: false,
-    believer: false,
-    readAll: false,
-    finalConfirmation: false,
-  });
+  const [auditionConfirmations, setAuditionConfirmations] = useState(initialAuditionConfirmations);
   const [showFinalConfirmation, setShowFinalConfirmation] = useState(false);
   const [ministryRequestDraft, setMinistryRequestDraft] = useState<string | null>(null);
 
@@ -243,19 +227,7 @@ const FormsSection = () => {
   };
 
   const resetAuditionChecklist = () => {
-    setAuditionConfirmations({
-      choreographed: false,
-      interview: false,
-      solo: false,
-      timing: false,
-      attire: false,
-      covering: false,
-      membership: false,
-      encounter: false,
-      believer: false,
-      readAll: false,
-      finalConfirmation: false,
-    });
+    setAuditionConfirmations(initialAuditionConfirmations);
     setShowFinalConfirmation(false);
     setAuditionChecklistOpen(false);
   };
@@ -372,23 +344,19 @@ const FormsSection = () => {
 
         <div className="space-y-10">
           {SHOW_REGISTRATION_FORMS && <>
-          <Card className="relative p-6 md:p-8 bg-white shadow-[0_20px_60px_rgba(15,8,32,0.5)] border border-white/20">
+          <Card id="workshop-registration" className="relative scroll-mt-24 p-6 md:p-8 bg-white shadow-[0_20px_60px_rgba(15,8,32,0.5)] border border-white/20">
             <div className="absolute top-0 left-1/2 -translate-x-1/2 h-px w-12 bg-fire-gold" />
             <div className="text-center">
               <h3 className="text-2xl md:text-3xl font-black tracking-tight text-fire-deep mb-2">
                 Workshop Registration
               </h3>
-              <p className="text-fire-gold font-semibold tracking-[0.2em] uppercase text-xs">
+              <p className="text-sm font-semibold text-fire-purple">
                 {WORKSHOP.date} &middot; {WORKSHOP.time}
               </p>
 
               <p className="mt-4 text-gray-600">
-                Register through Christian Life Center's giving page.
-                {" "}
-                <span className="font-semibold text-fire-deep">
-                  {WORKSHOP.minimum} minimum donation
-                </span>{" "}
-                to attend.
+                <strong className="text-fire-deep">This workshop is mandatory for everyone auditioning.</strong>{" "}
+                Register through Christian Life Center’s giving page with a minimum donation of {WORKSHOP.minimum}.
               </p>
 
               <Button asChild variant="fire" size="lg" className="mt-6 w-full max-w-md mx-auto">
@@ -410,12 +378,13 @@ const FormsSection = () => {
               <h3 className="text-2xl md:text-3xl font-black tracking-tight text-fire-deep mb-2">
                 Audition Signup
               </h3>
-              <p className="text-fire-gold font-semibold tracking-[0.2em] uppercase text-xs">
+              <p className="text-sm font-semibold text-fire-purple">
                 {AUDITION.date} &middot; {AUDITION.time}
               </p>
               <p className="mt-4 text-sm text-gray-600">
-                You'll review and agree to the audition requirements before your signup is
-                submitted.
+                To audition, you must attend the{" "}
+                <a className="font-semibold text-fire-purple underline" href="#workshop-registration">mandatory workshop</a>{" "}
+                on {WORKSHOP.date}. Please register for the workshop separately.
               </p>
             </div>
 
@@ -498,7 +467,7 @@ const FormsSection = () => {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Encounter/Collide (Y/N)</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <Select onValueChange={field.onChange} value={field.value}>
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue placeholder="Select" />
@@ -843,6 +812,19 @@ const FormsSection = () => {
             <div className="space-y-4">
               <div className="flex items-start space-x-3">
                 <Checkbox
+                  id="audition-workshop"
+                  checked={auditionConfirmations.workshop}
+                  onCheckedChange={(checked) =>
+                    handleAuditionCheckboxChange("workshop", checked === true)
+                  }
+                />
+                <Label htmlFor="audition-workshop" className="text-sm leading-relaxed">
+                  I understand that I must attend the workshop on {WORKSHOP.date} at {WORKSHOP.time} to audition.
+                </Label>
+              </div>
+
+              <div className="flex items-start space-x-3">
+                <Checkbox
                   id="audition-choreographed"
                   checked={auditionConfirmations.choreographed}
                   onCheckedChange={(checked) =>
@@ -889,7 +871,8 @@ const FormsSection = () => {
                   }
                 />
                 <Label htmlFor="audition-timing" className="text-sm leading-relaxed">
-                  {AUDITION.startSentence}
+                  Auditions begin promptly at {AUDITION.time} on {AUDITION.date} in the main sanctuary.
+                  Please arrive early. Late arrivals may not be seen.
                 </Label>
               </div>
 

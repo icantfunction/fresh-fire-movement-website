@@ -69,6 +69,7 @@ exports.handler = async (event) => {
       grade: String(payload.grade).trim(),
       audition: payload.audition,
       registrationType: isAuditionSignupPath ? "audition" : "workshop",
+      registrationStatus: "ACTIVE",
       present: false,
       createdAt,
     };
